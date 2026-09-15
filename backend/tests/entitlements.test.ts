@@ -6,7 +6,7 @@ describe('entitlements + free build atomicity', () => {
   it('new user: FREE plan, AVAILABLE free build, builds allowed once', async () => {
     const ctx = await makeCtx();
     const s = await registerUser(ctx);
-    const e = await getEntitlement(ctx.env.DB, s.user.id);
+    const e = await getEntitlement(ctx.env.DB_AUTH, s.user.id);
     expect(e.planId).toBe('FREE');
     expect(e.freeBuild).toBe('AVAILABLE');
     expect(e.buildsAllowed).toBe(true);
@@ -15,7 +15,7 @@ describe('entitlements + free build atomicity', () => {
   it('atomic claim: exactly one winner, release reopens, consume closes', async () => {
     const ctx = await makeCtx();
     const s = await registerUser(ctx, '09120003333', 'freebuilder');
-    const db = ctx.env.DB;
+    const db = ctx.env.DB_AUTH;
 
     // Simulated race: N concurrent claim attempts, exactly one wins.
     // NOTE: sql.js runs synchronously, so this validates the conditional-UPDATE
@@ -46,12 +46,12 @@ describe('entitlements + free build atomicity', () => {
   it('active subscription allows builds without free build', async () => {
     const ctx = await makeCtx();
     const s = await registerUser(ctx, '09120004444', 'subscriber');
-    const db = ctx.env.DB;
+    const db = ctx.env.DB_AUTH;
     const now = Math.floor(Date.now() / 1000);
-    ctx.db.run('INSERT INTO subscriptions (id, user_id, plan_id, started_at, expires_at, status, created_at) VALUES (?,?,?,?,?,?,?)', [
+    ctx.dbAuth.run('INSERT INTO subscriptions (id, user_id, plan_id, started_at, expires_at, status, created_at) VALUES (?,?,?,?,?,?,?)', [
       'sub_1', s.user.id, 'MONTHLY', now, now + 30 * 86400, 'active', now,
     ]);
-    ctx.db.run("UPDATE users SET free_build_state = 'CONSUMED' WHERE id = ?", [s.user.id]);
+    ctx.dbAuth.run("UPDATE users SET free_build_state = 'CONSUMED' WHERE id = ?", [s.user.id]);
     const e = await getEntitlement(db, s.user.id);
     expect(e.subscribed).toBe(true);
     expect(e.planId).toBe('MONTHLY');

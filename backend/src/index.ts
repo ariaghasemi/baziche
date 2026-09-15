@@ -8,7 +8,8 @@ import { metaRoutes } from './routes/meta';
 import { adminRoutes } from './routes/admin';
 
 export interface Env {
-  DB: D1Database;
+  DB_AUTH: D1Database; // identity, sessions, billing, admin, audit
+  DB_DATA: D1Database; // projects, revisions, assets, builds
   R2_PROJECTS: R2Bucket;
   R2_ASSETS: R2Bucket;
   R2_BUILDS: R2Bucket;

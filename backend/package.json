@@ -10,9 +10,9 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "db:local": "wrangler d1 migrations apply baziche-db --local",
-    "db:create": "wrangler d1 create baziche-db",
-    "db:migrate": "wrangler d1 migrations apply baziche-db --remote",
+    "db:local": "wrangler d1 migrations apply baziche-auth --local && wrangler d1 migrations apply baziche-data --local",
+    "db:create": "wrangler d1 create baziche-auth && wrangler d1 create baziche-data",
+    "db:migrate": "wrangler d1 migrations apply baziche-auth --remote && wrangler d1 migrations apply baziche-data --remote",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

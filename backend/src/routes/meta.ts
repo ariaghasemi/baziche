@@ -21,6 +21,6 @@ metaRoutes.get('/registries', (c) => {
 });
 
 metaRoutes.get('/plans', async (c) => {
-  const rows = await c.env.DB.prepare('SELECT id, title, price_toman AS priceToman, days, active FROM plans ORDER BY days ASC').all();
+  const rows = await c.env.DB_AUTH.prepare('SELECT id, title, price_toman AS priceToman, days, active FROM plans ORDER BY days ASC').all();
   return c.json({ success: true, plans: rows.results ?? [] });
 });

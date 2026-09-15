@@ -10,7 +10,7 @@ export const requireAuth = createMiddleware<{ Bindings: Env; Variables: { userId
     if (!m) throw err('TOKEN_INVALID', 'Missing bearer token', 401);
     try {
       const sub = await verifyAccessToken(m[1], c.env.JWT_SECRET, c.env.JWT_SECRET_PREV || undefined);
-      const u = await c.env.DB.prepare('SELECT status FROM users WHERE id = ?')
+      const u = await c.env.DB_AUTH.prepare('SELECT status FROM users WHERE id = ?')
         .bind(sub)
         .first<{ status: string }>();
       if (!u) throw err('TOKEN_INVALID', 'Unknown user', 401);
@@ -31,7 +31,7 @@ export const requireAdmin = createMiddleware<{ Bindings: Env; Variables: { userI
     // requireAuth must run first (mounted before in admin routes).
     const userId = c.get('userId');
     if (!userId) throw err('TOKEN_INVALID', 'Missing auth', 401);
-    const a = await c.env.DB.prepare('SELECT role FROM admins WHERE user_id = ?')
+    const a = await c.env.DB_AUTH.prepare('SELECT role FROM admins WHERE user_id = ?')
       .bind(userId)
       .first<{ role: string }>();
     if (!a) throw err('FORBIDDEN', 'Admin required', 403);

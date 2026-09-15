@@ -15,6 +15,8 @@
 2. با ایمیلت ثبت‌نام کن و ایمیل را تأیید کن.
 3. وارد داشبورد شو: https://dash.cloudflare.com
 
+> ⚠️ فقط **یک اکانت** — همین کافی است. ساخت اکانت دوم برای دور زدن سقف رایگان، خلاف قوانین Cloudflare است و باعث بن شدن می‌شود. طراحی ما عمداً تک‌اکانتی است.
+
 ## گام ۲ — ورود Wrangler (اتصال ترمینال به حسابت)
 
 در پوشه `backend`:
@@ -25,28 +27,33 @@ npx wrangler login
 
 مرورگر باز می‌شود → **Allow** را بزن. پیام موفقیت در ترمینال می‌آید.
 
-## گام ۳ — ساخت دیتابیس D1
+## گام ۳ — ساخت دیتابیس‌های D1 (دو تا، در همین یک اکانت)
+
+بازیچه هویت (کاربر/سشن/خرید) را از دیتای بازی (پروژه/نسخه/است) جدا نگه می‌دارد — مثل دو کشوی یک کمد که با یک کلید (همین Worker) باز می‌شوند:
 
 ```bash
-npx wrangler d1 create baziche-db
+npx wrangler d1 create baziche-auth
+npx wrangler d1 create baziche-data
 ```
 
-خروجی موفق شبیه این است:
+خروجی موفق برای هر کدام شبیه این است:
 
 ```text
-✅ Successfully created DB 'baziche-db'
+✅ Successfully created DB 'baziche-auth'
 database_id = "a1b2c3d4-...."
 ```
 
-**این `database_id` را کپی کن** و در فایل `backend/wrangler.toml` جای مقدار صفرها بگذار.
+**هر دو `database_id` را کپی کن** و در فایل `backend/wrangler.toml` بگذار:
+- اولی → بخش `[[d1_databases]]` با `binding = "DB_AUTH"`
+- دومی → بخش `[[d1_databases]]` با `binding = "DB_DATA"`
 
 ```bash
 npm run db:migrate
 ```
 
-خروجی موفق: `Migration 001_init.sql applied` (یا مشابه). این دستور جدول‌ها + پلن‌ها + شارد را می‌سازد.
+خروجی موفق: هر دو migration اعمال می‌شود (`001_init.sql` در auth و data). این دستور جدول‌ها + پلن‌ها + شارد را می‌سازد.
 
-> ✅ SAFE TO SEND: اسم دیتابیس و `database_id` را می‌توانی برای من بفرستی (سکرت نیست).
+> ✅ SAFE TO SEND: اسم دیتابیس‌ها و `database_id`ها را می‌توانی برای من بفرستی (سکرت نیست).
 > ❌ چیزی برای فرستادن نیست: پسورد/توکنی در کار نیست.
 
 ## گام ۴ — ساخت باکت‌های R2
@@ -132,7 +139,7 @@ BAZICHE_API_URL=https://baziche-api.<sub>.workers.dev/api/v1/
 
 اول در اپ **ثبت‌نام** کن، بعد `user_id` خودت را پیدا کن (لاگین کن و `GET /api/v1/me` را صدا بزن — مثلاً با مرورگر + توکن؟ ساده‌تر: موقتاً از داشبورد D1):
 
-داشبورد → **Workers & Pages** → **D1** → `baziche-db` → **Console** → اجرا:
+داشبورد → **Workers & Pages** → **D1** → `baziche-auth` → **Console** → اجرا:
 
 ```sql
 SELECT id, username FROM users;
@@ -141,7 +148,7 @@ SELECT id, username FROM users;
 بعد:
 
 ```bash
-npx wrangler d1 execute baziche-db --remote \
+npx wrangler d1 execute baziche-auth --remote \
   --command "INSERT INTO admins (user_id, role, created_at) VALUES ('<USER_ID>', 'admin', strftime('%s','now'))"
 ```
 

@@ -1,4 +1,4 @@
-// Test harness: REAL migration SQL executed on sql.js (SQLite), D1-compatible adapter,
+// Test harness: REAL migration SQL executed on sql.js (SQLite), D1-compatible adapters,
 // in-memory R2 fakes, and Hono app.request() — no mocks of app logic.
 import { readFileSync } from 'node:fs';
 import initSqlJs, { type Database } from 'sql.js';
@@ -64,10 +64,16 @@ function makeR2() {
     put: async (key: string, value: unknown) => {
       store.set(key, await toBytes(value));
     },
-    get: async (key: string) => {
+    get: async (key: string, options?: { range?: { offset?: number; length?: number } }) => {
       const b = store.get(key);
       if (!b) return null;
-      return { text: async () => new TextDecoder().decode(b) };
+      const body = options?.range
+        ? b.slice(options.range.offset ?? 0, (options.range.offset ?? 0) + (options.range.length ?? b.length))
+        : b;
+      return {
+        text: async () => new TextDecoder().decode(body),
+        arrayBuffer: async () => body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength) as ArrayBuffer,
+      };
     },
     head: async (key: string) => {
       const b = store.get(key);
@@ -82,7 +88,8 @@ function makeR2() {
 export interface TestCtx {
   env: Env;
   app: ReturnType<typeof createApp>;
-  db: Database;
+  dbAuth: Database;
+  dbData: Database;
   r2projects: ReturnType<typeof makeR2>;
   r2assets: ReturnType<typeof makeR2>;
   r2builds: ReturnType<typeof makeR2>;
@@ -90,14 +97,16 @@ export interface TestCtx {
 
 export async function makeCtx(): Promise<TestCtx> {
   const lib = await sqlLib();
-  const db = new lib.Database();
-  const migration = readFileSync(new URL('../migrations/001_init.sql', import.meta.url), 'utf8');
-  db.exec(migration);
+  const dbAuth = new lib.Database();
+  const dbData = new lib.Database();
+  dbAuth.exec(readFileSync(new URL('../migrations/auth/001_init.sql', import.meta.url), 'utf8'));
+  dbData.exec(readFileSync(new URL('../migrations/data/001_init.sql', import.meta.url), 'utf8'));
   const r2projects = makeR2();
   const r2assets = makeR2();
   const r2builds = makeR2();
   const env = {
-    DB: makeD1(db),
+    DB_AUTH: makeD1(dbAuth),
+    DB_DATA: makeD1(dbData),
     R2_PROJECTS: r2projects,
     R2_ASSETS: r2assets,
     R2_BUILDS: r2builds,
@@ -114,7 +123,7 @@ export async function makeCtx(): Promise<TestCtx> {
     R2_ACCESS_KEY_ID: 'testkey',
     R2_SECRET_ACCESS_KEY: 'testsecret',
   } as unknown as Env;
-  return { env, app: createApp(), db, r2projects, r2assets, r2builds };
+  return { env, app: createApp(), dbAuth, dbData, r2projects, r2assets, r2builds };
 }
 
 // --- client-side crypto simulation (mirrors Android PasswordStretcher, WebCrypto only) ---
@@ -167,4 +176,10 @@ export async function registerUser(
   const json = (await res.json()) as Record<string, never>;
   if (!json.success) throw new Error(`register failed: ${JSON.stringify(json)}`);
   return json as unknown as { success: true; user: { id: string; phone: string; username: string }; accessToken: string; refreshToken: string };
+}
+
+export async function createProject(ctx: TestCtx, token: string, name = 'P', gameType = 'quiz'): Promise<string> {
+  const res = await req(ctx, '/api/v1/projects', { method: 'POST', token, body: { name, gameType } });
+  const j = (await res.json()) as { project: { id: string } };
+  return j.project.id;
 }

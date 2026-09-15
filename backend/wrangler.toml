@@ -6,14 +6,22 @@ name = "baziche-api"
 main = "src/index.ts"
 compatibility_date = "2026-09-15"
 
-# --- D1 (metadata) ---
-# database_id is obtained from `wrangler d1 create baziche-db` (see docs/CLOUDFLARE_SETUP.md).
-# Local dev (--local) works without a real id.
+# --- D1: TWO databases, one account (separated but connected via this API) ---
+# baziche-auth: identity, sessions, plans, subscriptions, admin, audit
+# baziche-data: projects, revisions, assets, builds, shards, agents
+# Create: npm run db:create (or wrangler d1 create <name>), then paste ids below.
+
 [[d1_databases]]
-binding = "DB"
-database_name = "baziche-db"
+binding = "DB_AUTH"
+database_name = "baziche-auth"
 database_id = "00000000-0000-0000-0000-000000000000"
-migrations_dir = "migrations"
+migrations_dir = "migrations/auth"
+
+[[d1_databases]]
+binding = "DB_DATA"
+database_name = "baziche-data"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations/data"
 
 # --- R2 (bytes) ---
 [[r2_buckets]]
@@ -38,7 +46,6 @@ DEFAULT_TARGET_API = "36"
 DEFAULT_MIN_API = "26"
 MAX_PROJECT_JSON_BYTES = "5242880"
 
-# [env.staging] / [env.production] inherit above; override ENVIRONMENT + ids when created.
 [env.staging.vars]
 ENVIRONMENT = "staging"
 

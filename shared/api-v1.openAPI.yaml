@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Baziche API
   version: 1.0.0
-  description: Phase 1 — auth, projects, assets, meta, admin. builds/billing in later phases.
+  description: Phase 2 — auth, projects (+restore/merge), assets (magic-byte verified), meta, admin. builds/billing in later phases.
 servers:
   - url: https://api.baziche.app/api/v1
   - url: http://localhost:8787/api/v1
@@ -71,6 +71,20 @@ paths:
       security: [ { bearer: [] } ]
       parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
       responses: { '200': { description: '{ success, revisions[] }' } }
+  /projects/{id}/restore:
+    post:
+      summary: Restore an old revision as the new head (baseRev guarded)
+      security: [ { bearer: [] } ]
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [rev, baseRev], properties: { rev: { type: integer }, baseRev: { type: integer } } } } } }
+      responses: { '200': { description: '{ success, rev, restoredFrom }' }, '404': { $ref: '#/components/responses/Error' }, '409': { $ref: '#/components/responses/Error' } }
+  /projects/{id}/merge:
+    post:
+      summary: Three-way merge (baseRev + mine vs server; server wins flagged conflicts)
+      security: [ { bearer: [] } ]
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [baseRev, json], properties: { baseRev: { type: integer }, json: { type: object } } } } } }
+      responses: { '200': { description: '{ success, merged, conflicts[], serverRev }' } }
   /assets/presign:
     post:
       summary: Presigned PUT URL for one asset

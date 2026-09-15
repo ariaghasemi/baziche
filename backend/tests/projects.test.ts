@@ -101,7 +101,8 @@ describe('projects', () => {
     });
     expect(early.status).toBe(404); // nothing uploaded yet
 
-    await ctx.r2assets.put(pj.key, 'fake-png-bytes'); // simulate client PUT to presigned URL
+    // Real PNG magic so the commit-time sniff check passes.
+    await ctx.r2assets.put(pj.key, new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]));
     const done = await req(ctx, '/api/v1/assets/commit', {
       method: 'POST',
       token: s.accessToken,
@@ -116,7 +117,7 @@ describe('projects', () => {
     const denied = await req(ctx, '/api/v1/admin/stats', { token: s.accessToken });
     expect(denied.status).toBe(403);
 
-    ctx.db.run('INSERT INTO admins (user_id, role, created_at) VALUES (?, ?, ?)', [s.user.id, 'admin', 1]);
+    ctx.dbAuth.run('INSERT INTO admins (user_id, role, created_at) VALUES (?, ?, ?)', [s.user.id, 'admin', 1]);
     const stats = await req(ctx, '/api/v1/admin/stats', { token: s.accessToken });
     expect(stats.status).toBe(200);
     const sj = (await stats.json()) as { stats: { users: number; projects: number } };
