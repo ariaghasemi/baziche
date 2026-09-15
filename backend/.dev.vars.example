@@ -1,0 +1,14 @@
+# Copy to .dev.vars (gitignored) for local `wrangler dev`.
+# Generate dev-only values, e.g.: openssl rand -hex 32
+# NEVER use production secrets here. NEVER commit .dev.vars.
+
+JWT_SECRET=REPLACE_WITH_DEV_HEX_32_BYTES
+JWT_SECRET_PREV=
+PASSWORD_PEPPER=REPLACE_WITH_DEV_HEX_32_BYTES
+
+# R2 S3-compatible credentials (for presigned URLs). Create in dashboard:
+# R2 -> Manage R2 API Tokens (Object Read & Write on baziche-* buckets).
+# Local dev can use dummy values for URL-format tests; real uploads need real ones.
+R2_ACCOUNT_ID=REPLACE_OR_DUMMY
+R2_ACCESS_KEY_ID=REPLACE_OR_DUMMY
+R2_SECRET_ACCESS_KEY=REPLACE_OR_DUMMY

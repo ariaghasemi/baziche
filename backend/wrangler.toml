@@ -1,0 +1,46 @@
+# Baziche API — Cloudflare Workers config
+# Secrets are NEVER stored here. Use: wrangler secret put <NAME>
+# See docs/SECRETS.md for the full registry.
+
+name = "baziche-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-15"
+
+# --- D1 (metadata) ---
+# database_id is obtained from `wrangler d1 create baziche-db` (see docs/CLOUDFLARE_SETUP.md).
+# Local dev (--local) works without a real id.
+[[d1_databases]]
+binding = "DB"
+database_name = "baziche-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# --- R2 (bytes) ---
+[[r2_buckets]]
+binding = "R2_PROJECTS"
+bucket_name = "baziche-projects"
+
+[[r2_buckets]]
+binding = "R2_ASSETS"
+bucket_name = "baziche-assets"
+
+[[r2_buckets]]
+binding = "R2_BUILDS"
+bucket_name = "baziche-builds"
+
+# --- Non-secret vars ---
+[vars]
+ENVIRONMENT = "development"
+ACCESS_TOKEN_TTL_SEC = "900"
+REFRESH_TOKEN_TTL_SEC = "2592000"
+REGISTRIES_VERSION = "1"
+DEFAULT_TARGET_API = "36"
+DEFAULT_MIN_API = "26"
+MAX_PROJECT_JSON_BYTES = "5242880"
+
+# [env.staging] / [env.production] inherit above; override ENVIRONMENT + ids when created.
+[env.staging.vars]
+ENVIRONMENT = "staging"
+
+[env.production.vars]
+ENVIRONMENT = "production"

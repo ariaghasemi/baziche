@@ -1,0 +1,35 @@
+{
+  "name": "baziche-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Baziche backend — Hono + TypeScript on Cloudflare Workers (D1 + R2)",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:local": "wrangler d1 migrations apply baziche-db --local",
+    "db:create": "wrangler d1 create baziche-db",
+    "db:migrate": "wrangler d1 migrations apply baziche-db --remote",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "hono": "4.13.8",
+    "jose": "6.2.12",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260915.1",
+    "@types/node": "^22.0.0",
+    "@types/sql.js": "^1.4.11",
+    "sql.js": "1.14.2",
+    "typescript": "5.9.3",
+    "vite": "^8.3.0",
+    "vitest": "5.0.1",
+    "wrangler": "4.131.2"
+  }
+}
