@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "description": "Component catalog for :runtime (Phase 3). Stable names; data shapes evolve with formatVersion.",
+  "components": [
+    { "name": "Transform", "fields": ["x", "y", "w", "h", "rotation", "opacity", "anchorX", "anchorY"] },
+    { "name": "Sprite", "fields": ["assetId", "tint", "flipX", "flipY", "ninePatch"] },
+    { "name": "Text", "fields": ["text", "fontId", "size", "color", "align", "rtl", "bold"] },
+    { "name": "Collider", "fields": ["shape", "w", "h", "r", "offsetX", "offsetY", "isTrigger"] },
+    { "name": "RigidBody", "fields": ["bodyType", "mass", "gravityScale", "friction", "bounce"] },
+    { "name": "Movement", "fields": ["speed", "accel", "mode", "axisLock"] },
+    { "name": "Health", "fields": ["max", "current", "regen", "invincibleMs"] },
+    { "name": "Damage", "fields": ["amount", "cooldownMs", "knockback"] },
+    { "name": "Animation", "fields": ["animationId", "autoplay", "speed"] },
+    { "name": "Audio", "fields": ["assetId", "group", "volume", "loop", "autoplay", "fadeMs"] },
+    { "name": "Particle", "fields": ["preset", "rate", "lifetime", "autoplay"] },
+    { "name": "Camera", "fields": ["zoom", "followId", "bounds", "shake"] },
+    { "name": "UI", "fields": ["screenId", "zIndex", "safeArea"] },
+    { "name": "Button", "fields": ["label", "style", "eventId", "enabled"] },
+    { "name": "Input", "fields": ["bindings", "joystick", "multiTouch"] },
+    { "name": "Timer", "fields": ["durationMs", "repeat", "eventId", "autostart"] },
+    { "name": "Inventory", "fields": ["slots", "stackable", "persist"] },
+    { "name": "Quest", "fields": ["questId", "stage", "objectives"] },
+    { "name": "Dialogue", "fields": ["lines", "portraitId", "skippable"] },
+    { "name": "AI", "fields": ["behavior", "speed", "sightRange", "targetTag"] },
+    { "name": "Spawner", "fields": ["prefabId", "intervalMs", "maxAlive", "area"] },
+    { "name": "Trigger", "fields": ["eventId", "once", "filterTag"] },
+    { "name": "Checkpoint", "fields": ["checkpointId", "respawn"] },
+    { "name": "Score", "fields": ["variable", "perEvent"] },
+    { "name": "Currency", "fields": ["variable", "persist"] },
+    { "name": "SaveData", "fields": ["keys", "autosave"] }
+  ]
+}

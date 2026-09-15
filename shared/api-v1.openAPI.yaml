@@ -1,0 +1,139 @@
+openapi: 3.0.3
+info:
+  title: Baziche API
+  version: 1.0.0
+  description: Phase 1 — auth, projects, assets, meta, admin. builds/billing in later phases.
+servers:
+  - url: https://api.baziche.app/api/v1
+  - url: http://localhost:8787/api/v1
+paths:
+  /auth/challenge:
+    post:
+      summary: Get salt + stretch params (dummy for unknown users)
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [phone], properties: { phone: { type: string } } } } } }
+      responses: { '200': { description: '{ success, salt, iterations, algorithm }' } }
+  /auth/register:
+    post:
+      summary: Register with phone + username + stretched hash
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/RegisterIn' } } } }
+      responses: { '200': { description: '{ success, user, accessToken, refreshToken }' }, '400': { $ref: '#/components/responses/Error' }, '409': { $ref: '#/components/responses/Error' } }
+  /auth/login:
+    post:
+      summary: Login with phone + stretched hash
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [phone, clientHash], properties: { phone: { type: string }, clientHash: { type: string }, device: { type: string } } } } } }
+      responses: { '200': { description: session }, '401': { $ref: '#/components/responses/Error' }, '429': { $ref: '#/components/responses/Error' } }
+  /auth/refresh:
+    post:
+      summary: Rotate refresh token
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [refreshToken], properties: { refreshToken: { type: string } } } } } }
+      responses: { '200': { description: session }, '401': { $ref: '#/components/responses/Error' } }
+  /auth/logout:
+    post:
+      summary: Revoke one refresh token
+      security: [ { bearer: [] } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [refreshToken], properties: { refreshToken: { type: string } } } } } }
+      responses: { '200': { description: ok } }
+  /me:
+    get:
+      summary: Current user + entitlement snapshot
+      security: [ { bearer: [] } ]
+      responses: { '200': { description: '{ success, user, entitlement }' } }
+  /projects:
+    get:
+      summary: List my projects
+      security: [ { bearer: [] } ]
+      responses: { '200': { description: '{ success, projects[] }' } }
+    post:
+      summary: Create project
+      security: [ { bearer: [] } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [name, gameType], properties: { name: { type: string }, gameType: { type: string } } } } } }
+      responses: { '200': { description: '{ success, project }' } }
+  /projects/{id}:
+    get:
+      summary: Get project meta + current JSON
+      security: [ { bearer: [] } ]
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: '{ success, project, json }' }, '404': { $ref: '#/components/responses/Error' } }
+    patch:
+      summary: Save project JSON (baseRev guarded, 409 on conflict)
+      security: [ { bearer: [] } ]
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [baseRev, json], properties: { baseRev: { type: integer }, name: { type: string }, json: { type: object } } } } } }
+      responses: { '200': { description: '{ success, rev }' }, '409': { description: '{ success:false, error:REVISION_CONFLICT, serverRev, serverCopy }' } }
+    delete:
+      summary: Soft delete
+      security: [ { bearer: [] } ]
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: ok } }
+  /projects/{id}/revisions:
+    get:
+      summary: List revisions
+      security: [ { bearer: [] } ]
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: '{ success, revisions[] }' } }
+  /assets/presign:
+    post:
+      summary: Presigned PUT URL for one asset
+      security: [ { bearer: [] } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [projectId, kind, hash, bytes, contentType], properties: { projectId: { type: string }, kind: { type: string }, hash: { type: string }, bytes: { type: integer }, contentType: { type: string } } } } } }
+      responses: { '200': { description: '{ success, key, uploadUrl, expiresIn }' } }
+  /assets/commit:
+    post:
+      summary: Confirm upload (server verifies object exists)
+      security: [ { bearer: [] } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [projectId, key, hash, bytes, kind], properties: { projectId: { type: string }, key: { type: string }, hash: { type: string }, bytes: { type: integer }, kind: { type: string } } } } } }
+      responses: { '200': { description: '{ success, asset }' } }
+  /meta/registries:
+    get:
+      summary: Public versioned registries (capabilities/features/gameTypes/components)
+      responses: { '200': { description: '{ success, version, capabilities, features, gameTypes, components }' } }
+  /admin/stats:
+    get:
+      summary: Platform counters (admin)
+      security: [ { bearer: [] } ]
+      responses: { '200': { description: ok }, '403': { $ref: '#/components/responses/Error' } }
+  /admin/users:
+    get:
+      summary: List users (no hashes, admin)
+      security: [ { bearer: [] } ]
+      responses: { '200': { description: ok } }
+  /admin/users/{id}/suspend:
+    post:
+      summary: Suspend user (admin)
+      security: [ { bearer: [] } ]
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: ok } }
+  /admin/users/{id}/restore:
+    post:
+      summary: Restore user (admin)
+      security: [ { bearer: [] } ]
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: ok } }
+  /admin/users/{id}/reset-free-build:
+    post:
+      summary: Reset free build to AVAILABLE (admin, audited)
+      security: [ { bearer: [] } ]
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: ok } }
+  /admin/audit:
+    get:
+      summary: Recent audit logs (admin)
+      security: [ { bearer: [] } ]
+      responses: { '200': { description: ok } }
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer, bearerFormat: JWT }
+  schemas:
+    RegisterIn:
+      type: object
+      required: [phone, username, salt, clientHash]
+      properties:
+        phone: { type: string }
+        username: { type: string }
+        salt: { type: string, description: hex, 32-128 chars }
+        clientHash: { type: string, description: hex sha512 output, 128 chars }
+        iterations: { type: integer, minimum: 100000, maximum: 2000000 }
+        device: { type: string }
+  responses:
+    Error:
+      description: '{ success:false, error:{ code, message }, meta? }'
