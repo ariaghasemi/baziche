@@ -1,0 +1,22 @@
+#!/bin/sh
+# Baziche Gradle launcher (self-bootstrapping, POSIX sh).
+# No wrapper jar is committed to git. On first run it downloads Gradle 9.7.1
+# into $GRADLE_USER_HOME/wrapper/dists and execs it.
+# Requires: Java 17+, curl, unzip. Behind a filtered network set https_proxy.
+set -eu
+GRADLE_VERSION="9.7.1"
+APP_HOME=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+GRADLE_USER_HOME="${GRADLE_USER_HOME:-$HOME/.gradle}"
+DIST_DIR="$GRADLE_USER_HOME/wrapper/dists/gradle-$GRADLE_VERSION-bin"
+UNPACKED="$DIST_DIR/gradle-$GRADLE_VERSION/bin/gradle"
+if [ ! -x "$UNPACKED" ]; then
+  mkdir -p "$DIST_DIR"
+  ZIP="$DIST_DIR/gradle-$GRADLE_VERSION-bin.zip"
+  if [ ! -f "$ZIP" ]; then
+    echo "Downloading Gradle $GRADLE_VERSION ..." >&2
+    curl -fSL --retry 3 -o "$ZIP" "https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip"
+  fi
+  echo "Unpacking Gradle $GRADLE_VERSION ..." >&2
+  unzip -q -o "$ZIP" -d "$DIST_DIR"
+fi
+exec "$UNPACKED" "$@"

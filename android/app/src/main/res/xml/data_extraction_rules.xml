@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Backup rules: session tokens are device-bound and must NOT roam via backup. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="session_preferences.pb" />
+    </cloud-backup>
+</data-extraction-rules>

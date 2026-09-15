@@ -1,0 +1,151 @@
+# ============================================================================
+# BAZICHE game-build — DRAFT (activates in Phase 5)
+# ----------------------------------------------------------------------------
+# Builds ONE user game (APK + AAB) on free GitHub-hosted runners.
+# Trigger: backend POSTs workflow_dispatch (Phase 5 BuildProvider) with presigned
+# R2 URLs + an encrypted build bundle. No cloud credentials live in GitHub.
+#
+# DEPENDENCIES (NOT IMPLEMENTED yet):
+#   - android/game-shell template module (Phase 5)
+#   - backend BuildProvider trigger + callback endpoint (Phase 5)
+# Manual dispatch before Phase 5 WILL fail at the gradle step — expected.
+# Full contract: docs/GITHUB_BUILD_SETUP.md
+# ============================================================================
+name: game-build
+
+on:
+  workflow_dispatch:
+    inputs:
+      # All transfer via short-lived presigned R2 URLs (nothing sensitive persists here).
+      payload:
+        description: "JSON: {bundleUrl,bundleSha256,apkUrl,aabUrl,logUrl,callbackUrl,appId,appName,versionCode,versionName,targetApi,minApi,shellRef}"
+        required: true
+        type: string
+      bundle_key:
+        description: "AES-256 bundle password (masked immediately, never logged)"
+        required: true
+        type: string
+      callback_token:
+        description: "Bearer for backend callback (masked immediately, never logged)"
+        required: true
+        type: string
+
+run-name: "game-build ${{ github.run_number }}"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    env:
+      STAGING: ${{ runner.temp }}/bundle
+    steps:
+      - name: Mask secrets
+        run: |
+          echo "::add-mask::${{ inputs.bundle_key }}"
+          echo "::add-mask::${{ inputs.callback_token }}"
+
+      - name: Parse payload
+        id: p
+        run: |
+          echo '${{ inputs.payload }}' > payload.json
+          for k in bundleUrl bundleSha256 apkUrl aabUrl logUrl callbackUrl appId appName versionCode versionName targetApi minApi shellRef; do
+            v=$(jq -r ".$k // empty" payload.json)
+            if [ -z "$v" ]; then echo "missing payload key: $k" >&2; exit 1; fi
+            echo "$k=$v" >> "$GITHUB_OUTPUT"
+          done
+
+      - name: Checkout game-shell template
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.p.outputs.shellRef }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Download + verify + decrypt bundle
+        run: |
+          mkdir -p "$STAGING"
+          curl -fSL --retry 3 -o "$STAGING/bundle.enc" "${{ steps.p.outputs.bundleUrl }}"
+          echo "${{ steps.p.outputs.bundleSha256 }}  $STAGING/bundle.enc" | sha256sum -c -
+          openssl enc -d -aes-256-cbc -pbkdf2 -in "$STAGING/bundle.enc" -out "$STAGING/bundle.zip" -pass "env:BUNDLE_KEY"
+          unzip -q "$STAGING/bundle.zip" -d "$STAGING/plain"
+          # expected layout: game.json, assets/, keystore.jks.enc? (keystore arrives decrypted inside bundle), signing.json
+          ls -la "$STAGING/plain"
+        env:
+          BUNDLE_KEY: ${{ inputs.bundle_key }}
+
+      - name: Inject game into shell
+        run: |
+          SHELL_DIR="android/game-shell"
+          test -d "$SHELL_DIR" || { echo "game-shell missing (Phase 5)"; exit 1; }
+          mkdir -p "$SHELL_DIR/src/main/assets/baziche"
+          cp "$STAGING/plain/game.json" "$SHELL_DIR/src/main/assets/baziche/game.json"
+          if [ -d "$STAGING/plain/assets" ]; then cp -r "$STAGING/plain/assets/." "$SHELL_DIR/src/main/assets/baziche/assets/"; fi
+          cp "$STAGING/plain/signing.json" "$STAGING/signing.json"
+
+      - name: Build APK + AAB
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          KS_PASS=$(jq -r .storePassword "$STAGING/signing.json")
+          KEY_PASS=$(jq -r .keyPassword "$STAGING/signing.json")
+          KEY_ALIAS=$(jq -r .alias "$STAGING/signing.json")
+          echo "::add-mask::$KS_PASS"; echo "::add-mask::$KEY_PASS"
+          ./gradlew :game-shell:assembleRelease :game-shell:bundleRelease \
+            -PBAZICHE_APP_ID='${{ steps.p.outputs.appId }}' \
+            -PBAZICHE_APP_NAME='${{ steps.p.outputs.appName }}' \
+            -PBAZICHE_VERSION_CODE='${{ steps.p.outputs.versionCode }}' \
+            -PBAZICHE_VERSION_NAME='${{ steps.p.outputs.versionName }}' \
+            -PBAZICHE_TARGET_API='${{ steps.p.outputs.targetApi }}' \
+            -PBAZICHE_MIN_API='${{ steps.p.outputs.minApi }}' \
+            -PBAZICHE_KEYSTORE="$STAGING/plain/keystore.jks" \
+            -PBAZICHE_KEY_ALIAS="$KEY_ALIAS" \
+            -PBAZICHE_STORE_PASS="$KS_PASS" \
+            -PBAZICHE_KEY_PASS="$KEY_PASS" \
+            --stacktrace 2>&1 | tee "$STAGING/build.log"
+          test -f game-shell/build/outputs/apk/release/game-shell-release.apk
+          test -f game-shell/build/outputs/bundle/release/game-shell-release.aab
+
+      - name: Upload artifacts to R2
+        if: success()
+        run: |
+          curl -fSL -X PUT --retry 3 -H "Content-Type: application/vnd.android.package-archive" \
+            --data-binary "@android/game-shell/build/outputs/apk/release/game-shell-release.apk" "${{ steps.p.outputs.apkUrl }}"
+          curl -fSL -X PUT --retry 3 -H "Content-Type: application/octet-stream" \
+            --data-binary "@android/game-shell/build/outputs/bundle/release/game-shell-release.aab" "${{ steps.p.outputs.aabUrl }}"
+          curl -fSL -X PUT --retry 3 -H "Content-Type: text/plain" \
+            --data-binary "@$STAGING/build.log" "${{ steps.p.outputs.logUrl }}"
+
+      - name: Callback (success)
+        if: success()
+        run: |
+          curl -fSL -X POST "${{ steps.p.outputs.callbackUrl }}" \
+            -H "Authorization: Bearer $CALLBACK_TOKEN" -H "Content-Type: application/json" \
+            -d '{"status":"COMPLETED","runId":"${{ github.run_id }}"}'
+        env:
+          CALLBACK_TOKEN: ${{ inputs.callback_token }}
+
+      - name: Callback (failure)
+        if: failure()
+        run: |
+          curl -fSL -X PUT --retry 3 -H "Content-Type: text/plain" \
+            --data-binary "@$STAGING/build.log" "${{ steps.p.outputs.logUrl }}" || true
+          curl -fSL -X POST "${{ steps.p.outputs.callbackUrl }}" \
+            -H "Authorization: Bearer $CALLBACK_TOKEN" -H "Content-Type: application/json" \
+            -d '{"status":"FAILED","runId":"${{ github.run_id }}"}' || true
+        env:
+          CALLBACK_TOKEN: ${{ inputs.callback_token }}
+
+      - name: Cleanup secrets from disk
+        if: always()
+        run: |
+          rm -rf "$STAGING" payload.json
+          echo "workspace cleaned"
