@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="editor">ویرایشگر</string>
+    <string name="save">ذخیره</string>
+    <string name="retry">تلاش مجدد</string>
+    <string name="rename">تغییر نام</string>
+    <string name="duplicate">تکثیر</string>
+    <string name="set_entry">صحنه شروع</string>
+    <string name="delete">حذف</string>
+    <string name="ok">تأیید</string>
+    <string name="cancel">انصراف</string>
+    <string name="width">عرض</string>
+    <string name="height">ارتفاع</string>
+    <string name="rotation">چرخش</string>
+    <string name="opacity">شفافیت</string>
+    <string name="layer">لایه %1$d</string>
+    <string name="visible">قابل مشاهده</string>
+    <string name="new_scene">صحنه جدید</string>
+    <string name="rename_scene">تغییر نام صحنه</string>
+    <string name="conflict_title">تداخل نسخه</string>
+    <string name="conflict_msg">روی سرور نسخه جدیدتری (r%1$d) از دستگاه دیگری ذخیره شده است. روش حل را انتخاب کنید:</string>
+    <string name="auto_merge">ادغام خودکار</string>
+    <string name="use_mine">نسخه من بماند</string>
+    <string name="use_server">نسخه سرور</string>
+    <string name="offline_saved">اتصال نیست — روی همین دستگاه ذخیره شد، بعداً همگام می‌شود.</string>
+    <string name="merged_clean">بدون تداخل ادغام شد. بازبینی کنید بعد ذخیره.</string>
+    <string name="merged_conflicts">با تداخل ادغام شد (نسخه سرور نگه داشته شد): %1$s. بازبینی کنید بعد ذخیره.</string>
+</resources>

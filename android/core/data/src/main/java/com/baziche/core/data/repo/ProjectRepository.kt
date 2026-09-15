@@ -4,12 +4,16 @@ import com.baziche.core.common.ApiResult
 import com.baziche.core.data.db.CachedProject
 import com.baziche.core.data.db.ProjectCache
 import com.baziche.core.network.ApiErrors
+import com.baziche.core.network.ApiException
 import com.baziche.core.network.BazicheApi
 import com.baziche.core.network.ConflictResponse
 import com.baziche.core.network.CreateProjectRequest
 import com.baziche.core.network.GameTypeDto
+import com.baziche.core.network.MergeRequest
 import com.baziche.core.network.NetworkModule
 import com.baziche.core.network.ProjectDto
+import com.baziche.core.network.RestoreRequest
+import com.baziche.core.network.RevisionDto
 import com.baziche.core.network.SaveProjectRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,10 +23,14 @@ import retrofit2.HttpException
 sealed interface SaveResult {
     data class Saved(val rev: Int) : SaveResult
     data class Conflict(val serverRev: Int, val serverCopy: JsonObject?) : SaveResult
+    /** No connection: JSON stored in the local dirty cache; SyncWorker pushes it later. */
+    data object OfflineCached : SaveResult
     data class Failed(val code: String, val message: String) : SaveResult
 }
 
 data class ProjectDetail(val project: ProjectDto, val json: JsonObject?)
+
+data class MergedProject(val merged: JsonObject, val conflicts: List<String>, val serverRev: Int)
 
 class ProjectRepository(
     private val api: BazicheApi,
@@ -109,11 +117,44 @@ class ProjectRepository(
                 }
                 return@withContext SaveResult.Conflict(parsed?.serverRev ?: -1, parsed?.serverCopy)
             }
-            // Also handle 409 wrapped by withAuthRetry? No — ApiException only wraps 401 path.
             val e = ApiErrors.map(t)
-            if (e.code == "REVISION_CONFLICT") SaveResult.Conflict(-1, null)
-            else SaveResult.Failed(e.code, e.message ?: "Save failed")
+            if (e.code == "REVISION_CONFLICT") return@withContext SaveResult.Conflict(-1, null)
+            if (e.httpCode == 0) {
+                // Offline: keep the JSON in the dirty cache; SyncWorker pushes it later.
+                val c = cache.get(id)
+                cache.upsert(
+                    CachedProject(
+                        id, name ?: (c?.name ?: ""), c?.gameType ?: "", baseRev,
+                        json.toString(), System.currentTimeMillis(), true,
+                    ),
+                )
+                return@withContext SaveResult.OfflineCached
+            }
+            SaveResult.Failed(e.code, e.message ?: "Save failed")
         }
+    }
+
+    /** Three-way merge on the server. Throws [ApiException] on failure. */
+    suspend fun mergeProject(id: String, baseRev: Int, json: JsonObject): MergedProject = withContext(Dispatchers.IO) {
+        val res = auth.withAuthRetry { api.merge(id, MergeRequest(baseRev, json)) }
+        val merged = res.merged
+        if (!res.success || merged == null) {
+            throw ApiException(res.error?.code ?: "MERGE_FAILED", res.error?.message ?: "Merge failed", 0)
+        }
+        MergedProject(merged, res.conflicts, res.serverRev ?: (baseRev + 1))
+    }
+
+    suspend fun revisions(id: String): List<RevisionDto> = withContext(Dispatchers.IO) {
+        auth.withAuthRetry { api.revisions(id) }.revisions
+    }
+
+    /** Restores [rev] as a new head revision. Returns the new rev. Throws [ApiException] on failure. */
+    suspend fun restoreRevision(id: String, rev: Int, baseRev: Int): Int = withContext(Dispatchers.IO) {
+        val res = auth.withAuthRetry { api.restore(id, RestoreRequest(rev, baseRev)) }
+        if (!res.success || res.rev == null) {
+            throw ApiException(res.error?.code ?: "RESTORE_FAILED", res.error?.message ?: "Restore failed", 0)
+        }
+        res.rev
     }
 
     suspend fun deleteProject(id: String): ApiResult<Unit> = withContext(Dispatchers.IO) {

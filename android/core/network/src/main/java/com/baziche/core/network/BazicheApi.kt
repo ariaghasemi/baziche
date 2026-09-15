@@ -45,6 +45,12 @@ interface BazicheApi {
     @GET("projects/{id}/revisions")
     suspend fun revisions(@Path("id") id: String): RevisionsResponse
 
+    @POST("projects/{id}/restore")
+    suspend fun restore(@Path("id") id: String, @Body body: RestoreRequest): RestoreResponse
+
+    @POST("projects/{id}/merge")
+    suspend fun merge(@Path("id") id: String, @Body body: MergeRequest): MergeResponse
+
     @POST("assets/presign")
     suspend fun presign(@Body body: PresignRequest): PresignResponse
 

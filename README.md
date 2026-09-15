@@ -7,7 +7,7 @@
 ## ساختار ریپو
 
 ```text
-android/    اپ Native (Kotlin + Compose) — app + core/*  (editor/runtime/game-shell در فازهای بعد)
+android/    اپ Native (Kotlin + Compose) — app + core/* + editor  (runtime/game-shell در فازهای بعد)
 backend/    API روی Cloudflare Workers (Hono + TS + D1 + R2)
 shared/     قراردادها: project-format.schema.json، api-v1.openAPI.yaml، error-codes.md، registries
 .github/    CI (اندروید + بک‌اند) + game-build.yml (ورک‌فلوی بیلد بازی — DRAFT فاز ۵)
@@ -35,8 +35,8 @@ npm test                # تست‌ها (vitest + شبیه‌ساز واقعی D
 
 | فاز | وضعیت | خروجی |
 |---|---|---|
-| PHASE 1 | ✅ پیاده‌سازی‌شده (این نسخه) | Shell + Auth + Backend Core + D1/R2 + Project Core + Admin skeleton + Registries + CI |
-| PHASE 2 | ⬜ NOT IMPLEMENTED | Sync کامل + Editor MVP |
+| PHASE 1 | ✅ پیاده‌سازی‌شده | Shell + Auth + Backend Core + D1/R2 + Project Core + Admin skeleton + Registries + CI |
+| PHASE 2 | ✅ پیاده‌سازی‌شده (این نسخه) | دیتابیس دوگانه (auth+data) + Restore/Merge + Magic-byte + Editor MVP + SyncWorker |
 | PHASE 3 | ⬜ NOT IMPLEMENTED | Runtime Core |
 | PHASE 4 | ⬜ NOT IMPLEMENTED | ۸ Game Type اجرایی + Template |
 | PHASE 5 | 🟨 DRAFT | `game-build.yml` نوشته شده؛ فعال‌سازی با game-shell |

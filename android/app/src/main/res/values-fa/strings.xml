@@ -52,4 +52,9 @@
     <string name="err_NETWORK">اتصال نیست. اینترنت را بررسی کن.</string>
     <string name="err_ACCOUNT_SUSPENDED">این حساب معلق شده است.</string>
     <string name="err_generic">خطایی رخ داد. دوباره تلاش کن.</string>
+    <string name="history">تاریخچه</string>
+    <string name="restore">بازیابی</string>
+    <string name="restore_confirm">نسخه r%1$d به‌عنوان نسخه جدید بازیابی شود؟ کار فعلی شما در تاریخچه می‌ماند.</string>
+    <string name="no_revisions">هنوز تاریخچه‌ای نیست.</string>
+    <string name="current">فعلی</string>
 </resources>

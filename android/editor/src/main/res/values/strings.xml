@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="editor">Editor</string>
+    <string name="save">Save</string>
+    <string name="retry">Retry</string>
+    <string name="rename">Rename</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="set_entry">Set as entry</string>
+    <string name="delete">Delete</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="width">W</string>
+    <string name="height">H</string>
+    <string name="rotation">Rot</string>
+    <string name="opacity">Opacity</string>
+    <string name="layer">Layer %1$d</string>
+    <string name="visible">Visible</string>
+    <string name="new_scene">New scene</string>
+    <string name="rename_scene">Rename scene</string>
+    <string name="conflict_title">Conflict</string>
+    <string name="conflict_msg">The server has a newer revision (r%1$d) saved from another device. Choose how to resolve:</string>
+    <string name="auto_merge">Auto-merge</string>
+    <string name="use_mine">Keep mine</string>
+    <string name="use_server">Use server</string>
+    <string name="offline_saved">No connection — saved on this device, will sync later.</string>
+    <string name="merged_clean">Merged cleanly. Review, then Save.</string>
+    <string name="merged_conflicts">Merged with conflicts (server version kept): %1$s. Review, then Save.</string>
+</resources>

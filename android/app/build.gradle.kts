@@ -11,7 +11,7 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "0.2.0"
         // Debug default = local backend via emulator. Override with -PBAZICHE_API_URL=...
         val apiUrl = (project.findProperty("BAZICHE_API_URL") as String?)?.trim()?.ifEmpty { null }
             ?: "http://10.0.2.2:8787/api/v1/"
@@ -44,6 +44,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:network"))
     implementation(project(":core:data"))
+    implementation(project(":editor"))
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)
@@ -52,6 +53,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.work.runtime)
     implementation(platform(libs.coroutines.bom))
     implementation(libs.coroutines.android)
     implementation(libs.serialization.json)

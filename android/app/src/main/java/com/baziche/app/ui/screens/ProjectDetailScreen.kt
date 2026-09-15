@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -36,11 +37,25 @@ import com.baziche.app.ui.components.ErrorCard
 import com.baziche.core.common.ApiResult
 import com.baziche.core.data.repo.ProjectDetail
 import com.baziche.core.data.repo.ProjectRepository
+import com.baziche.core.network.RevisionDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-data class DetailUi(val loading: Boolean = true, val detail: ProjectDetail? = null, val errorCode: String? = null, val errorMsg: String = "", val deleted: Boolean = false)
+data class DetailUi(
+    val loading: Boolean = true,
+    val detail: ProjectDetail? = null,
+    val errorCode: String? = null,
+    val errorMsg: String = "",
+    val deleted: Boolean = false,
+    val revisions: List<RevisionDto> = emptyList(),
+    val revisionsLoading: Boolean = false,
+    val restoring: Boolean = false,
+    val restoreError: String? = null,
+)
 
 class ProjectDetailViewModel(private val repo: ProjectRepository, private val id: String) : ViewModel() {
     private val _ui = MutableStateFlow(DetailUi())
@@ -51,11 +66,39 @@ class ProjectDetailViewModel(private val repo: ProjectRepository, private val id
     }
 
     fun refresh() {
-        _ui.value = _ui.value.copy(loading = true, errorCode = null)
+        _ui.value = _ui.value.copy(loading = true, errorCode = null, restoreError = null)
         viewModelScope.launch {
             when (val r = repo.getProject(id)) {
-                is ApiResult.Success -> _ui.value = DetailUi(detail = r.data)
-                is ApiResult.Error -> _ui.value = DetailUi(loading = false, errorCode = r.code, errorMsg = r.message)
+                is ApiResult.Success -> {
+                    _ui.value = _ui.value.copy(loading = false, detail = r.data)
+                    loadRevisions()
+                }
+                is ApiResult.Error -> _ui.value = _ui.value.copy(loading = false, errorCode = r.code, errorMsg = r.message)
+            }
+        }
+    }
+
+    fun loadRevisions() {
+        viewModelScope.launch {
+            _ui.value = _ui.value.copy(revisionsLoading = true)
+            try {
+                _ui.value = _ui.value.copy(revisions = repo.revisions(id), revisionsLoading = false)
+            } catch (t: Throwable) {
+                _ui.value = _ui.value.copy(revisionsLoading = false)
+            }
+        }
+    }
+
+    fun restore(rev: Int) {
+        val baseRev = _ui.value.detail?.project?.rev ?: return
+        _ui.value = _ui.value.copy(restoring = true, restoreError = null)
+        viewModelScope.launch {
+            try {
+                repo.restoreRevision(id, rev, baseRev)
+                _ui.value = _ui.value.copy(restoring = false)
+                refresh()
+            } catch (t: Throwable) {
+                _ui.value = _ui.value.copy(restoring = false, restoreError = t.message ?: "restore failed")
             }
         }
     }
@@ -70,12 +113,15 @@ class ProjectDetailViewModel(private val repo: ProjectRepository, private val id
     }
 }
 
+private fun formatTs(epochSec: Long): String =
+    SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(epochSec * 1000))
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProjectDetailScreen(vm: ProjectDetailViewModel, onBack: () -> Unit) {
+fun ProjectDetailScreen(vm: ProjectDetailViewModel, onBack: () -> Unit, onOpenEditor: () -> Unit) {
     val ui by vm.ui.collectAsState()
-    var showEditorNote by rememberSaveable { mutableStateOf(false) }
     var showDelete by rememberSaveable { mutableStateOf(false) }
+    var restoreTarget by rememberSaveable { mutableStateOf<Int?>(null) }
     if (ui.deleted) {
         onBack()
         return
@@ -98,8 +144,34 @@ fun ProjectDetailScreen(vm: ProjectDetailViewModel, onBack: () -> Unit) {
                             Text("${stringResource(R.string.revision)}: ${d.project.rev}")
                         }
                     }
-                    Button(onClick = { showEditorNote = true }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.open_in_editor)) }
+                    Button(onClick = onOpenEditor, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.open_in_editor)) }
                     OutlinedButton(onClick = { showDelete = true }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.delete)) }
+                    Text(stringResource(R.string.history), style = MaterialTheme.typography.labelLarge)
+                    Card(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (ui.revisionsLoading || ui.restoring) {
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) { CircularProgressIndicator() }
+                            } else if (ui.revisions.isEmpty()) {
+                                Text(stringResource(R.string.no_revisions), style = MaterialTheme.typography.bodySmall)
+                            } else {
+                                ui.revisions.forEach { rev ->
+                                    Row(
+                                        Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text("r${rev.rev} · ${formatTs(rev.createdAt)}", style = MaterialTheme.typography.bodySmall)
+                                        if (rev.rev == d.project.rev) {
+                                            Text(stringResource(R.string.current), style = MaterialTheme.typography.labelSmall)
+                                        } else {
+                                            TextButton(onClick = { restoreTarget = rev.rev }) { Text(stringResource(R.string.restore)) }
+                                        }
+                                    }
+                                }
+                            }
+                            ui.restoreError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                        }
+                    }
                     Text(stringResource(R.string.project_json), style = MaterialTheme.typography.labelLarge)
                     Card(Modifier.fillMaxWidth()) {
                         Text(
@@ -112,12 +184,13 @@ fun ProjectDetailScreen(vm: ProjectDetailViewModel, onBack: () -> Unit) {
             }
         }
     }
-    if (showEditorNote) {
+    restoreTarget?.let { rev ->
         AlertDialog(
-            onDismissRequest = { showEditorNote = false },
-            title = { Text(stringResource(R.string.open_in_editor)) },
-            text = { Text(stringResource(R.string.editor_phase2)) },
-            confirmButton = { TextButton(onClick = { showEditorNote = false }) { Text(stringResource(R.string.got_it)) } },
+            onDismissRequest = { restoreTarget = null },
+            title = { Text(stringResource(R.string.restore)) },
+            text = { Text(stringResource(R.string.restore_confirm, rev)) },
+            confirmButton = { TextButton(onClick = { restoreTarget = null; vm.restore(rev) }) { Text(stringResource(R.string.restore)) } },
+            dismissButton = { TextButton(onClick = { restoreTarget = null }) { Text(stringResource(R.string.cancel)) } },
         )
     }
     if (showDelete) {

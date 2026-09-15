@@ -22,6 +22,8 @@ import com.baziche.app.ui.screens.SharedAuthViewModel
 import com.baziche.app.ui.screens.SplashScreen
 import com.baziche.app.ui.screens.SplashViewModel
 import com.baziche.app.ui.util.vmFactory
+import com.baziche.editor.EditorViewModel
+import com.baziche.editor.ui.SceneEditorScreen
 
 object Routes {
     const val SPLASH = "splash"
@@ -30,8 +32,10 @@ object Routes {
     const val DASHBOARD = "dashboard"
     const val PROJECTS = "projects"
     const val DETAIL = "project/{id}"
+    const val EDITOR = "editor/{id}"
     const val SETTINGS = "settings"
     fun detail(id: String) = "project/$id"
+    fun editor(id: String) = "editor/$id"
 }
 
 @Composable
@@ -70,7 +74,14 @@ fun NavGraph(c: AppContainer) {
         composable(Routes.DETAIL, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStack ->
             val id = backStack.arguments?.getString("id").orEmpty()
             val vm: ProjectDetailViewModel = viewModel(factory = vmFactory { ProjectDetailViewModel(c.projectRepository, id) })
-            ProjectDetailScreen(vm, onBack = { nav.popBackStack() })
+            ProjectDetailScreen(vm,
+                onBack = { nav.popBackStack() },
+                onOpenEditor = { nav.navigate(Routes.editor(id)) })
+        }
+        composable(Routes.EDITOR, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStack ->
+            val id = backStack.arguments?.getString("id").orEmpty()
+            val vm: EditorViewModel = viewModel(factory = vmFactory { EditorViewModel(c.projectRepository, id) })
+            SceneEditorScreen(vm, onBack = { nav.popBackStack() })
         }
         composable(Routes.SETTINGS) {
             val vm: SettingsViewModel = viewModel(factory = vmFactory { SettingsViewModel(c.authRepository, c.languageManager, c.apiBaseUrl) })

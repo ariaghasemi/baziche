@@ -1,6 +1,5 @@
 package com.baziche.core.network
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
@@ -124,6 +123,24 @@ data class RevisionsResponse(val success: Boolean = false, val revisions: List<R
 
 @Serializable
 data class OkResponse(val success: Boolean = false, val error: ErrorBody? = null)
+
+@Serializable
+data class RestoreRequest(val rev: Int, val baseRev: Int)
+
+@Serializable
+data class RestoreResponse(val success: Boolean = false, val rev: Int? = null, val restoredFrom: Int? = null, val error: ErrorBody? = null)
+
+@Serializable
+data class MergeRequest(val baseRev: Int, val json: JsonObject)
+
+@Serializable
+data class MergeResponse(
+    val success: Boolean = false,
+    val merged: JsonObject? = null,
+    val conflicts: List<String> = emptyList(),
+    val serverRev: Int? = null,
+    val error: ErrorBody? = null,
+)
 
 // ---------- meta ----------
 @Serializable
