@@ -18,6 +18,7 @@ include(":core:common")
 include(":core:network")
 include(":core:data")
 include(":editor")
-// Phase 3+: :runtime, :preview
+include(":runtime")
+include(":preview")
 // Phase 5+: :game-shell
 // Phase 8+: :iap-core, :iap-myket, ...

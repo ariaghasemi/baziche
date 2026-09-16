@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="preview">Preview</string>
+    <string name="restart">Restart</string>
+    <string name="retry">Retry</string>
+    <string name="warnings_title">Runtime warnings (tap to dismiss)</string>
+    <string name="warnings_more">+%1$d more</string>
+</resources>

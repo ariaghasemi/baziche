@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="editor">ویرایشگر</string>
+    <string name="preview">پیش‌نمایش</string>
     <string name="save">ذخیره</string>
     <string name="retry">تلاش مجدد</string>
     <string name="rename">تغییر نام</string>

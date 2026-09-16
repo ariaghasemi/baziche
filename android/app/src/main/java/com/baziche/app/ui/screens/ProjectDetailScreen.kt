@@ -118,7 +118,7 @@ private fun formatTs(epochSec: Long): String =
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProjectDetailScreen(vm: ProjectDetailViewModel, onBack: () -> Unit, onOpenEditor: () -> Unit) {
+fun ProjectDetailScreen(vm: ProjectDetailViewModel, onBack: () -> Unit, onOpenEditor: () -> Unit, onPreview: () -> Unit) {
     val ui by vm.ui.collectAsState()
     var showDelete by rememberSaveable { mutableStateOf(false) }
     var restoreTarget by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -145,6 +145,7 @@ fun ProjectDetailScreen(vm: ProjectDetailViewModel, onBack: () -> Unit, onOpenEd
                         }
                     }
                     Button(onClick = onOpenEditor, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.open_in_editor)) }
+                    Button(onClick = onPreview, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.preview)) }
                     OutlinedButton(onClick = { showDelete = true }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.delete)) }
                     Text(stringResource(R.string.history), style = MaterialTheme.typography.labelLarge)
                     Card(Modifier.fillMaxWidth()) {

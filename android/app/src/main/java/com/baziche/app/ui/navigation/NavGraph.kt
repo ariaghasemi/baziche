@@ -1,6 +1,7 @@
 package com.baziche.app.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -24,6 +25,8 @@ import com.baziche.app.ui.screens.SplashViewModel
 import com.baziche.app.ui.util.vmFactory
 import com.baziche.editor.EditorViewModel
 import com.baziche.editor.ui.SceneEditorScreen
+import com.baziche.preview.PreviewViewModel
+import com.baziche.preview.ui.PreviewScreen
 
 object Routes {
     const val SPLASH = "splash"
@@ -33,9 +36,11 @@ object Routes {
     const val PROJECTS = "projects"
     const val DETAIL = "project/{id}"
     const val EDITOR = "editor/{id}"
+    const val PREVIEW = "preview/{id}"
     const val SETTINGS = "settings"
     fun detail(id: String) = "project/$id"
     fun editor(id: String) = "editor/$id"
+    fun preview(id: String) = "preview/$id"
 }
 
 @Composable
@@ -76,12 +81,21 @@ fun NavGraph(c: AppContainer) {
             val vm: ProjectDetailViewModel = viewModel(factory = vmFactory { ProjectDetailViewModel(c.projectRepository, id) })
             ProjectDetailScreen(vm,
                 onBack = { nav.popBackStack() },
-                onOpenEditor = { nav.navigate(Routes.editor(id)) })
+                onOpenEditor = { nav.navigate(Routes.editor(id)) },
+                onPreview = { nav.navigate(Routes.preview(id)) })
         }
         composable(Routes.EDITOR, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStack ->
             val id = backStack.arguments?.getString("id").orEmpty()
             val vm: EditorViewModel = viewModel(factory = vmFactory { EditorViewModel(c.projectRepository, id) })
-            SceneEditorScreen(vm, onBack = { nav.popBackStack() })
+            SceneEditorScreen(vm,
+                onBack = { nav.popBackStack() },
+                onPreview = { nav.navigate(Routes.preview(id)) })
+        }
+        composable(Routes.PREVIEW, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStack ->
+            val id = backStack.arguments?.getString("id").orEmpty()
+            val appContext = LocalContext.current.applicationContext
+            val vm: PreviewViewModel = viewModel(factory = vmFactory { PreviewViewModel(c.projectRepository, c.api, appContext, id) })
+            PreviewScreen(vm, onBack = { nav.popBackStack() })
         }
         composable(Routes.SETTINGS) {
             val vm: SettingsViewModel = viewModel(factory = vmFactory { SettingsViewModel(c.authRepository, c.languageManager, c.apiBaseUrl) })

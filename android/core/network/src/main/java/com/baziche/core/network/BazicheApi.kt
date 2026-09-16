@@ -6,6 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 /** Retrofit interface mirroring shared/api-v1.openAPI.yaml (Phase 1 surface). */
 interface BazicheApi {
@@ -56,6 +57,12 @@ interface BazicheApi {
 
     @POST("assets/commit")
     suspend fun commitAsset(@Body body: CommitRequest): OkResponse
+
+    @GET("assets")
+    suspend fun assets(@Query("projectId") projectId: String): AssetsResponse
+
+    @GET("assets/{id}/url")
+    suspend fun assetUrl(@Path("id") id: String): AssetUrlResponse
 
     @GET("meta/registries")
     suspend fun registries(): RegistriesResponse

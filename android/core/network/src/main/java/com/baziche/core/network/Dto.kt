@@ -175,3 +175,12 @@ data class PresignResponse(val success: Boolean = false, val key: String? = null
 
 @Serializable
 data class CommitRequest(val projectId: String, val key: String, val hash: String, val bytes: Long, val kind: String)
+
+@Serializable
+data class AssetDto(val id: String, val kind: String, val hash: String, val bytes: Long, val createdAt: Long? = null)
+
+@Serializable
+data class AssetsResponse(val success: Boolean = false, val assets: List<AssetDto> = emptyList(), val error: ErrorBody? = null)
+
+@Serializable
+data class AssetUrlResponse(val success: Boolean = false, val url: String? = null, val kind: String? = null, val expiresIn: Int? = null, val error: ErrorBody? = null)

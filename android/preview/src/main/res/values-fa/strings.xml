@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="preview">پیش‌نمایش</string>
+    <string name="restart">شروع مجدد</string>
+    <string name="retry">تلاش مجدد</string>
+    <string name="warnings_title">هشدارهای موتور (برای بستن بزن)</string>
+    <string name="warnings_more">+%1$d مورد دیگر</string>
+</resources>

@@ -68,7 +68,7 @@ private fun kindColor(kind: String): Color = when (kind) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SceneEditorScreen(vm: EditorViewModel, onBack: () -> Unit) {
+fun SceneEditorScreen(vm: EditorViewModel, onBack: () -> Unit, onPreview: () -> Unit) {
     val ui by vm.ui.collectAsState()
     Scaffold(
         topBar = {
@@ -77,6 +77,9 @@ fun SceneEditorScreen(vm: EditorViewModel, onBack: () -> Unit) {
                 navigationIcon = { TextButton(onClick = onBack) { Text("‹") } },
                 actions = {
                     if (ui.dirty) Text("•", color = MaterialTheme.colorScheme.tertiary)
+                    TextButton(onClick = onPreview, enabled = !ui.loading) {
+                        Text(stringResource(R.string.preview))
+                    }
                     TextButton(onClick = { vm.save() }, enabled = !ui.saving && !ui.loading) {
                         Text(stringResource(R.string.save))
                     }

@@ -53,6 +53,7 @@
     <string name="err_ACCOUNT_SUSPENDED">This account is suspended.</string>
     <string name="err_generic">Something went wrong. Try again.</string>
     <string name="history">History</string>
+    <string name="preview">Preview</string>
     <string name="restore">Restore</string>
     <string name="restore_confirm">Restore revision r%1$d as a new revision? Your current work stays in history.</string>
     <string name="no_revisions">No history yet.</string>
