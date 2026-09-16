@@ -97,6 +97,18 @@ paths:
       security: [ { bearer: [] } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [projectId, key, hash, bytes, kind], properties: { projectId: { type: string }, key: { type: string }, hash: { type: string }, bytes: { type: integer }, kind: { type: string } } } } } }
       responses: { '200': { description: '{ success, asset }' } }
+  /assets:
+    get:
+      summary: List committed assets of one project (owner)
+      security: [ { bearer: [] } ]
+      parameters: [ { name: projectId, in: query, required: true, schema: { type: string } } ]
+      responses: { '200': { description: '{ success, assets[] }' } }
+  /assets/{id}/url:
+    get:
+      summary: Short-lived presigned download URL (owner)
+      security: [ { bearer: [] } ]
+      parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: '{ success, url, kind, expiresIn }' }, '404': { $ref: '#/components/responses/Error' } }
   /meta/registries:
     get:
       summary: Public versioned registries (capabilities/features/gameTypes/components)

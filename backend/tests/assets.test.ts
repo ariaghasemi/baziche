@@ -53,4 +53,61 @@ describe('magic bytes', () => {
     });
     expect(good.status).toBe(200);
   });
+
+  it('download url: owner gets presigned GET, stranger gets 404, unknown id 404', async () => {
+    const ctx = await makeCtx();
+    const s = await registerUser(ctx, '09120008888', 'dlowner');
+    const stranger = await registerUser(ctx, '09120009999', 'dlstranger');
+    const projectId = await createProject(ctx, s.accessToken, 'D', 'quiz');
+    const p = (await (await req(ctx, '/api/v1/assets/presign', {
+      method: 'POST', token: s.accessToken,
+      body: { projectId, kind: 'audio', hash: 'd'.repeat(64), bytes: 100, contentType: 'audio/mpeg' },
+    })).json()) as { key: string };
+    await ctx.r2assets.put(p.key, MP3);
+    const cm = (await (await req(ctx, '/api/v1/assets/commit', {
+      method: 'POST', token: s.accessToken,
+      body: { projectId, key: p.key, hash: 'd'.repeat(64), bytes: 100, kind: 'audio' },
+    })).json()) as { asset: { id: string } };
+
+    const ok = await req(ctx, `/api/v1/assets/${cm.asset.id}/url`, { token: s.accessToken });
+    expect(ok.status).toBe(200);
+    const oj = (await ok.json()) as { url: string; kind: string; expiresIn: number };
+    expect(oj.kind).toBe('audio');
+    expect(oj.url).toContain('X-Amz-Signature=');
+    expect(oj.url).toContain('baziche-assets');
+
+    const denied = await req(ctx, `/api/v1/assets/${cm.asset.id}/url`, { token: stranger.accessToken });
+    expect(denied.status).toBe(404);
+    const missing = await req(ctx, '/api/v1/assets/ast_nope/url', { token: s.accessToken });
+    expect(missing.status).toBe(404);
+  });
+
+  it('asset list: owner sees committed assets, stranger denied, projectId required', async () => {
+    const ctx = await makeCtx();
+    const s = await registerUser(ctx, '09120001111', 'lister');
+    const stranger = await registerUser(ctx, '09120002222', 'liststranger');
+    const projectId = await createProject(ctx, s.accessToken, 'L', 'quiz');
+    const empty = (await (await req(ctx, `/api/v1/assets?projectId=${projectId}`, { token: s.accessToken })).json()) as {
+      assets: unknown[];
+    };
+    expect(empty.assets).toEqual([]);
+
+    const p = (await (await req(ctx, '/api/v1/assets/presign', {
+      method: 'POST', token: s.accessToken,
+      body: { projectId, kind: 'image', hash: 'c'.repeat(64), bytes: 100, contentType: 'image/png' },
+    })).json()) as { key: string };
+    await ctx.r2assets.put(p.key, PNG);
+    await req(ctx, '/api/v1/assets/commit', {
+      method: 'POST', token: s.accessToken,
+      body: { projectId, key: p.key, hash: 'c'.repeat(64), bytes: 100, kind: 'image' },
+    });
+    const full = (await (await req(ctx, `/api/v1/assets?projectId=${projectId}`, { token: s.accessToken })).json()) as {
+      assets: { id: string; kind: string; hash: string }[];
+    };
+    expect(full.assets.length).toBe(1);
+    expect(full.assets[0].hash).toBe('c'.repeat(64));
+
+    expect((await req(ctx, `/api/v1/assets?projectId=${projectId}`, { token: stranger.accessToken })).status).toBe(404);
+    expect((await req(ctx, '/api/v1/assets', { token: s.accessToken })).status).toBe(400);
+  });
 });

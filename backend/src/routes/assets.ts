@@ -5,7 +5,7 @@ import { err, newId, nowSec } from '../lib/errors';
 import { parse, zHex } from '../lib/validate';
 import { requireAuth } from '../middleware/auth';
 import { storageRouter } from '../lib/storage-router';
-import { presignPutUrl, type R2Creds } from '../lib/r2';
+import { presignGetUrl, presignPutUrl, type R2Creds } from '../lib/r2';
 import { kindAllows, sniff } from '../lib/magic';
 import { audit } from '../lib/audit';
 
@@ -86,4 +86,41 @@ assetRoutes.post('/commit', async (c) => {
     .run();
   await audit(c.env.DB_AUTH, 'asset.commit', userId, { assetId: id, kind: b.kind, bytes: b.bytes });
   return c.json({ success: true, asset: { id, key: b.key } });
+});
+
+// Short-lived download URL for committed assets (Preview audio/images, game-shell builds).
+assetRoutes.get('/:id/url', async (c) => {
+  const userId = c.get('userId');
+  const id = c.req.param('id');
+  const a = await c.env.DB_DATA.prepare(
+    'SELECT a.r2_key AS r2key, a.kind AS kind, p.user_id AS uid FROM assets a JOIN projects p ON p.id = a.project_id WHERE a.id = ?',
+  )
+    .bind(id)
+    .first<{ r2key: string; kind: string; uid: string }>();
+  if (!a || a.uid !== userId) throw err('ASSET_NOT_FOUND', 'Asset not found', 404);
+  const creds: R2Creds = {
+    accountId: c.env.R2_ACCOUNT_ID,
+    accessKeyId: c.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: c.env.R2_SECRET_ACCESS_KEY,
+  };
+  const url = await presignGetUrl(creds, 'baziche-assets', a.r2key, 3600);
+  return c.json({ success: true, url, kind: a.kind, expiresIn: 3600 });
+});
+
+// List committed assets of one project (owner only). Used by Preview to map
+// project-JSON asset ids (by hash) to downloadable server asset ids.
+assetRoutes.get('/', async (c) => {
+  const userId = c.get('userId');
+  const projectId = c.req.query('projectId') ?? '';
+  if (!projectId) throw err('VALIDATION_ERROR', 'projectId required', 400);
+  const p = await c.env.DB_DATA.prepare('SELECT user_id AS uid FROM projects WHERE id = ?')
+    .bind(projectId)
+    .first<{ uid: string }>();
+  if (!p || p.uid !== userId) throw err('PROJECT_NOT_FOUND', 'Project not found', 404);
+  const rows = await c.env.DB_DATA.prepare(
+    'SELECT id, kind, hash, bytes, created_at AS createdAt FROM assets WHERE project_id = ? ORDER BY created_at ASC',
+  )
+    .bind(projectId)
+    .all<{ id: string; kind: string; hash: string; bytes: number; createdAt: number }>();
+  return c.json({ success: true, assets: rows.results });
 });
