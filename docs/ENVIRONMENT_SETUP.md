@@ -91,3 +91,25 @@ npm run typecheck
 | `backend/.dev.vars.example` | قالب | ✅ |
 | `backend/wrangler.toml` | کانفیگ غیرحساس | ✅ |
 | `~/.gradle/gradle.properties` | `BAZICHE_API_URL` شخصی (اختیاری) | ❌ (خارج از ریپو) |
+
+## Android SDK: platform-37 alias (Sept 2026, temporary)
+
+Stable androidx libraries (Compose 1.12.1, core 1.19.0, lifecycle 2.11.0,
+navigation 2.10.1) declare `minCompileSdk 37`, but Google has not published
+`platforms;android-37` yet (404 + absent from `repository2-1.xml` as of
+2026-09-16). So `compileSdk = 37` is satisfied with an alias:
+
+```bash
+cp -r $ANDROID_HOME/platforms/android-36 $ANDROID_HOME/platforms/android-37
+```
+
+Our code calls no API-37 symbols (minSdk 26, plain Canvas/Compose APIs), and
+androidx guards new-API paths with `SDK_INT` checks, so the alias is safe for
+debug builds. When Google publishes the real platform, replace the alias:
+
+```bash
+rm -rf $ANDROID_HOME/platforms/android-37
+sdkmanager "platforms;android-37"
+```
+
+CI (`game-build.yml`, Phase 5) must include the same alias step until then.

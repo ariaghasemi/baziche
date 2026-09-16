@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,7 +37,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -44,6 +47,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.baziche.preview.PreviewViewModel
@@ -82,7 +87,7 @@ fun PreviewScreen(vm: PreviewViewModel, onBack: () -> Unit) {
             }
             ui.snapshot != null -> Column(Modifier.fillMaxSize().padding(pad)) {
                 Box(Modifier.weight(1f).fillMaxWidth()) {
-                    GameCanvas(ui.snapshot!!, ui.orientation) { x, y -> vm.tap(x, y) }
+                    GameCanvas(ui.snapshot!!, ui.orientation, ui.images) { x, y -> vm.tap(x, y) }
                 }
                 if (ui.warnings.isNotEmpty()) {
                     WarningsCard(ui.warnings) { vm.dismissWarnings() }
@@ -109,8 +114,12 @@ private fun WarningsCard(warnings: List<String>, onDismiss: () -> Unit) {
     }
 }
 
+/**
+ * Shared game canvas (used by :preview and :game-shell).
+ * [images] maps Sprite assetId -> decoded bitmap; missing entries render a tinted placeholder.
+ */
 @Composable
-private fun GameCanvas(snap: RenderState, orientation: String, onTap: (Float, Float) -> Unit) {
+fun GameCanvas(snap: RenderState, orientation: String, images: Map<String, ImageBitmap>, onTap: (Float, Float) -> Unit) {
     val logical = remember(orientation) {
         if (orientation == "landscape") Size(800f, 480f) else Size(480f, 800f)
     }
@@ -149,8 +158,16 @@ private fun GameCanvas(snap: RenderState, orientation: String, onTap: (Float, Fl
                 val top = (d.y - camY) * scale
                 val w = d.w * scale
                 val h = d.h * scale
+                val pivot = Offset(left + w / 2f, top + h / 2f)
                 withTransform({
-                    rotate(d.rotation, Offset(left + w / 2f, top + h / 2f))
+                    rotate(d.rotation, pivot)
+                    if (d.kind == "sprite") {
+                        scale(
+                            if (d.sprite?.flipX == true) -1f else 1f,
+                            if (d.sprite?.flipY == true) -1f else 1f,
+                            pivot,
+                        )
+                    }
                 }) {
                     when (d.kind) {
                         "circle" -> drawOval(kindColor(d), Offset(left, top), Size(w, h), alpha = d.opacity)
@@ -185,16 +202,26 @@ private fun GameCanvas(snap: RenderState, orientation: String, onTap: (Float, Fl
                             }
                         }
                         "sprite" -> {
-                            drawRect(
-                                d.sprite?.tint?.let { parseColor(it, Color(0xFF00BCD4) } } ?: Color(0xFF00BCD4),
-                                Offset(left, top), Size(w, h), alpha = d.opacity,
-                            )
-                            val tag = d.sprite?.assetId?.takeLast(8) ?: "IMG"
-                            drawText(
-                                measurer, tag,
-                                topLeft = Offset(left + 6f * scale, top + 4f * scale),
-                                style = TextStyle(color = Color.Black, fontSize = (12f * scale).sp),
-                            )
+                            val img = d.sprite?.assetId?.let { images[it] }
+                            if (img != null) {
+                                drawImage(
+                                    img,
+                                    dstOffset = IntOffset(left.toInt(), top.toInt()),
+                                    dstSize = IntSize(w.toInt().coerceAtLeast(1), h.toInt().coerceAtLeast(1)),
+                                    alpha = d.opacity,
+                                )
+                            } else {
+                                drawRect(
+                                    d.sprite?.tint?.let { parseColor(it, Color(0xFF00BCD4)) } ?: Color(0xFF00BCD4),
+                                    Offset(left, top), Size(w, h), alpha = d.opacity,
+                                )
+                                val tag = d.sprite?.assetId?.takeLast(8) ?: "IMG"
+                                drawText(
+                                    measurer, tag,
+                                    topLeft = Offset(left + 6f * scale, top + 4f * scale),
+                                    style = TextStyle(color = Color.Black, fontSize = (12f * scale).sp),
+                                )
+                            }
                         }
                         else -> drawRect(kindColor(d), Offset(left, top), Size(w, h), alpha = d.opacity)
                     }

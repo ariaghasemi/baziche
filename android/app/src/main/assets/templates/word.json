@@ -1,0 +1,20 @@
+{
+  "formatVersion": 1,
+  "meta": { "name": "Word Tap", "gameType": "word", "orientation": "portrait" },
+  "settings": { "locale": "fa" },
+  "scenes": [
+    { "id": "s1", "name": "Play", "entry": true, "background": { "color": "#3C0753" }, "objectIds": [], "transitions": [] }
+  ],
+  "objects": [
+    { "id": "prompt", "sceneId": "s1", "kind": "text", "visible": true, "layer": 0, "components": { "Transform": { "x": 40, "y": 120, "w": 400, "h": 60 }, "Text": { "text": "Tap: SALAM", "size": 36, "color": "#FFFFFF" } } },
+    { "id": "wA", "sceneId": "s1", "kind": "button", "visible": true, "layer": 1, "components": { "Transform": { "x": 90, "y": 320, "w": 300, "h": 70 }, "Button": { "label": "SALAM", "eventId": "evGood", "enabled": true } } },
+    { "id": "wB", "sceneId": "s1", "kind": "button", "visible": true, "layer": 1, "components": { "Transform": { "x": 90, "y": 410, "w": 300, "h": 70 }, "Button": { "label": "KHODA", "eventId": "evBad", "enabled": true } } },
+    { "id": "wC", "sceneId": "s1", "kind": "button", "visible": true, "layer": 1, "components": { "Transform": { "x": 90, "y": 500, "w": 300, "h": 70 }, "Button": { "label": "MERCI", "eventId": "evBad", "enabled": true } } }
+  ],
+  "events": [
+    { "id": "evGood", "trigger": { "type": "tap", "target": "wA" }, "actions": [ { "capability": "CAP-0020", "params": { "variable": "score", "amount": 1 } }, { "capability": "CAP-0026", "params": { "durationMs": 40 } } ] },
+    { "id": "evBad", "trigger": { "type": "tap" }, "actions": [ { "capability": "CAP-0026", "params": { "durationMs": 150 } } ] }
+  ],
+  "variables": [ { "name": "score", "type": "number", "initial": 0 } ],
+  "assets": []
+}

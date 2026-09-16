@@ -1,0 +1,25 @@
+{
+  "formatVersion": 1,
+  "meta": { "name": "Gem Tap", "gameType": "match3", "orientation": "portrait" },
+  "settings": { "locale": "fa" },
+  "scenes": [
+    { "id": "s1", "name": "Board", "entry": true, "background": { "color": "#2D0A4E" }, "objectIds": [], "transitions": [] },
+    { "id": "s2", "name": "Win", "entry": false, "background": { "color": "#1B262C" }, "objectIds": [], "transitions": [] }
+  ],
+  "objects": [
+    { "id": "title", "sceneId": "s1", "kind": "text", "visible": true, "layer": 0, "components": { "Transform": { "x": 40, "y": 60, "w": 400, "h": 50 }, "Text": { "text": "Clear the gems", "size": 30, "color": "#FFFFFF" } } },
+    { "id": "g1", "sceneId": "s1", "kind": "circle", "visible": true, "layer": 1, "components": { "Transform": { "x": 90, "y": 220, "w": 90, "h": 90 } } },
+    { "id": "g2", "sceneId": "s1", "kind": "rect", "visible": true, "layer": 1, "components": { "Transform": { "x": 195, "y": 220, "w": 90, "h": 90 } } },
+    { "id": "g3", "sceneId": "s1", "kind": "circle", "visible": true, "layer": 1, "components": { "Transform": { "x": 300, "y": 220, "w": 90, "h": 90 } } },
+    { "id": "g4", "sceneId": "s1", "kind": "rect", "visible": true, "layer": 1, "components": { "Transform": { "x": 195, "y": 325, "w": 90, "h": 90 } } },
+    { "id": "win", "sceneId": "s2", "kind": "text", "visible": true, "layer": 0, "components": { "Transform": { "x": 40, "y": 300, "w": 400, "h": 80 }, "Text": { "text": "Board Clear!", "size": 44, "color": "#FFC107" } } }
+  ],
+  "events": [
+    { "id": "evG1", "trigger": { "type": "tap", "target": "g1" }, "actions": [ { "capability": "CAP-0004", "params": { "target": "g1" } }, { "capability": "CAP-0020", "params": { "variable": "cleared", "amount": 1 } }, { "capability": "CAP-0009", "params": { "condition": { "a": "$cleared", "op": ">=", "b": 4 }, "then": [ { "capability": "CAP-0015", "params": { "sceneId": "s2" } } ] } } ] },
+    { "id": "evG2", "trigger": { "type": "tap", "target": "g2" }, "actions": [ { "capability": "CAP-0004", "params": { "target": "g2" } }, { "capability": "CAP-0020", "params": { "variable": "cleared", "amount": 1 } }, { "capability": "CAP-0009", "params": { "condition": { "a": "$cleared", "op": ">=", "b": 4 }, "then": [ { "capability": "CAP-0015", "params": { "sceneId": "s2" } } ] } } ] },
+    { "id": "evG3", "trigger": { "type": "tap", "target": "g3" }, "actions": [ { "capability": "CAP-0004", "params": { "target": "g3" } }, { "capability": "CAP-0020", "params": { "variable": "cleared", "amount": 1 } }, { "capability": "CAP-0009", "params": { "condition": { "a": "$cleared", "op": ">=", "b": 4 }, "then": [ { "capability": "CAP-0015", "params": { "sceneId": "s2" } } ] } } ] },
+    { "id": "evG4", "trigger": { "type": "tap", "target": "g4" }, "actions": [ { "capability": "CAP-0004", "params": { "target": "g4" } }, { "capability": "CAP-0020", "params": { "variable": "cleared", "amount": 1 } }, { "capability": "CAP-0009", "params": { "condition": { "a": "$cleared", "op": ">=", "b": 4 }, "then": [ { "capability": "CAP-0015", "params": { "sceneId": "s2" } } ] } } ] }
+  ],
+  "variables": [ { "name": "cleared", "type": "number", "initial": 0 } ],
+  "assets": []
+}

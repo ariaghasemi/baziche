@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "meta": { "name": "Lights Out", "gameType": "puzzle", "orientation": "portrait" },
+  "settings": { "locale": "fa" },
+  "scenes": [
+    { "id": "s1", "name": "Board", "entry": true, "background": { "color": "#222831" }, "objectIds": [], "transitions": [] },
+    { "id": "s2", "name": "Win", "entry": false, "background": { "color": "#1B262C" }, "objectIds": [], "transitions": [] }
+  ],
+  "objects": [
+    { "id": "title", "sceneId": "s1", "kind": "text", "visible": true, "layer": 0, "components": { "Transform": { "x": 40, "y": 60, "w": 400, "h": 50 }, "Text": { "text": "Tap all 3 tiles", "size": 30, "color": "#EEEEEE" } } },
+    { "id": "t1", "sceneId": "s1", "kind": "rect", "visible": true, "layer": 1, "components": { "Transform": { "x": 90, "y": 250, "w": 90, "h": 90 } } },
+    { "id": "t2", "sceneId": "s1", "kind": "rect", "visible": true, "layer": 1, "components": { "Transform": { "x": 195, "y": 250, "w": 90, "h": 90 } } },
+    { "id": "t3", "sceneId": "s1", "kind": "rect", "visible": true, "layer": 1, "components": { "Transform": { "x": 300, "y": 250, "w": 90, "h": 90 } } },
+    { "id": "win", "sceneId": "s2", "kind": "text", "visible": true, "layer": 0, "components": { "Transform": { "x": 40, "y": 300, "w": 400, "h": 80 }, "Text": { "text": "Solved!", "size": 48, "color": "#00ADB5" } } }
+  ],
+  "events": [
+    { "id": "evT1", "trigger": { "type": "tap", "target": "t1" }, "actions": [ { "capability": "CAP-0004", "params": { "target": "t1" } }, { "capability": "CAP-0020", "params": { "variable": "cleared", "amount": 1 } }, { "capability": "CAP-0009", "params": { "condition": { "a": "$cleared", "op": ">=", "b": 3 }, "then": [ { "capability": "CAP-0015", "params": { "sceneId": "s2" } } ] } } ] },
+    { "id": "evT2", "trigger": { "type": "tap", "target": "t2" }, "actions": [ { "capability": "CAP-0004", "params": { "target": "t2" } }, { "capability": "CAP-0020", "params": { "variable": "cleared", "amount": 1 } }, { "capability": "CAP-0009", "params": { "condition": { "a": "$cleared", "op": ">=", "b": 3 }, "then": [ { "capability": "CAP-0015", "params": { "sceneId": "s2" } } ] } } ] },
+    { "id": "evT3", "trigger": { "type": "tap", "target": "t3" }, "actions": [ { "capability": "CAP-0004", "params": { "target": "t3" } }, { "capability": "CAP-0020", "params": { "variable": "cleared", "amount": 1 } }, { "capability": "CAP-0009", "params": { "condition": { "a": "$cleared", "op": ">=", "b": 3 }, "then": [ { "capability": "CAP-0015", "params": { "sceneId": "s2" } } ] } } ] }
+  ],
+  "variables": [ { "name": "cleared", "type": "number", "initial": 0 } ],
+  "assets": []
+}

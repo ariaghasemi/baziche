@@ -20,6 +20,7 @@ data class LoadedProject(
     val varDefs: List<RtVarDef>,
     val assetIds: Set<String>,
     val levels: List<RtLevel>,
+    val animations: List<RtAnimation>,
 )
 
 /**
@@ -51,6 +52,7 @@ object ProjectLoader {
                 val id = o.str("id")
                 if (id.isBlank()) null else RtLevel(id, o.str("name", id))
             },
+            animations = root.arr("animations").mapNotNull(::parseAnimation),
         )
     }
 
@@ -102,5 +104,28 @@ object ProjectLoader {
             else -> return null
         }
         return RtVarDef(name, type, VariableStore.coerce(type, o["initial"] ?: JsonPrimitive(0)), o.bool("persist"))
+    }
+
+    private fun parseAnimation(el: JsonElement): RtAnimation? {
+        val o = el as? JsonObject ?: return null
+        val id = o.str("id")
+        if (id.isBlank()) return null
+        val frames = (o["frames"] as? JsonArray)?.mapNotNull { f ->
+            val fo = f as? JsonObject ?: return@mapNotNull null
+            val prop = when (fo.str("prop")) {
+                "x" -> AnimProp.X
+                "y" -> AnimProp.Y
+                "w" -> AnimProp.W
+                "h" -> AnimProp.H
+                "rotation" -> AnimProp.ROTATION
+                "opacity" -> AnimProp.OPACITY
+                else -> return@mapNotNull null
+            }
+            RtKeyframe(fo.num("at").toLong().coerceAtLeast(0), prop, fo.num("value").toFloat())
+        } ?: emptyList()
+        if (frames.isEmpty()) return null
+        val maxAt = frames.maxOf { it.atMs }
+        val dur = o.num("durationMs", maxAt.toDouble()).toLong()
+        return RtAnimation(id, if (dur <= 0) maxAt else dur, o.bool("loop"), frames.sortedBy { it.atMs })
     }
 }

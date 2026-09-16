@@ -19,7 +19,7 @@ Conditions: `{ a, op, b }`, ops `== != > < >= <=`, operands may be `$variable` /
 | 0007–0010 | Set/Get Variable / If / Compare (`$last`) | ✅ |
 | 0011–0012 | Start Timer / Delay | ✅ |
 | 0013 | Play Sound (asset validated vs project assets[]) | ✅ |
-| 0014 | Play Animation | ❌ Phase 4 (warns) |
+| 0014 | Play Animation (keyframe player: x/y/w/h/rotation/opacity, loop) | ✅ |
 | 0015 | Change Scene (+back stack) | ✅ |
 | 0016–0017 | Show/Hide UI (state tracked; rendered in Phase 4 UIBuilder) | 🟨 PARTIAL |
 | 0018–0019 | Save/Load Game (scene+vars+unlocked per slot) | ✅ |

@@ -1,0 +1,20 @@
+{
+  "formatVersion": 1,
+  "meta": { "name": "Tap Target", "gameType": "arcade", "orientation": "portrait" },
+  "settings": { "locale": "fa" },
+  "scenes": [
+    { "id": "s1", "name": "Play", "entry": true, "background": { "color": "#0F3460" }, "objectIds": [], "transitions": [] }
+  ],
+  "objects": [
+    { "id": "title", "sceneId": "s1", "kind": "text", "visible": true, "layer": 0, "components": { "Transform": { "x": 40, "y": 60, "w": 400, "h": 50 }, "Text": { "text": "Tap the circle!", "size": 32, "color": "#FFFFFF" } } },
+    { "id": "target", "sceneId": "s1", "kind": "circle", "visible": true, "layer": 1, "components": { "Transform": { "x": 190, "y": 350, "w": 100, "h": 100 } } },
+    { "id": "decoy1", "sceneId": "s1", "kind": "rect", "visible": true, "layer": 1, "components": { "Transform": { "x": 60, "y": 550, "w": 80, "h": 80 } } },
+    { "id": "decoy2", "sceneId": "s1", "kind": "rect", "visible": true, "layer": 1, "components": { "Transform": { "x": 340, "y": 550, "w": 80, "h": 80 } } }
+  ],
+  "events": [
+    { "id": "evHit", "trigger": { "type": "tap", "target": "target" }, "actions": [ { "capability": "CAP-0020", "params": { "variable": "score", "amount": 1 } }, { "capability": "CAP-0006", "params": { "target": "target", "x": 60, "y": 250 } }, { "capability": "CAP-0026", "params": { "durationMs": 40 } } ] },
+    { "id": "evMiss", "trigger": { "type": "tap", "target": "decoy1" }, "actions": [ { "capability": "CAP-0026", "params": { "durationMs": 150 } } ] }
+  ],
+  "variables": [ { "name": "score", "type": "number", "initial": 0 } ],
+  "assets": []
+}

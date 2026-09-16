@@ -254,4 +254,47 @@ class EditorDoc(root: JsonObject) {
         setArray("objects", list.filter { it["id"]?.jsonPrimitive?.content != id })
         return true
     }
+
+    // ---------- text / button data (Phase 4: editable content) ----------
+    fun getText(id: String): EdText? {
+        val o = array("objects").firstOrNull { it["id"]?.jsonPrimitive?.content == id } ?: return null
+        val t = objOf(objOf(o, "components") ?: JsonObject(emptyMap()), "Text") ?: return EdText("", 24f, "#FFFFFF")
+        return EdText(
+            text = t["text"]?.jsonPrimitive?.contentOrNull ?: "",
+            size = t["size"]?.jsonPrimitive?.floatOrNull ?: t["size"]?.jsonPrimitive?.doubleOrNull?.toFloat() ?: 24f,
+            color = t["color"]?.jsonPrimitive?.contentOrNull ?: "#FFFFFF",
+        )
+    }
+
+    fun setText(id: String, text: String, size: Float, color: String): Boolean = mutateObject(id) { m ->
+        val comps = (m["components"] as? JsonObject)?.toMutableMap() ?: mutableMapOf()
+        val tx = ((comps["Text"] as? JsonObject)?.toMutableMap() ?: mutableMapOf())
+        tx["text"] = JsonPrimitive(text)
+        tx["size"] = JsonPrimitive(size)
+        tx["color"] = JsonPrimitive(color)
+        comps["Text"] = JsonObject(tx)
+        m["components"] = JsonObject(comps)
+    }
+
+    fun getButton(id: String): EdButton? {
+        val o = array("objects").firstOrNull { it["id"]?.jsonPrimitive?.content == id } ?: return null
+        val b = objOf(objOf(o, "components") ?: JsonObject(emptyMap()), "Button") ?: return null
+        return EdButton(
+            label = b["label"]?.jsonPrimitive?.contentOrNull ?: "",
+            enabled = b["enabled"]?.jsonPrimitive?.booleanOrNull ?: true,
+        )
+    }
+
+    fun setButton(id: String, label: String, enabled: Boolean): Boolean = mutateObject(id) { m ->
+        val comps = (m["components"] as? JsonObject)?.toMutableMap() ?: mutableMapOf()
+        val b = ((comps["Button"] as? JsonObject)?.toMutableMap() ?: mutableMapOf())
+        b["label"] = JsonPrimitive(label)
+        b["enabled"] = JsonPrimitive(enabled)
+        comps["Button"] = JsonObject(b)
+        m["components"] = JsonObject(comps)
+    }
 }
+
+data class EdText(val text: String, val size: Float, val color: String)
+
+data class EdButton(val label: String, val enabled: Boolean)

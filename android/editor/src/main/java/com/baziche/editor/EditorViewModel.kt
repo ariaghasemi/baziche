@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.baziche.core.common.ApiResult
 import com.baziche.core.data.repo.ProjectRepository
 import com.baziche.core.data.repo.SaveResult
+import com.baziche.editor.core.EdButton
+import com.baziche.editor.core.EdText
 import com.baziche.editor.core.EditorDoc
 import com.baziche.editor.core.ObjItem
 import com.baziche.editor.core.ObjTransform
@@ -241,6 +243,43 @@ class EditorViewModel(
         val sel = _ui.value.selected ?: return
         if (d.deleteObject(sel.id)) {
             _ui.value = _ui.value.copy(selectedId = null)
+            markDirty(); emit()
+        }
+    }
+
+    // ---------- text / button content ----------
+    fun selectedText(): EdText? {
+        val id = _ui.value.selectedId ?: return null
+        return doc?.getText(id)
+    }
+
+    fun setText(text: String, size: Float, color: String) {
+        val d = doc ?: return
+        val sel = _ui.value.selected ?: return
+        if (d.setText(sel.id, text, size, color)) {
+            markDirty(); emit()
+        }
+    }
+
+    fun selectedButton(): EdButton? {
+        val id = _ui.value.selectedId ?: return null
+        return doc?.getButton(id)
+    }
+
+    fun setButtonLabel(label: String) {
+        val d = doc ?: return
+        val sel = _ui.value.selected ?: return
+        val cur = d.getButton(sel.id)
+        if (d.setButton(sel.id, label, cur?.enabled ?: true)) {
+            markDirty(); emit()
+        }
+    }
+
+    fun setButtonEnabled(enabled: Boolean) {
+        val d = doc ?: return
+        val sel = _ui.value.selected ?: return
+        val cur = d.getButton(sel.id)
+        if (d.setButton(sel.id, cur?.label ?: "", enabled)) {
             markDirty(); emit()
         }
     }

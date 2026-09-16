@@ -1,0 +1,24 @@
+{
+  "formatVersion": 1,
+  "meta": { "name": "Hopper", "gameType": "platformer", "orientation": "landscape" },
+  "settings": { "locale": "fa" },
+  "scenes": [
+    { "id": "s1", "name": "Level1", "entry": true, "background": { "color": "#1A1A2E" }, "objectIds": [], "transitions": [] }
+  ],
+  "objects": [
+    { "id": "hero", "sceneId": "s1", "kind": "rect", "visible": true, "layer": 2, "components": { "Transform": { "x": 120, "y": 320, "w": 56, "h": 56 }, "Health": { "max": 3, "current": 3 } } },
+    { "id": "ground", "sceneId": "s1", "kind": "panel", "visible": true, "layer": 0, "components": { "Transform": { "x": 0, "y": 400, "w": 800, "h": 80 } } },
+    { "id": "coin", "sceneId": "s1", "kind": "circle", "visible": true, "layer": 1, "components": { "Transform": { "x": 500, "y": 300, "w": 44, "h": 44 } } },
+    { "id": "btnL", "sceneId": "s1", "kind": "button", "visible": true, "layer": 3, "components": { "Transform": { "x": 40, "y": 380, "w": 90, "h": 60 }, "Button": { "label": "<", "eventId": "evLeft", "enabled": true } } },
+    { "id": "btnR", "sceneId": "s1", "kind": "button", "visible": true, "layer": 3, "components": { "Transform": { "x": 150, "y": 380, "w": 90, "h": 60 }, "Button": { "label": ">", "eventId": "evRight", "enabled": true } } },
+    { "id": "btnJ", "sceneId": "s1", "kind": "button", "visible": true, "layer": 3, "components": { "Transform": { "x": 660, "y": 380, "w": 90, "h": 60 }, "Button": { "label": "^", "eventId": "evJump", "enabled": true } } }
+  ],
+  "events": [
+    { "id": "evLeft", "trigger": { "type": "tap", "target": "btnL" }, "actions": [ { "capability": "CAP-0001", "params": { "target": "hero", "dx": -60, "dy": 0, "durationMs": 150 } } ] },
+    { "id": "evRight", "trigger": { "type": "tap", "target": "btnR" }, "actions": [ { "capability": "CAP-0001", "params": { "target": "hero", "dx": 60, "dy": 0, "durationMs": 150 } } ] },
+    { "id": "evJump", "trigger": { "type": "tap", "target": "btnJ" }, "actions": [ { "capability": "CAP-0001", "params": { "target": "hero", "dx": 0, "dy": -140, "durationMs": 220 } }, { "capability": "CAP-0012", "params": { "durationMs": 230, "then": [ { "capability": "CAP-0001", "params": { "target": "hero", "dx": 0, "dy": 140, "durationMs": 220 } } ] } } ] },
+    { "id": "evCoin", "trigger": { "type": "tap", "target": "coin" }, "actions": [ { "capability": "CAP-0004", "params": { "target": "coin" } }, { "capability": "CAP-0020", "params": { "variable": "score", "amount": 1 } } ] }
+  ],
+  "variables": [ { "name": "score", "type": "number", "initial": 0 } ],
+  "assets": []
+}

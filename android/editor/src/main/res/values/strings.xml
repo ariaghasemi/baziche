@@ -15,6 +15,10 @@
     <string name="rotation">Rot</string>
     <string name="opacity">Opacity</string>
     <string name="layer">Layer %1$d</string>
+    <string name="text_content">Text</string>
+    <string name="text_size">Size</string>
+    <string name="button_label">Label</string>
+    <string name="enabled">Enabled</string>
     <string name="visible">Visible</string>
     <string name="new_scene">New scene</string>
     <string name="rename_scene">Rename scene</string>

@@ -25,6 +25,8 @@ npm-debug.log*
 android/.gradle/
 android/build/
 android/*/build/
+android/core/*/build/
+**/build/
 android/local.properties
 android/*.iml
 .idea/

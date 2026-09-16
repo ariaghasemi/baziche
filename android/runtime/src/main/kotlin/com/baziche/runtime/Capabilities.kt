@@ -121,7 +121,15 @@ internal class CapabilityRunner(private val e: GameEngine) {
                 }
                 e.sinks.audio.play(assetId, num(p, "volume", 1.0).toFloat().coerceIn(0f, 1f), false)
             }
-            "CAP-0014" -> e.warn("CAP-0014 Play Animation: arrives in Phase 4 (not executed)")
+            "CAP-0014" -> { // Play Animation (keyframe player)
+                val target = str(p, "target")
+                val animId = str(p, "animationId")
+                if (target.isBlank() || animId.isBlank()) {
+                    e.warn("CAP-0014: target + animationId required")
+                    return
+                }
+                e.playAnimation(target, animId)
+            }
             "CAP-0015" -> { // Change Scene
                 val id = str(p, "sceneId")
                 if (id.isBlank()) {

@@ -39,10 +39,14 @@ class AuthRepository(
             val res = api.register(
                 RegisterRequest(phone, username.trim(), PasswordStretcher.toHex(salt), PasswordStretcher.toHex(hash), PasswordStretcher.DEFAULT_ITERATIONS, deviceLabel()),
             )
-            if (!res.success || res.user == null || res.accessToken == null || res.refreshToken == null) {
+            // Locals first: cross-module public vals don't smartcast (Kotlin 2.x).
+            val user = res.user
+            val accessToken = res.accessToken
+            val refreshToken = res.refreshToken
+            if (!res.success || user == null || accessToken == null || refreshToken == null) {
                 return@withContext ApiResult.Error(res.error?.code ?: "INTERNAL", res.error?.message ?: "Register failed")
             }
-            val s = Session(res.user.id, res.user.username, res.user.phone, res.accessToken, res.refreshToken)
+            val s = Session(user.id, user.username, user.phone, accessToken, refreshToken)
             sessions.save(s)
             ApiResult.Success(s)
         } catch (t: Throwable) {
@@ -55,15 +59,20 @@ class AuthRepository(
         val phone = PhoneUtils.normalize(phoneRaw) ?: return@withContext ApiResult.Error("INVALID_PHONE", "Invalid phone")
         try {
             val ch = api.challenge(ChallengeRequest(phone))
-            if (!ch.success || ch.salt.isNullOrEmpty() || ch.iterations == null) {
+            val salt = ch.salt
+            val iterations = ch.iterations
+            if (!ch.success || salt.isNullOrEmpty() || iterations == null) {
                 return@withContext ApiResult.Error(ch.error?.code ?: "INTERNAL", "Challenge failed")
             }
-            val hash = PasswordStretcher.stretch(password, PasswordStretcher.fromHex(ch.salt), ch.iterations)
+            val hash = PasswordStretcher.stretch(password, PasswordStretcher.fromHex(salt), iterations)
             val res = api.login(LoginRequest(phone, PasswordStretcher.toHex(hash), deviceLabel()))
-            if (!res.success || res.user == null || res.accessToken == null || res.refreshToken == null) {
+            val user = res.user
+            val accessToken = res.accessToken
+            val refreshToken = res.refreshToken
+            if (!res.success || user == null || accessToken == null || refreshToken == null) {
                 return@withContext ApiResult.Error(res.error?.code ?: "INVALID_CREDENTIALS", res.error?.message ?: "Login failed")
             }
-            val s = Session(res.user.id, res.user.username, res.user.phone, res.accessToken, res.refreshToken)
+            val s = Session(user.id, user.username, user.phone, accessToken, refreshToken)
             sessions.save(s)
             ApiResult.Success(s)
         } catch (t: Throwable) {
@@ -77,11 +86,13 @@ class AuthRepository(
         val cur = sessions.sessionFlow.first() ?: return false
         try {
             val res = api.refresh(RefreshRequest(cur.refreshToken))
-            if (!res.success || res.accessToken == null || res.refreshToken == null) {
+            val accessToken = res.accessToken
+            val refreshToken = res.refreshToken
+            if (!res.success || accessToken == null || refreshToken == null) {
                 sessions.clear()
                 return false
             }
-            sessions.updateTokens(res.accessToken, res.refreshToken)
+            sessions.updateTokens(accessToken, refreshToken)
             true
         } catch (_: Throwable) {
             false
@@ -106,10 +117,12 @@ class AuthRepository(
     suspend fun me(): ApiResult<MeInfo> = withContext(Dispatchers.IO) {
         try {
             val res = withAuthRetry { api.me() }
-            if (!res.success || res.user == null || res.entitlement == null) {
+            val user = res.user
+            val entitlement = res.entitlement
+            if (!res.success || user == null || entitlement == null) {
                 return@withContext ApiResult.Error(res.error?.code ?: "INTERNAL", "Failed to load profile")
             }
-            ApiResult.Success(MeInfo(res.user.id, res.user.username, res.user.phone, res.user.projects ?: 0, res.entitlement))
+            ApiResult.Success(MeInfo(user.id, user.username, user.phone, user.projects ?: 0, entitlement))
         } catch (t: Throwable) {
             val e = ApiErrors.map(t)
             ApiResult.Error(e.code, e.message ?: "Failed", e.httpCode)

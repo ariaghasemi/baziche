@@ -202,3 +202,10 @@ sealed interface RtValue {
 data class RtVarDef(val name: String, val type: VarType, val initial: RtValue, val persist: Boolean)
 
 data class RtLevel(val id: String, val name: String)
+
+// ---------- keyframe animations (project `animations[]`, played via CAP-0014) ----------
+enum class AnimProp { X, Y, W, H, ROTATION, OPACITY }
+
+data class RtKeyframe(val atMs: Long, val prop: AnimProp, val value: Float)
+
+data class RtAnimation(val id: String, val durationMs: Long, val loop: Boolean, val frames: List<RtKeyframe>)

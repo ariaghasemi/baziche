@@ -1,0 +1,19 @@
+{
+  "formatVersion": 1,
+  "meta": { "name": "High Card", "gameType": "card", "orientation": "portrait" },
+  "settings": { "locale": "fa" },
+  "scenes": [
+    { "id": "s1", "name": "Table", "entry": true, "background": { "color": "#0B3D2E" }, "objectIds": [], "transitions": [] }
+  ],
+  "objects": [
+    { "id": "title", "sceneId": "s1", "kind": "text", "visible": true, "layer": 0, "components": { "Transform": { "x": 40, "y": 60, "w": 400, "h": 50 }, "Text": { "text": "Draw to score", "size": 30, "color": "#FFFFFF" } } },
+    { "id": "cardA", "sceneId": "s1", "kind": "panel", "visible": true, "layer": 1, "components": { "Transform": { "x": 90, "y": 200, "w": 130, "h": 180 } } },
+    { "id": "cardB", "sceneId": "s1", "kind": "panel", "visible": true, "layer": 1, "components": { "Transform": { "x": 260, "y": 200, "w": 130, "h": 180 } } },
+    { "id": "btnDraw", "sceneId": "s1", "kind": "button", "visible": true, "layer": 2, "components": { "Transform": { "x": 140, "y": 480, "w": 200, "h": 70 }, "Button": { "label": "DRAW", "eventId": "evDraw", "enabled": true } } }
+  ],
+  "events": [
+    { "id": "evDraw", "trigger": { "type": "tap", "target": "btnDraw" }, "actions": [ { "capability": "CAP-0020", "params": { "variable": "score", "amount": 1 } }, { "capability": "CAP-0001", "params": { "target": "cardA", "dx": 0, "dy": -40, "durationMs": 200 } }, { "capability": "CAP-0012", "params": { "durationMs": 210, "then": [ { "capability": "CAP-0001", "params": { "target": "cardA", "dx": 0, "dy": 40, "durationMs": 200 } } ] } } ] }
+  ],
+  "variables": [ { "name": "score", "type": "number", "initial": 0 } ],
+  "assets": []
+}

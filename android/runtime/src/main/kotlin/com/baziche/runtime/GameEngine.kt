@@ -25,6 +25,8 @@ internal data class TweenState(
     val durationMs: Long,
 )
 
+internal data class ActiveAnim(val objectId: String, val anim: RtAnimation, var elapsedMs: Long)
+
 // ---------- render snapshot (engine -> canvas, no Android types) ----------
 data class Drawable(
     val id: String,
@@ -69,6 +71,7 @@ class GameEngine(internal val sinks: EngineSinks) {
     private val objects = mutableMapOf<String, RtObject>()
     private var events: List<RtEvent> = emptyList()
     private var levels: List<RtLevel> = emptyList()
+    private var animations: List<RtAnimation> = emptyList()
 
     internal val assetIds = mutableSetOf<String>()
     lateinit var vars: VariableStore
@@ -95,6 +98,7 @@ class GameEngine(internal val sinks: EngineSinks) {
     private val timers = mutableListOf<TimerState>()
     private val pending = mutableListOf<DelayedAction>()
     private val tweens = mutableListOf<TweenState>()
+    private val anims = mutableListOf<ActiveAnim>()
     private val lastDamageAt = mutableMapOf<String, Long>()
     private val warnings = mutableListOf<String>()
     private var clockMs: Long = 0
@@ -109,6 +113,7 @@ class GameEngine(internal val sinks: EngineSinks) {
         lp.objects.forEach { objects[it.id] = it }
         events = lp.events
         levels = lp.levels
+        animations = lp.animations
         assetIds.clear()
         assetIds.addAll(lp.assetIds)
         vars = VariableStore(lp.varDefs)
@@ -125,6 +130,7 @@ class GameEngine(internal val sinks: EngineSinks) {
         timers.clear()
         pending.clear()
         tweens.clear()
+        anims.clear()
         lastDamageAt.clear()
         warnings.clear()
         clockMs = 0
@@ -149,7 +155,8 @@ class GameEngine(internal val sinks: EngineSinks) {
         if (hit != null) {
             val btn = hit.button()
             if (btn != null && !btn.enabled) return // disabled button swallows the tap
-            if (btn?.eventId != null) fireEventById(btn.eventId)
+            val btnEvent = btn?.eventId
+            if (btnEvent != null) fireEventById(btnEvent)
             fireTrigger(TYPE_TAP) { trig -> trig.str("target", hit.id) == hit.id }
         } else {
             fireTrigger(TYPE_TAP) { trig -> (trig["target"] as? JsonPrimitive)?.contentOrNull == null }
@@ -157,7 +164,7 @@ class GameEngine(internal val sinks: EngineSinks) {
     }
 
     /**
-     * Advances timers, delayed actions, tweens and health regen by [dtMs].
+     * Advances timers, delayed actions, tweens, animations and health regen by [dtMs].
      * Each timer fires at most once per tick (documented MVP semantics).
      */
     fun tick(dtMs: Long) {
@@ -203,6 +210,35 @@ class GameEngine(internal val sinks: EngineSinks) {
             if (k >= 1f) done.add(tw)
         }
         tweens.removeAll(done.toSet())
+        // Keyframe animations.
+        val finished = mutableListOf<ActiveAnim>()
+        for (an in anims) {
+            val o = objects[an.objectId]
+            if (o == null) {
+                finished.add(an)
+                continue
+            }
+            an.elapsedMs += dt
+            val dur = an.anim.durationMs
+            if (dur <= 0) {
+                applyAnimFrame(o, an.anim, Long.MAX_VALUE)
+                finished.add(an)
+                continue
+            }
+            var t = an.elapsedMs
+            if (t >= dur) {
+                if (an.anim.loop) {
+                    t %= dur
+                    an.elapsedMs = t
+                } else {
+                    applyAnimFrame(o, an.anim, dur)
+                    finished.add(an)
+                    continue
+                }
+            }
+            applyAnimFrame(o, an.anim, t)
+        }
+        anims.removeAll(finished.toSet())
         // Health regen (per second).
         if (dt > 0) {
             for (o in objects.values) {
@@ -212,6 +248,41 @@ class GameEngine(internal val sinks: EngineSinks) {
                     o.setHealth(h)
                 }
             }
+        }
+    }
+
+    private fun applyAnimFrame(o: RtObject, anim: RtAnimation, t: Long) {
+        val tr = o.transform()
+        for (prop in AnimProp.entries) {
+            val keys = anim.frames.filter { it.prop == prop }
+            if (keys.isEmpty()) continue
+            tr.setProp(prop, sampleKeys(keys, t))
+        }
+        o.setTransform(tr)
+    }
+
+    private fun sampleKeys(keys: List<RtKeyframe>, t: Long): Float {
+        if (t <= keys.first().atMs) return keys.first().value
+        for (i in 0 until keys.size - 1) {
+            val a = keys[i]
+            val b = keys[i + 1]
+            if (t <= b.atMs) {
+                val span = (b.atMs - a.atMs).coerceAtLeast(1)
+                val k = ((t - a.atMs).toFloat() / span).coerceIn(0f, 1f)
+                return a.value + (b.value - a.value) * k
+            }
+        }
+        return keys.last().value
+    }
+
+    private fun RtTransform.setProp(prop: AnimProp, v: Float) {
+        when (prop) {
+            AnimProp.X -> x = v
+            AnimProp.Y -> y = v
+            AnimProp.W -> w = v
+            AnimProp.H -> h = v
+            AnimProp.ROTATION -> rotation = v
+            AnimProp.OPACITY -> opacity = v
         }
     }
 
@@ -255,6 +326,7 @@ class GameEngine(internal val sinks: EngineSinks) {
     internal fun timerCount(): Int = timers.size
     internal fun tweenCount(): Int = tweens.size
     internal fun pendingCount(): Int = pending.size
+    internal fun animCount(): Int = anims.size
 
     // ---------- events ----------
     fun fireEventById(id: String) {
@@ -321,6 +393,7 @@ class GameEngine(internal val sinks: EngineSinks) {
     internal fun destroyObject(id: String): Boolean {
         if (objects.remove(id) == null) return false
         tweens.removeAll { it.objectId == id }
+        anims.removeAll { it.objectId == id }
         lastDamageAt.remove(id)
         return true
     }
@@ -357,6 +430,21 @@ class GameEngine(internal val sinks: EngineSinks) {
     internal fun addTween(objectId: String, prop: TweenProp, from: Float, to: Float, durationMs: Long) {
         tweens.removeAll { it.objectId == objectId && it.prop == prop }
         tweens.add(TweenState(objectId, prop, from, to, 0, durationMs))
+    }
+
+    internal fun playAnimation(targetId: String, animId: String) {
+        val o = objects[targetId]
+        if (o == null) {
+            warn("CAP-0014: unknown target '$targetId'")
+            return
+        }
+        val anim = animations.firstOrNull { it.id == animId }
+        if (anim == null) {
+            warn("CAP-0014: unknown animation '$animId'")
+            return
+        }
+        anims.removeAll { it.objectId == targetId }
+        anims.add(ActiveAnim(targetId, anim, 0))
     }
 
     internal fun damage(target: String, amount: Double) {
@@ -399,11 +487,11 @@ class GameEngine(internal val sinks: EngineSinks) {
 
     internal fun saveGame(slot: String) {
         val data = buildJsonObject {
-            put("v", 1)
-            put("scene", currentSceneId ?: "")
+            put("v", JsonPrimitive(1))
+            put("scene", JsonPrimitive(currentSceneId ?: ""))
             put("vars", JsonObject(vars.snapshotAll()))
             put("unlocked", JsonArray(unlockedLevels.map { JsonPrimitive(it) }))
-            put("clockMs", clockMs)
+            put("clockMs", JsonPrimitive(clockMs))
         }
         sinks.save.save(slot, data.toString())
     }

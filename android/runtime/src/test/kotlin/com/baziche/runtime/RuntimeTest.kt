@@ -3,8 +3,10 @@ package com.baziche.runtime
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonObjectBuilder
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -12,6 +14,17 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
+
+// serialization 1.11 keeps only put(String, JsonElement): restore primitive overloads locally.
+private fun JsonObjectBuilder.put(key: String, value: String) {
+    put(key, JsonPrimitive(value))
+}
+private fun JsonObjectBuilder.put(key: String, value: Number) {
+    put(key, JsonPrimitive(value))
+}
+private fun JsonObjectBuilder.put(key: String, value: Boolean) {
+    put(key, JsonPrimitive(value))
+}
 
 // ---------- builders ----------
 private fun v(n: Number): JsonElement = JsonPrimitive(n)
@@ -838,5 +851,57 @@ class RuntimeTest {
         )
         fx.engine.start()
         assertTrue(fx.engine.drainWarnings().any { it.contains("too deep") })
+    }
+
+    @Test
+    fun play_animation_interpolates_loops_and_validates() {
+        val slide = buildJsonObject {
+            put("id", "slide")
+            put("durationMs", 1000)
+            put("loop", true)
+            put("frames", JsonArray(listOf(
+                buildJsonObject { put("at", 0); put("prop", "x"); put("value", 0) },
+                buildJsonObject { put("at", 1000); put("prop", "x"); put("value", 100) },
+                buildJsonObject { put("at", 0); put("prop", "opacity"); put("value", 1) },
+                buildJsonObject { put("at", 1000); put("prop", "opacity"); put("value", 0) },
+            )))
+        }
+        val once = buildJsonObject {
+            put("id", "once")
+            put("durationMs", 400)
+            put("frames", JsonArray(listOf(
+                buildJsonObject { put("at", 0); put("prop", "y"); put("value", 10) },
+                buildJsonObject { put("at", 400); put("prop", "y"); put("value", 210) },
+            )))
+        }
+        val base = project(
+            scenes = listOf(scene("s1", true)),
+            objects = listOf(obj("o1", "s1", x = 5, y = 5)),
+            events = listOf(
+                ev("boot", "start", listOf(act("CAP-0014", "target" to v("o1"), "animationId" to v("slide")))),
+                ev("bad", "start", listOf(
+                    act("CAP-0014", "target" to v("ghost"), "animationId" to v("slide")),
+                    act("CAP-0014", "target" to v("o1"), "animationId" to v("nope")),
+                )),
+            ),
+        )
+        val withAnim = JsonObject(base.toMutableMap().also { it["animations"] = JsonArray(listOf(slide, once)) })
+        val fx = Fx()
+        fx.engine.load(withAnim)
+        fx.engine.start()
+        assertEquals(5f, fx.engine.objectById("o1")!!.transform().x) // untouched until first tick
+        fx.engine.tick(500)
+        assertEquals(50f, fx.engine.objectById("o1")!!.transform().x)
+        assertEquals(0.5f, fx.engine.objectById("o1")!!.transform().opacity)
+        fx.engine.tick(500) // loop wraps to start
+        assertEquals(0f, fx.engine.objectById("o1")!!.transform().x)
+        assertEquals(1, fx.engine.animCount())
+        // non-loop holds the end value then finishes
+        fx.engine.fireEventById("bad") // only warnings, no crash
+        assertTrue(fx.engine.drainWarnings().any { it.contains("CAP-0014") })
+        fx.engine.playAnimation("o1", "once")
+        fx.engine.tick(1000)
+        assertEquals(210f, fx.engine.objectById("o1")!!.transform().y)
+        assertEquals(0, fx.engine.animCount())
     }
 }

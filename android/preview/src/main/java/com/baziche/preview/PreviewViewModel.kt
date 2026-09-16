@@ -1,6 +1,9 @@
 package com.baziche.preview
 
 import android.content.Context
+import android.graphics.BitmapFactory
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.baziche.core.common.ApiResult
@@ -36,6 +39,7 @@ data class PreviewUi(
     val warnings: List<String> = emptyList(),
     val projectName: String = "",
     val orientation: String = "portrait",
+    val images: Map<String, ImageBitmap> = emptyMap(),
 )
 
 class PreviewViewModel(
@@ -50,6 +54,9 @@ class PreviewViewModel(
     private var engine: GameEngine? = null
     private var ticker: Job? = null
     private var audioSink: SoundPoolAudioSink? = null
+    private val imageCache = mutableMapOf<String, ImageBitmap>()
+    private val imageFailed = mutableSetOf<String>()
+    private val imageInflight = mutableSetOf<String>()
     private val http = OkHttpClient()
 
     init {
@@ -61,6 +68,9 @@ class PreviewViewModel(
         audioSink?.release()
         audioSink = null
         engine = null
+        imageCache.clear()
+        imageFailed.clear()
+        imageInflight.clear()
         viewModelScope.launch {
             _ui.value = PreviewUi(loading = true)
             val detail = when (val r = repo.getProject(projectId)) {
@@ -76,7 +86,7 @@ class PreviewViewModel(
                 return@launch
             }
             val assetMap = resolveAssets(json)
-            val audio = SoundPoolAudioSink(appContext) { serverId -> downloadAsset(serverId) }
+            val audio = SoundPoolAudioSink(appContext) { serverId -> downloadAsset(serverId, "preview_audio") }
             audio.setMapping(assetMap)
             audioSink = audio
             val eng = try {
@@ -89,21 +99,25 @@ class PreviewViewModel(
                 return@launch
             }
             engine = eng
+            val snap = eng.snapshot()
             _ui.value = PreviewUi(
                 loading = false,
-                snapshot = eng.snapshot(),
+                snapshot = snap,
                 warnings = eng.drainWarnings(),
                 projectName = eng.projectName,
                 orientation = eng.orientation,
             )
+            launchImageLoads(snap, assetMap)
             ticker = viewModelScope.launch {
                 while (isActive) {
                     delay(TICK_MS)
                     eng.tick(TICK_MS)
+                    val s = eng.snapshot()
                     _ui.value = _ui.value.copy(
-                        snapshot = eng.snapshot(),
+                        snapshot = s,
                         warnings = (_ui.value.warnings + eng.drainWarnings()).takeLast(MAX_WARNINGS),
                     )
+                    launchImageLoads(s, assetMap)
                 }
             }
         }
@@ -133,6 +147,39 @@ class PreviewViewModel(
         _ui.value = _ui.value.copy(warnings = emptyList())
     }
 
+    /** Kicks off async bitmap loads for sprite assets visible in [snap]. Cheap: skips cached/failed. */
+    private fun launchImageLoads(snap: RenderState, assetMap: Map<String, String>) {
+        if (imageCache.size >= MAX_IMAGES) return
+        val wanted = snap.drawables
+            .filter { it.kind == "sprite" }
+            .mapNotNull { it.sprite?.assetId }
+            .distinct()
+            .filter { it !in imageCache && it !in imageFailed && it !in imageInflight }
+            .take(4)
+        for (assetId in wanted) {
+            val serverId = assetMap[assetId] ?: run { imageFailed.add(assetId); continue }
+            imageInflight.add(assetId)
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    val file = downloadAsset(serverId, "preview_images")
+                    val bmp = file?.absolutePath?.let {
+                        BitmapFactory.decodeFile(it, BitmapFactory.Options().apply { inPreferredConfig = android.graphics.Bitmap.Config.ARGB_8888 })
+                    }?.asImageBitmap()
+                    if (bmp != null) {
+                        imageCache[assetId] = bmp
+                        _ui.value = _ui.value.copy(images = imageCache.toMap())
+                    } else {
+                        imageFailed.add(assetId)
+                    }
+                } catch (_: Exception) {
+                    imageFailed.add(assetId)
+                } finally {
+                    imageInflight.remove(assetId)
+                }
+            }
+        }
+    }
+
     /** Maps project-JSON asset ids to server asset ids by hash. Best-effort: never fails load. */
     private suspend fun resolveAssets(json: JsonObject): Map<String, String> {
         return try {
@@ -152,16 +199,16 @@ class PreviewViewModel(
     }
 
     /** Downloads one asset via presigned URL into cacheDir (size-capped). Null on any failure. */
-    private suspend fun downloadAsset(serverId: String): File? = withContext(Dispatchers.IO) {
+    private suspend fun downloadAsset(serverId: String, subdir: String): File? = withContext(Dispatchers.IO) {
         try {
             val url = api.assetUrl(serverId).url ?: return@withContext null
-            val file = File(appContext.cacheDir, "preview_audio/$projectId/$serverId.bin")
+            val file = File(appContext.cacheDir, "$subdir/$projectId/$serverId.bin")
             if (file.exists() && file.length() > 0) return@withContext file
             file.parentFile?.mkdirs()
             http.newCall(Request.Builder().url(url).build()).execute().use { resp ->
                 if (!resp.isSuccessful) return@withContext null
                 val body = resp.body ?: return@withContext null
-                if (body.contentLength() > MAX_AUDIO_BYTES) return@withContext null
+                if (body.contentLength() > MAX_ASSET_BYTES) return@withContext null
                 var total = 0L
                 val buf = ByteArray(8192)
                 val input = body.byteStream()
@@ -170,7 +217,7 @@ class PreviewViewModel(
                         val n = input.read(buf)
                         if (n < 0) break
                         total += n
-                        if (total > MAX_AUDIO_BYTES) {
+                        if (total > MAX_ASSET_BYTES) {
                             out.close()
                             file.delete()
                             return@withContext null
@@ -194,6 +241,7 @@ class PreviewViewModel(
     companion object {
         const val TICK_MS = 50L
         const val MAX_WARNINGS = 20
-        const val MAX_AUDIO_BYTES = 8L * 1024 * 1024
+        const val MAX_IMAGES = 32
+        const val MAX_ASSET_BYTES = 8L * 1024 * 1024
     }
 }

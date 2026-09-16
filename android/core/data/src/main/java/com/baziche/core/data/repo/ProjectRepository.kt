@@ -62,12 +62,13 @@ class ProjectRepository(
     suspend fun createProject(name: String, gameType: String): ApiResult<ProjectDto> = withContext(Dispatchers.IO) {
         try {
             val res = auth.withAuthRetry { api.createProject(CreateProjectRequest(name.trim(), gameType)) }
-            if (!res.success || res.project == null) {
+            // Locals first: cross-module public vals don't smartcast (Kotlin 2.x).
+            val project = res.project
+            if (!res.success || project == null) {
                 return@withContext ApiResult.Error(res.error?.code ?: "INTERNAL", res.error?.message ?: "Create failed")
             }
-            val p = res.project
-            cache.upsert(CachedProject(p.id, p.name, p.gameType, p.rev, null, System.currentTimeMillis(), false))
-            ApiResult.Success(p)
+            cache.upsert(CachedProject(project.id, project.name, project.gameType, project.rev, null, System.currentTimeMillis(), false))
+            ApiResult.Success(project)
         } catch (t: Throwable) {
             val e = ApiErrors.map(t)
             ApiResult.Error(e.code, e.message ?: "Create failed", e.httpCode)
@@ -77,12 +78,13 @@ class ProjectRepository(
     suspend fun getProject(id: String): ApiResult<ProjectDetail> = withContext(Dispatchers.IO) {
         try {
             val res = auth.withAuthRetry { api.project(id) }
-            if (!res.success || res.project == null) {
+            val project = res.project
+            if (!res.success || project == null) {
                 return@withContext ApiResult.Error(res.error?.code ?: "PROJECT_NOT_FOUND", res.error?.message ?: "Not found")
             }
             val jsonStr = res.json?.toString()
-            cache.upsert(CachedProject(res.project.id, res.project.name, res.project.gameType, res.project.rev, jsonStr, System.currentTimeMillis(), false))
-            ApiResult.Success(ProjectDetail(res.project, res.json))
+            cache.upsert(CachedProject(project.id, project.name, project.gameType, project.rev, jsonStr, System.currentTimeMillis(), false))
+            ApiResult.Success(ProjectDetail(project, res.json))
         } catch (t: Throwable) {
             val c = cache.get(id)
             if (c?.json != null) {
@@ -102,9 +104,10 @@ class ProjectRepository(
     suspend fun saveProject(id: String, baseRev: Int, json: JsonObject, name: String? = null): SaveResult = withContext(Dispatchers.IO) {
         try {
             val res = auth.withAuthRetry { api.saveProject(id, SaveProjectRequest(baseRev, name, json)) }
-            if (res.success && res.rev != null) {
-                cache.upsert(CachedProject(id, name ?: (cache.get(id)?.name ?: ""), cache.get(id)?.gameType ?: "", res.rev, json.toString(), System.currentTimeMillis(), false))
-                SaveResult.Saved(res.rev)
+            val rev = res.rev
+            if (res.success && rev != null) {
+                cache.upsert(CachedProject(id, name ?: (cache.get(id)?.name ?: ""), cache.get(id)?.gameType ?: "", rev, json.toString(), System.currentTimeMillis(), false))
+                SaveResult.Saved(rev)
             } else {
                 SaveResult.Failed(res.error?.code ?: "INTERNAL", res.error?.message ?: "Save failed")
             }
@@ -151,10 +154,11 @@ class ProjectRepository(
     /** Restores [rev] as a new head revision. Returns the new rev. Throws [ApiException] on failure. */
     suspend fun restoreRevision(id: String, rev: Int, baseRev: Int): Int = withContext(Dispatchers.IO) {
         val res = auth.withAuthRetry { api.restore(id, RestoreRequest(rev, baseRev)) }
-        if (!res.success || res.rev == null) {
+        val rev = res.rev
+        if (!res.success || rev == null) {
             throw ApiException(res.error?.code ?: "RESTORE_FAILED", res.error?.message ?: "Restore failed", 0)
         }
-        res.rev
+        rev
     }
 
     suspend fun deleteProject(id: String): ApiResult<Unit> = withContext(Dispatchers.IO) {
