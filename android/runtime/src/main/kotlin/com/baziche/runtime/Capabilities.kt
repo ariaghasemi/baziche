@@ -187,8 +187,14 @@ internal class CapabilityRunner(private val e: GameEngine) {
                 }
                 e.sinks.system.openLink(url)
             }
-            "CAP-0028" -> e.warn("CAP-0028 Rewarded Ad: arrives in Phase 8 (not executed)")
-            "CAP-0029" -> e.warn("CAP-0029 Purchase: arrives in Phase 8 (not executed)")
+            "CAP-0028" -> { // Rewarded Ad (host shows it, reports back via onRewardedAdResult)
+                e.monetization.onRewardedAdRequested(str(p, "placement", "default").ifBlank { "default" })
+            }
+            "CAP-0029" -> { // Purchase (host verifies server-side, reports back via onPurchaseResult)
+                val sku = str(p, "sku")
+                if (sku.isBlank()) e.warn("CAP-0029: sku required")
+                else e.monetization.onPurchaseRequested(sku, str(p, "developerPayload", ""))
+            }
             "CAP-0030" -> e.navigateBack()
             "CAP-0031" -> e.gravity = Gravity(gx = num(p, "gx"), gy = num(p, "gy"))
             "CAP-0032" -> { // Camera Follow

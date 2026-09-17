@@ -3,6 +3,8 @@ package com.baziche.app.di
 import android.content.Context
 import android.os.Build
 import com.baziche.app.ui.util.LanguageManager
+import com.baziche.core.billing.BillingGateway
+import com.baziche.core.billing.MyketBillingGateway
 import com.baziche.core.data.db.BazicheDb
 import com.baziche.core.data.db.SqlProjectCache
 import com.baziche.core.data.repo.AuthRepository
@@ -28,4 +30,7 @@ class AppContainer(context: Context, val apiBaseUrl: String, val debug: Boolean)
         AuthRepository(api, sessionStore) { "android-${Build.MODEL ?: "device"}" }
     }
     val projectRepository by lazy { ProjectRepository(api, authRepository, projectCache) }
+
+    // Phase 8: Myket adapter (available=false until the Myket Billing SDK AAR is added).
+    val billingGateway: BillingGateway by lazy { MyketBillingGateway(app, app.packageName) }
 }

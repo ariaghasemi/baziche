@@ -824,9 +824,10 @@ class RuntimeTest {
         )
         fx.engine.start()
         val w = fx.engine.drainWarnings()
-        assertEquals(5, w.size)
+        // CAP-0028/0029 are real since Phase 8 (silent no-op sink by default).
+        assertEquals(3, w.size)
         assertTrue(w.any { it.contains("Phase 4") })
-        assertTrue(w.any { it.contains("Phase 8") })
+        assertTrue(w.none { it.contains("CAP-0028") || it.contains("CAP-0029") })
         assertTrue(w.any { it.contains("unknown capability CAP-9999") })
     }
 
@@ -974,5 +975,66 @@ class RuntimeTest {
         assertEquals(10, fx.engine.particleCount()) // exactly one burst, ambient off
         fx.engine.tick(1000) // burst lifetime is 600ms
         assertEquals(0, fx.engine.particleCount())
+    }
+
+    // ---------- phase 8: monetization ----------
+    @Test
+    fun purchase_and_ad_dispatch_to_sink() {
+        val rec = RecMonetization()
+        val engine = GameEngine(NoopSinks.ALL, rec)
+        engine.load(
+            project(
+                scenes = listOf(scene("s1", true)),
+                events = listOf(
+                    ev(
+                        "boot", "start",
+                        listOf(
+                            act("CAP-0029", "sku" to v("build_single"), "developerPayload" to v("u1")),
+                            act("CAP-0029", "sku" to v("")), // blank sku warns, no dispatch
+                            act("CAP-0028", "placement" to v("reward_x2")),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        engine.start()
+        assertEquals(listOf("build_single" to "u1"), rec.purchases)
+        assertEquals(listOf("reward_x2"), rec.ads)
+        assertTrue(engine.drainWarnings().any { it.contains("CAP-0029") })
+    }
+
+    @Test
+    fun default_sink_is_silent_and_results_fire_events() {
+        val engine = GameEngine(NoopSinks.ALL) // default NoOpMonetization
+        engine.load(
+            project(
+                scenes = listOf(scene("s1", true)),
+                vars = listOf(numVar("rewarded", 0), numVar("premium", 0)),
+                events = listOf(
+                    ev("boot", "start", listOf(act("CAP-0028", "placement" to v("p")))),
+                    ev("onAd", "adReward", listOf(act("CAP-0007", "name" to v("rewarded"), "value" to v(1)))),
+                    ev("onBuy", "iapResult", listOf(act("CAP-0007", "name" to v("premium"), "value" to v(1)))),
+                ),
+            ),
+        )
+        engine.start() // no-op sink: no crash, no warnings
+        assertTrue(engine.drainWarnings().isEmpty())
+        engine.onRewardedAdResult("p", true)
+        assertEquals(1.0, VariableStore.asNumber(engine.vars.get("rewarded")!!), 0.001)
+        assertEquals(RtValue.Bool(true), engine.vars.last)
+        engine.onPurchaseResult("sub_monthly", true)
+        assertEquals(1.0, VariableStore.asNumber(engine.vars.get("premium")!!), 0.001)
+        assertEquals(RtValue.Bool(true), engine.vars.last)
+    }
+}
+
+private class RecMonetization : MonetizationSink {
+    val purchases = mutableListOf<Pair<String, String>>()
+    val ads = mutableListOf<String>()
+    override fun onPurchaseRequested(sku: String, developerPayload: String) {
+        purchases.add(sku to developerPayload)
+    }
+    override fun onRewardedAdRequested(placement: String) {
+        ads.add(placement)
     }
 }

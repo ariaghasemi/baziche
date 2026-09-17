@@ -66,7 +66,7 @@ data class RenderState(
  * manual tick (the host drives timing), and emits render snapshots + warnings.
  * All platform effects go through [EngineSinks]. Deterministic given same inputs.
  */
-class GameEngine(internal val sinks: EngineSinks) {
+class GameEngine(internal val sinks: EngineSinks, val monetization: MonetizationSink = NoOpMonetization) {
     private val runner = CapabilityRunner(this)
 
     private var scenes: List<RtScene> = emptyList()
@@ -349,6 +349,25 @@ class GameEngine(internal val sinks: EngineSinks) {
     internal fun particleCount(): Int = particleSystem.particles.size
     internal fun traumaLevel(): Float = trauma
 
+    /**
+     * Host reports a rewarded-ad outcome. Sets `$last` (earned?) and fires
+     * `adReward` triggers whose `placement` matches (triggers without a
+     * placement key match any placement).
+     */
+    fun onRewardedAdResult(placement: String, earned: Boolean) {
+        vars.last = RtValue.Bool(earned)
+        fireTrigger(TYPE_AD_REWARD) { trig -> trig.str("placement", placement) == placement }
+    }
+
+    /**
+     * Host reports a purchase outcome (AFTER server verification).
+     * Sets `$last` and fires matching `iapResult` triggers.
+     */
+    fun onPurchaseResult(sku: String, success: Boolean) {
+        vars.last = RtValue.Bool(success)
+        fireTrigger(TYPE_IAP_RESULT) { trig -> trig.str("sku", sku) == sku }
+    }
+
     /** Screen-shake impulse 0..1 (decays automatically). CAP-0022 damage also fires it. */
     fun addTrauma(x: Float) {
         trauma = (trauma + x).coerceIn(0f, 1f)
@@ -559,5 +578,7 @@ class GameEngine(internal val sinks: EngineSinks) {
         const val TYPE_TAP = "tap"
         const val TYPE_TIMER = "timer"
         const val TYPE_SCENE_ENTER = "sceneEnter"
+        const val TYPE_AD_REWARD = "adReward"
+        const val TYPE_IAP_RESULT = "iapResult"
     }
 }
