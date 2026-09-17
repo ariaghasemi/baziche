@@ -3,6 +3,7 @@ package com.baziche.core.data
 import com.baziche.core.data.crypto.PasswordStretcher
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PasswordStretcherTest {

@@ -14,9 +14,15 @@ import com.baziche.core.network.CommitRequest
 import com.baziche.core.network.CreateProjectRequest
 import com.baziche.core.network.CreateProjectResponse
 import com.baziche.core.network.ErrorBody
+import com.baziche.core.network.AssetUrlResponse
+import com.baziche.core.network.AssetsResponse
 import com.baziche.core.network.LoginRequest
 import com.baziche.core.network.MeResponse
+import com.baziche.core.network.MergeRequest
+import com.baziche.core.network.MergeResponse
 import com.baziche.core.network.OkResponse
+import com.baziche.core.network.RestoreRequest
+import com.baziche.core.network.RestoreResponse
 import com.baziche.core.network.PlansResponse
 import com.baziche.core.network.PresignRequest
 import com.baziche.core.network.PresignResponse
@@ -80,6 +86,10 @@ class FakeApi(
     override suspend fun saveProject(id: String, body: SaveProjectRequest): SaveProjectResponse = throw NotImplementedError()
     override suspend fun deleteProject(id: String): OkResponse = throw NotImplementedError()
     override suspend fun revisions(id: String): RevisionsResponse = throw NotImplementedError()
+    override suspend fun restore(id: String, body: RestoreRequest): RestoreResponse = throw NotImplementedError()
+    override suspend fun merge(id: String, body: MergeRequest): MergeResponse = throw NotImplementedError()
+    override suspend fun assets(projectId: String): AssetsResponse = throw NotImplementedError()
+    override suspend fun assetUrl(id: String): AssetUrlResponse = throw NotImplementedError()
     override suspend fun presign(body: PresignRequest): PresignResponse = throw NotImplementedError()
     override suspend fun commitAsset(body: CommitRequest): OkResponse = throw NotImplementedError()
     override suspend fun registries(): RegistriesResponse = throw NotImplementedError()
