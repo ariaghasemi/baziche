@@ -22,4 +22,5 @@ include(":editor")
 include(":runtime")
 include(":preview")
 include(":game-shell")
+include(":scaffolder")
 // Phase 8+: :iap-core, :iap-myket, ...

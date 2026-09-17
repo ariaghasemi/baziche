@@ -63,6 +63,12 @@ HTTP status پیشنهادی کنار هر کد آمده. پیام فارسی د
 | `PURCHASE_INVALID` | 402 | خرید در سرور Myket تأیید نشد |
 | `PURCHASE_REPLAY` | 409 | این token قبلاً مصرف شده |
 
+## AI (429/501/502) — فاز ۹
+
+| Code | HTTP | معنی |
+|---|---|---|
+| `AI_UPSTREAM_ERROR` | 502 | provider unreachable / bad JSON / no content |
+
 ## Admin (403) / Generic
 
 | Code | HTTP | معنی |

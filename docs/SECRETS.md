@@ -12,6 +12,7 @@
 | `R2_SECRET_ACCESS_KEY` | Backend (امضای Presigned URL) | Cloudflare Secret | `wrangler secret put R2_SECRET_ACCESS_KEY` | همراه بالایی |
 | `GITHUB_DISPATCH_TOKEN` | Backend فاز ۵ (تریگر بیلد) | Cloudflare Secret | dashboard → secrets | Fine-grained PAT، اسکوپ Actions |
 | `MYKET_ACCESS_TOKEN` | Backend فاز ۶ (تأیید خرید) | Cloudflare Secret | از پنل توسعه‌دهنده Myket | طبق پنل Myket |
+| `AI_API_KEY` | Backend فاز ۹ (`/ai/expand`) | Cloudflare Secret | `wrangler secret put AI_API_KEY` | ساخت کلید جدید در provider |
 | `SIGNING_MASTER_KEY` | Backend فاز ۵ (رمز Keystoreها) | Cloudflare Secret | `wrangler secret put` | با re-encrypt برنامه‌ریزی‌شده |
 | `BUILD_AGENT_TOKEN` | Agent فاز Scale | VPS env (Docker secret) | فایل env روی سرور | چرخش دوره‌ای |
 | Keystore هر پروژه | Build (امضای APK) | R2 خصوصی، رمزنگاری‌شده | خودکار در اولین بیلد | هرگز دستی دستکاری نشود |

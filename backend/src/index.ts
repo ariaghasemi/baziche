@@ -8,6 +8,7 @@ import { metaRoutes } from './routes/meta';
 import { adminRoutes, adminUiRoutes } from './routes/admin';
 import { buildRoutes } from './routes/builds';
 import { billingRoutes } from './routes/billing';
+import { aiRoutes } from './routes/ai';
 
 export interface Env {
   DB_AUTH: D1Database; // identity, sessions, billing, admin, audit
@@ -37,6 +38,10 @@ export interface Env {
   // Phase 6: Myket billing (both optional — without them /verify answers 501)
   MYKET_ACCESS_TOKEN?: string;
   MYKET_PACKAGE?: string;
+  // Phase 9: generic OpenAI-compatible AI (all optional — without a key /expand answers 501)
+  AI_API_KEY?: string;
+  AI_BASE_URL?: string;
+  AI_MODEL?: string;
 }
 
 export function createApp() {
@@ -56,6 +61,7 @@ export function createApp() {
   app.route('/admin', adminUiRoutes); // server-rendered console: GET /admin/ui?token=...
   app.route('/api/v1/builds', buildRoutes);
   app.route('/api/v1/billing', billingRoutes);
+  app.route('/api/v1/ai', aiRoutes);
 
   app.notFound((c) => c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Not found' } }, 404));
 
