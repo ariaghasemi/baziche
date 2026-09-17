@@ -1,0 +1,635 @@
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Write-Host "`n===== BACKEND WRANGLER =====" -ForegroundColor Cyan
+
+===== BACKEND WRANGLER =====
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Get-Content ".\backend\wrangler.toml"
+# Baziche API — Cloudflare Workers config
+# Secrets are NEVER stored here. Use: wrangler secret put <NAME>
+# See docs/SECRETS.md for the full registry.
+
+name = "baziche-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-15"
+
+# Nightly D1 -> R2 backup (03:00 UTC). See src/lib/backup.ts + docs/RUNBOOK.md.
+[triggers]
+crons = ["0 3 * * *"]
+
+# --- D1: TWO databases, one account (separated but connected via this API) ---
+# baziche-auth: identity, sessions, plans, subscriptions, admin, audit
+# baziche-data: projects, revisions, assets, builds, shards, agents
+# Create: npm run db:create (or wrangler d1 create <name>), then paste ids below.
+
+[[d1_databases]]
+binding = "DB_AUTH"
+database_name = "baziche-auth"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations/auth"
+
+[[d1_databases]]
+binding = "DB_DATA"
+database_name = "baziche-data"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations/data"
+
+# --- R2 (bytes) ---
+[[r2_buckets]]
+binding = "R2_PROJECTS"
+bucket_name = "baziche-projects"
+
+[[r2_buckets]]
+binding = "R2_ASSETS"
+bucket_name = "baziche-assets"
+
+[[r2_buckets]]
+binding = "R2_BUILDS"
+bucket_name = "baziche-builds"
+
+# --- Non-secret vars ---
+[vars]
+ENVIRONMENT = "development"
+ACCESS_TOKEN_TTL_SEC = "900"
+REFRESH_TOKEN_TTL_SEC = "2592000"
+REGISTRIES_VERSION = "1"
+DEFAULT_TARGET_API = "36"
+DEFAULT_MIN_API = "26"
+MAX_PROJECT_JSON_BYTES = "5242880"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche>
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Write-Host "`n===== BACKEND PACKAGE =====" -ForegroundColor Cyan
+
+===== BACKEND PACKAGE =====
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Get-Content ".\backend\package.json"
+{
+  "name": "baziche-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Baziche backend — Hono + TypeScript on Cloudflare Workers (D1 + R2)",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:local": "wrangler d1 migrations apply baziche-auth --local && wrangler d1 migrations apply baziche-data --local",
+    "db:create": "wrangler d1 create baziche-auth && wrangler d1 create baziche-data",
+    "db:migrate": "wrangler d1 migrations apply baziche-auth --remote && wrangler d1 migrations apply baziche-data --remote",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3",
+    "hono": "4.13.8",
+    "jose": "6.2.12",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260915.1",
+    "@types/node": "^22.0.0",
+    "@types/sql.js": "^1.4.11",
+    "sql.js": "1.14.2",
+    "typescript": "5.9.3",
+    "vite": "^8.3.0",
+    "vitest": "5.0.1",
+    "wrangler": "4.131.2"
+  }
+}
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche>
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Write-Host "`n===== DEV VARS EXAMPLE =====" -ForegroundColor Cyan
+
+===== DEV VARS EXAMPLE =====
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Get-Content ".\backend\.dev.vars.example"
+# Copy to .dev.vars (gitignored) for local `wrangler dev`.
+# Generate dev-only values, e.g.: openssl rand -hex 32
+# NEVER use production secrets here. NEVER commit .dev.vars.
+
+JWT_SECRET=REPLACE_WITH_DEV_HEX_32_BYTES
+JWT_SECRET_PREV=
+PASSWORD_PEPPER=REPLACE_WITH_DEV_HEX_32_BYTES
+
+# R2 S3-compatible credentials (for presigned URLs). Create in dashboard:
+# R2 -> Manage R2 API Tokens (Object Read & Write on baziche-* buckets).
+# Local dev can use dummy values for URL-format tests; real uploads need real ones.
+R2_ACCOUNT_ID=REPLACE_OR_DUMMY
+R2_ACCESS_KEY_ID=REPLACE_OR_DUMMY
+R2_SECRET_ACCESS_KEY=REPLACE_OR_DUMMY
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche>
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Write-Host "`n===== CLOUDFLARE SETUP =====" -ForegroundColor Cyan
+
+===== CLOUDFLARE SETUP =====
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Get-Content ".\docs\CLOUDFLARE_SETUP.md"
+# ☁️ راهنمای ساخت Cloudflare (قدم‌به‌قدم)
+
+> چه زمانی؟ وقتی خواستی API واقعی روی اینترنت داشته باشی (برای تست محلی لازم نیست).
+> هزینه: **۰** — همه‌چیز در Free Tier جا می‌شود.
+> زمان تقریبی: ۳۰ دقیقه.
+
+## پیش‌نیاز
+
+- یک ایمیل معتبر (برای حساب Cloudflare).
+- Node 22 + کد پروژه (مرحله ENVIRONMENT_SETUP انجام شده).
+
+## گام ۱ — ساخت حساب
+
+1. برو به https://dash.cloudflare.com/sign-up
+2. با ایمیلت ثبت‌نام کن و ایمیل را تأیید کن.
+3. وارد داشبورد شو: https://dash.cloudflare.com
+
+> ⚠️ فقط **یک اکانت** — همین کافی است. ساخت اکانت دوم برای دور زدن سقف رایگان، خلاف قوانین Cloudflare است و باعث بن شدن می‌شود. طراحی ما عمداً تک‌اکانتی است.
+
+## گام ۲ — ورود Wrangler (اتصال ترمینال به حسابت)
+
+در پوشه `backend`:
+
+```bash
+npx wrangler login
+```
+
+مرورگر باز می‌شود → **Allow** را بزن. پیام موفقیت در ترمینال می‌آید.
+
+## گام ۳ — ساخت دیتابیس‌های D1 (دو تا، در همین یک اکانت)
+
+بازیچه هویت (کاربر/سشن/خرید) را از دیتای بازی (پروژه/نسخه/است) جدا نگه می‌دارد — مثل دو کشوی یک کمد که با یک کلید (همین Worker) باز می‌شوند:
+
+```bash
+npx wrangler d1 create baziche-auth
+npx wrangler d1 create baziche-data
+```
+
+خروجی موفق برای هر کدام شبیه این است:
+
+```text
+✅ Successfully created DB 'baziche-auth'
+database_id = "a1b2c3d4-...."
+```
+
+**هر دو `database_id` را کپی کن** و در فایل `backend/wrangler.toml` بگذار:
+- اولی → بخش `[[d1_databases]]` با `binding = "DB_AUTH"`
+- دومی → بخش `[[d1_databases]]` با `binding = "DB_DATA"`
+
+```bash
+npm run db:migrate
+```
+
+خروجی موفق: هر دو migration اعمال می‌شود (`001_init.sql` در auth و data). این دستور جدول‌ها + پلن‌ها + شارد را می‌سازد.
+
+> ✅ SAFE TO SEND: اسم دیتابیس‌ها و `database_id`ها را می‌توانی برای من بفرستی (سکرت نیست).
+> ❌ چیزی برای فرستادن نیست: پسورد/توکنی در کار نیست.
+
+## گام ۴ — ساخت باکت‌های R2
+
+```bash
+npx wrangler r2 bucket create baziche-projects
+npx wrangler r2 bucket create baziche-assets
+npx wrangler r2 bucket create baziche-builds
+```
+
+هر سه باید `Created bucket ...` بدهند.
+
+## گام ۵ — ساخت R2 API Token (برای Presigned URL)
+
+1. داشبورد → منوی **R2** → دکمه **Manage R2 API Tokens**.
+2. **Create API Token** → اسم: `baziche-presign`.
+3. Permissions: **Object Read & Write**.
+4. Specify bucket(s): هر سه باکت بالا را انتخاب کن.
+5. بقیه پیش‌فرض → **Create API Token**.
+6. سه مقدار نمایش داده می‌شود — **همین حالا کپی و نگه دار** (دوباره نشان داده نمی‌شود):
+   - `Access Key ID`
+   - `Secret Access Key`
+   - Endpoint (شامل Account ID است: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`)
+
+> ❌ NEVER SEND IN CHAT: این دو کلید را برای هیچ‌کس (از جمله من در چت) نفرست.
+> فقط با دستورهای گام ۶ داخل Secretهای Worker بگذار.
+
+## گام ۶ — ثبت سکرت‌ها در Worker
+
+```bash
+npx wrangler secret put JWT_SECRET
+# یک رشته تصادفی قوی بده (مثلاً خروجی: openssl rand -hex 32)
+
+npx wrangler secret put PASSWORD_PEPPER
+# یک رشته تصادفی قوی و متفاوت بده
+
+npx wrangler secret put R2_ACCESS_KEY_ID
+# مقدار گام ۵ را بده
+
+npx wrangler secret put R2_SECRET_ACCESS_KEY
+# مقدار گام ۵ را بده
+```
+
+مقادیر متنی ساده هم هستند:
+
+```bash
+# R2_ACCOUNT_ID را از Endpoint گام ۵ بردار (بخش <ACCOUNT_ID>)
+# چون wrangler secret فقط برای سکرت است، این را موقتاً هم secret بگذار:
+npx wrangler secret put R2_ACCOUNT_ID
+```
+
+## گام ۷ — دیپلوی
+
+```bash
+npm run deploy
+```
+
+خروجی موفق شامل یک URL است، مثل:
+
+```text
+https://baziche-api.<your-subdomain>.workers.dev
+```
+
+تست سلامت: `https://.../health` باید `{"success":true,"status":"ok"}` بدهد.
+
+> ✅ SAFE TO SEND: این Worker URL را برای من بفرست تا کانفیگ اپ را با آن به‌روز کنم.
+> جمله‌ای که بگویی: «دیپلوی شد: <URL>»
+
+## گام ۸ — اتصال اپ به API واقعی (اختیاری، بعد از گام ۷)
+
+```bash
+cd android
+./gradlew :app:assembleDebug -PBAZICHE_API_URL='https://baziche-api.<sub>.workers.dev/api/v1/'
+```
+
+یا برای همیشه در فایل `~/.gradle/gradle.properties` خودت (نه داخل ریپو):
+
+```properties
+BAZICHE_API_URL=https://baziche-api.<sub>.workers.dev/api/v1/
+```
+
+## گام ۹ — اولین ادمین (اختیاری)
+
+اول در اپ **ثبت‌نام** کن، بعد `user_id` خودت را پیدا کن (لاگین کن و `GET /api/v1/me` را صدا بزن — مثلاً با مرورگر + توکن؟ ساده‌تر: موقتاً از داشبورد D1):
+
+داشبورد → **Workers & Pages** → **D1** → `baziche-auth` → **Console** → اجرا:
+
+```sql
+SELECT id, username FROM users;
+```
+
+بعد:
+
+```bash
+npx wrangler d1 execute baziche-auth --remote \
+  --command "INSERT INTO admins (user_id, role, created_at) VALUES ('<USER_ID>', 'admin', strftime('%s','now'))"
+```
+
+## چک‌لیست تأیید
+
+```text
+[ ] /health روی اینترنت جواب می‌دهد
+[ ] ثبت‌نام از اپ (با API واقعی) موفق است
+[ ] ساخت پروژه موفق است
+[ ] /api/v1/meta/registries لیست ۲۰ گیم‌تایپ را می‌دهد
+```
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche>
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Write-Host "`n===== FINAL SETUP INPUTS =====" -ForegroundColor Cyan
+
+===== FINAL SETUP INPUTS =====
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Get-Content ".\docs\FINAL_SETUP_INPUTS.md"
+# 📥 اطلاعات نهایی که از تو لازم دارم (تنها فایل ورودی کاربر)
+
+> همه‌ی کدها (فاز ۱ تا ۱۰) نوشته و تست شده. APK دیباگ هم بدون هیچ‌کدام از این‌ها
+> کار می‌کند (ادیتور/پری‌ویو/بازی آفلاین). موارد زیر فقط برای **سرویس واقعی**
+> (لاگین، بیلد ابری، خرید، هوش مصنوعی) لازم است.
+>
+> ⚠️ قانون امنیت: **توکن/کلید/پسورد را هرگز در چت نفرست.** فقط با دستورهای زیر
+> مستقیم در Cloudflare/GitHub ست کن و در چت فقط بگو «انجام شد». چیزهایی که امن
+> است در چت بفرستی (آدرس ورکر، نام ریپو، نام باکت‌ها) با ✅ مشخص شده.
+
+## قدم ۰) GitHub — فقط push (بدون هیچ سکرتی در گیت‌هاب!)
+
+1. یک ریپوی **private** بساز و کل پوشه‌ی `baziche` را push کن.
+2. همین. هر سه ورک‌فلو از قبل در ریپو هستند و کدی لازم نیست کپی کنی:
+   - `android-ci.yml` — با هر push روی `android/` اجرا می‌شود (APK دیباگ می‌سازد)
+   - `backend-ci.yml` — تست‌های بک‌اند
+   - `game-build.yml` — فقط با دستور سرور اجرا می‌شود (دستی اجرا نکن)
+3. ✅ در چت بفرست: **`owner/repo`** ریپو (مثلاً `ali/baziche`).
+
+## قدم ۱) Cloudflare — دیتابیس‌ها و باکت‌ها
+
+```bash
+npm i -g wrangler        # اگر نداری
+wrangler login           # با مرورگر وارد اکانتت شو
+cd backend
+npm run db:create        # دو دیتابیس می‌سازد: baziche-auth و baziche-data
+```
+
+4. خروجی `db:create` دو تا `database_id` می‌دهد → در `backend/wrangler.toml`
+   جای `00000000-0000-0000-0000-000000000000` بگذار (دو جا).
+5. سه باکت R2 بساز (داشبورد یا CLI):
+   `baziche-projects` ، `baziche-assets` ، `baziche-builds`
+6. مایگریشن و دیپلوی:
+```bash
+npm run db:migrate       # اجرای 001/002/003 روی هر دو دیتابیس
+wrangler deploy          # آدرس ورکر را می‌دهد: https://baziche-api.<user>.workers.dev
+```
+7. ✅ در چت بفرست: **آدرس ورکر** (همان URL مرحله‌ی قبل).
+
+## قدم ۲) سکرت‌های اجباری سرور (با CLI، نه چت!)
+
+```bash
+cd backend
+openssl rand -hex 32 | wrangler secret put JWT_SECRET
+openssl rand -hex 32 | wrangler secret put PASSWORD_PEPPER
+# R2: داشبورد Cloudflare → R2 → Manage R2 API Tokens → یک توکن با دسترسی
+# Object Read & Write روی هر سه باکت بساز، بعد:
+wrangler secret put R2_ACCOUNT_ID        # همان Account ID اکانتت
+wrangler secret put R2_ACCESS_KEY_ID
+wrangler secret put R2_SECRET_ACCESS_KEY
+wrangler deploy                          # اعمال نهایی
+```
+
+## قدم ۳) سکرت‌های اختیاری (هر کدام را که می‌خواهی)
+
+| قابلیت | چه کار کنی |
+|---|---|
+| 🤖 بیلد ابری بازی | GitHub → Settings → Developer settings → Personal access tokens → **Tokens (classic)** با اسکوپ‌های `repo` و `workflow` بساز → `wrangler secret put GITHUB_DISPATCH_TOKEN`. بعد در `wrangler.toml` بخش `[vars]` اضافه کن: `GITHUB_REPO = "owner/repo"` (همان قدم ۰) و `wrangler deploy`. |
+| 💳 خرید مایکت | طبق `docs/MYKET_SETUP.md`: اپ را در پنل مایکت ثبت کن، ۵ SKU را بساز، `X-Access-Token` را بگیر → `wrangler secret put MYKET_ACCESS_TOKEN`. اگر packageName غیر از `com.baziche.app` است در `[vars]`: `MYKET_PACKAGE = "..."`. |
+| ✨ گسترش با هوش مصنوعی | از OpenAI (یا هر سرویس OpenAI-compatible) کلید بگیر → `wrangler secret put AI_API_KEY`. اگر پروکسی داری در `[vars]`: `AI_BASE_URL` و `AI_MODEL`. |
+
+## قدم ۴) اولین ادمین + چک نهایی
+
+```bash
+# ۱. در اپ ثبت‌نام کن، بعد user_id را از GET /api/v1/me بردار
+# ۲. ادمینش کن:
+wrangler d1 execute baziche-auth --remote --command \
+  "INSERT INTO admins (user_id, role, created_at) VALUES ('<user_id>', 'admin', strftime('%s','now'));"
+```
+
+- چک سلامت: مرورگر → `https://<worker>/health` و `/api/v1/meta/metrics`
+- کنسول ادمین: `https://<worker>/admin/ui?token=<access-token>` (توکن را از لاگین اپ بگیر)
+- بکاپ شبانه خودکار است (۰۳:۰۰ UTC)؛ چیزی برای فعال‌سازی لازم نیست.
+
+## قدم ۵) APK متصل به سرور تو (آخرین قدم، با من)
+
+APK فعلی به لوکال‌هاست وصل است. وقتی قدم ۱ تمام شد:
+
+8. ✅ در چت بفرست: **آدرس ورکر + `GITHUB_REPO`** (اگر قدم ۳ را رفتی).
+9. من با `-PBAZICHE_API_URL=https://<worker>/api/v1/` ری‌بیلد می‌کنم و APK نهایی را می‌دهم.
+
+## چک‌لیست برگشتی (فقط همین‌ها را در چت بفرست)
+
+- [ ] ✅ `owner/repo` گیت‌هاب
+- [ ] ✅ آدرس ورکر (`https://...`)
+- [ ] ✅ «دیتابیس‌ها + R2 ساخته و migrate شد» یا نه
+- [ ] ✅ کدام اختیاری‌ها فعال شود: بیلد ابری / مایکت / هوش مصنوعی
+- [ ] ✅ اگر مایکت: فایل AAR کتابخانه‌ی مایکت + packageName نهایی (AAR را همین‌جا آپلود کن تا در `:core:billing` سیم‌کشی کنم)
+- [ ] (امضای release در v1 لازم نیست — بیلدهای رایگان APK دیباگ می‌دهند)
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche>
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Write-Host "`n===== SECRETS =====" -ForegroundColor Cyan
+
+===== SECRETS =====
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Get-Content ".\docs\SECRETS.md"
+# 🔑 جدول سکرت‌های بازیچه
+
+> این فایل فقط **نام** سکرت‌ها و **محل نگهداری** را مشخص می‌کند.
+> **هیچ مقدار واقعی هرگز اینجا، در کد، در Git یا در چت قرار نمی‌گیرد.**
+
+| Secret | مصرف‌کننده | محل نگهداری | روش ست کردن | چرخش |
+|---|---|---|---|---|
+| `JWT_SECRET` | Backend (امضای Access Token) | Cloudflare Secret + `.dev.vars` محلی | `wrangler secret put JWT_SECRET` | با `JWT_SECRET_PREV` بدون قطعی |
+| `JWT_SECRET_PREV` | Backend (دوره چرخش) | Cloudflare Secret | `wrangler secret put JWT_SECRET_PREV` | بعد از ۱۵ دقیقه پاک شود |
+| `PASSWORD_PEPPER` | Backend (هش نهایی پسورد) | Cloudflare Secret + `.dev.vars` محلی | `wrangler secret put PASSWORD_PEPPER` | نیازمند re-hash کاربران؛ با برنامه |
+| `R2_ACCESS_KEY_ID` | Backend (امضای Presigned URL) | Cloudflare Secret | `wrangler secret put R2_ACCESS_KEY_ID` | ساخت توکن جدید R2 + حذف قدیمی |
+| `R2_SECRET_ACCESS_KEY` | Backend (امضای Presigned URL) | Cloudflare Secret | `wrangler secret put R2_SECRET_ACCESS_KEY` | همراه بالایی |
+| `GITHUB_DISPATCH_TOKEN` | Backend فاز ۵ (تریگر بیلد) | Cloudflare Secret | dashboard → secrets | Fine-grained PAT، اسکوپ Actions |
+| `MYKET_ACCESS_TOKEN` | Backend فاز ۶ (تأیید خرید) | Cloudflare Secret | از پنل توسعه‌دهنده Myket | طبق پنل Myket |
+| `AI_API_KEY` | Backend فاز ۹ (`/ai/expand`) | Cloudflare Secret | `wrangler secret put AI_API_KEY` | ساخت کلید جدید در provider |
+| `SIGNING_MASTER_KEY` | Backend فاز ۵ (رمز Keystoreها) | Cloudflare Secret | `wrangler secret put` | با re-encrypt برنامه‌ریزی‌شده |
+| `BUILD_AGENT_TOKEN` | Agent فاز Scale | VPS env (Docker secret) | فایل env روی سرور | چرخش دوره‌ای |
+| Keystore هر پروژه | Build (امضای APK) | R2 خصوصی، رمزنگاری‌شده | خودکار در اولین بیلد | هرگز دستی دستکاری نشود |
+
+## اگر سکرتی لو رفت
+
+1. فوراً در محل اصلی Revoke/Rotate کن (Cloudflare dashboard یا پنل سرویس).
+2. مقدار جدید را با همان روش «ست کردن» جایگزین کن.
+3. اگر در Git کامیت شده: تاریخچه را بازنویسی نکن — فقط Rotate کن (تاریخچه دیگر امن نیست).
+4. در چت فقط بگو «Rotate شد»، مقدار جدید را نفرست.
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche>
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Write-Host "`n===== GITHUB SETUP =====" -ForegroundColor Cyan
+
+===== GITHUB SETUP =====
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Get-Content ".\docs\GITHUB_SETUP.md"
+# 🐙 راهنمای GitHub (قدم‌به‌قدم)
+
+> چرا؟ اجرای خودکار CI (بیلد + تست) روی هر Push — رایگان.
+> چرا Private؟ Assetها و بیلدهای کاربران در آینده نباید عمومی باشند.
+
+## گام ۱ — ساخت ریپو
+
+1. برو به https://github.com/new
+2. Repository name: `baziche`
+3. Visibility: **Private** ✅ (مهم)
+4. **هیچکدام** از گزینه‌های Add README / .gitignore / license را تیک نزن (ما از قبل داریم).
+5. **Create repository**.
+
+آدرس ریپو شبیه این می‌شود: `https://github.com/<username>/baziche`
+
+> ✅ SAFE TO SEND: همین URL را برای من بفرست.
+> جمله‌ای که بگویی: «ریپو ساخته شد: <URL>»
+
+## گام ۲ — Push کردن کد
+
+در پوشه `baziche` (جایی که این فایل‌هاست):
+
+```bash
+git init -b main
+git add .
+git commit -m "feat: baziche phase 1 (shell, auth, backend, projects, admin, ci)"
+git remote add origin https://github.com/<username>/baziche.git
+git push -u origin main
+```
+
+اگر Git از تو username/password خواست: پسورد گیت‌هاب کار نمی‌کند — باید Personal Access Token بسازی:
+
+1. گیت‌هاب → عکس پروفایل → **Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**.
+2. **Generate new token (classic)** → اسم: `baziche-push` → تیک `repo` → Generate.
+3. توکن را به‌جای پسورد بده (یک‌بار؛ کش می‌شود).
+
+> ❌ NEVER SEND IN CHAT: این توکن را برای من نفرست. فقط روی کامپیوتر خودت استفاده کن.
+
+## گام ۳ — سبز شدن CI
+
+1. در صفحه ریپو تب **Actions** را باز کن.
+2. دو ورک‌فلو می‌بینی: `android-ci` و `backend-ci` — باید هر دو **سبز (✓)** شوند (۵–۱۵ دقیقه اول).
+3. اگر قرمز شدند: روی Run کلیک کن، لاگ خطا را بخوان و متن خطا را برای من بفرست تا درستش کنم.
+
+## گام ۴ — دانلود APK تست (اختیاری)
+
+بعد از سبز شدن `android-ci`:
+
+1. تب **Actions** → آخرین Run سبز → پایین صفحه **Artifacts** → `baziche-debug-apk` را دانلود کن.
+2. روی گوشی نصب کن (این نسخه Debug به API محلی وصل نمی‌شود؛ برای تست واقعی گام ۸ CLOUDFLARE_SETUP را انجام بده).
+
+## سکرت‌های گیت‌هاب در فاز ۱
+
+```text
+NO SECRETS REQUIRED — در فاز ۱ هیچ GitHub Secret لازم نیست.
+(GITHUB_DISPATCH_TOKEN در فاز ۵ لازم می‌شود — آن‌وقت آموزشش می‌آید.)
+```
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche>
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Write-Host "`n===== GITHUB BUILD SETUP =====" -ForegroundColor Cyan
+
+===== GITHUB BUILD SETUP =====
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Get-Content ".\docs\GITHUB_BUILD_SETUP.md"
+# 🏭 قرارداد بیلد بازی با GitHub Actions (فاز ۵)
+
+> وضعیت: **DRAFT** — فایل `.github/workflows/game-build.yml` نوشته شده ولی تا فاز ۵ فعال نیست.
+> این سند قرارداد دقیق بین Backend و Runner است تا فاز ۵ بدون ابهام اجرا شود.
+
+## ایده (۳۰ ثانیه‌ای)
+
+بک‌اند به‌جای داشتن سرور بیلد، برای هر بیلد یک **بسته رمزنگاری‌شده** می‌سازد:
+
+```text
+bundle.zip (AES-256) = game.json + assets/ + keystore.jks + signing.json
+```
+
+بعد به GitHub می‌گوید «این بسته را بگیر، بساز، APK/AAB را با این لینک‌ها آپلود کن، نتیجه را به من خبر بده». همه لینک‌ها **Presigned کوتاه‌عمر** هستند و هیچ Credential ابری در GitHub ذخیره نمی‌شود.
+
+## ورودی‌های workflow_dispatch
+
+| Input | نوع | توضیح |
+|---|---|---|
+| `payload` | JSON string | همه URLها + کانفیگ بیلد (جدول بعد) |
+| `bundle_key` | string (secret) | پسورد AES بسته — بلافاصله mask می‌شود |
+| `callback_token` | string (secret) | Bearer کال‌بک به بک‌اند — بلافاصله mask می‌شود |
+
+فیلدهای `payload`:
+
+```jsonc
+{
+  "bundleUrl": "https://…presigned GET…",
+  "bundleSha256": "hex…",
+  "apkUrl": "https://…presigned PUT…",
+  "aabUrl": "https://…presigned PUT…",
+  "logUrl": "https://…presigned PUT…",
+  "callbackUrl": "https://api…/api/v1/builds/<id>/callback",
+  "appId": "com.example.game",
+  "appName": "My Game",
+  "versionCode": 1,
+  "versionName": "1.0.0",
+  "targetApi": 36,
+  "minApi": 26,
+  "shellRef": "git sha/tags — نسخه قفل‌شده game-shell"
+}
+```
+
+## فرمت bundle.zip (داخل بسته رمزگشایی‌شده)
+
+```text
+game.json          # Project JSON نسخه‌دار
+assets/...         # فایل‌های بازی
+keystore.jks       # Keystore همان پروژه (فقط همین بیلد)
+signing.json       # { "alias": "...", "storePassword": "...", "keyPassword": "..." }
+```
+
+## قرارداد Callback
+
+Runner بعد از اتمام (موفق یا ناموفق) POST می‌زند:
+
+```http
+POST {callbackUrl}
+Authorization: Bearer {callback_token}
+Content-Type: application/json
+
+{"status":"COMPLETED","runId":"12345"}
+{"status":"FAILED","runId":"12345"}
+```
+
+بک‌اند با `callback_token` یک‌بارمصرف هر بیلد، اصالت را بررسی می‌کند (Phase 5).
+
+## امنیت
+
+- باندل با AES-256-CBC + PBKDF2 رمز است؛ کلید فقط در حافظه Runner.
+- Keystore فقط همان پروژه است، نه کلید مادر.
+- بعد از هر Job، کل Workspace پاک می‌شود (`rm -rf` در گام Cleanup).
+- لاگ‌ها ممکن است نام فایل‌ها را داشته باشند ولی هرگز پسورد/توکن (mask) ندارند.
+- ریپو **Private** است تا Runها و آرتیفکت‌ها عمومی نباشند.
+
+## محدودیت‌های صادقانه (Free)
+
+| محدودیت | مقدار | اثر |
+|---|---|---|
+| دقیقه بیلد | ~۲۰۰۰/ماه (ریپو Private) | ≈ ۱۳۰–۴۰۰ بیلد/ماه (هر بیلد ۵–۱۵ دقیقه) |
+| همزمانی | ۲۰ Job | صف بیلد در بک‌اند مدیریت می‌کند |
+| سقف هر Job | ۶ ساعت | کافی (بیلدها چند دقیقه‌اند) |
+| آرتیفکت | ۹۰ روز | ما همه‌چیز را در R2 نگه می‌داریم، نه گیت‌هاب |
+
+## چک‌لیست فعال‌سازی (فاز ۵ — فعلاً هیچ‌کدام)
+
+```text
+[ ] android/game-shell ساخته شد
+[ ] Backend: POST /builds + BuildProvider.dispatch
+[ ] Backend: callback endpoint + توکن یک‌بارمصرف
+[ ] Backend: ساخت bundle رمزنگاری‌شده + presign آپلودها
+[ ] Fine-grained PAT گیت‌هاب (Actions:Write) → Secret در Cloudflare
+[ ] اولین بیلد آزمایشی موفق + دانلود APK
+```
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche>
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Write-Host "`n===== MYKET SETUP =====" -ForegroundColor Cyan
+
+===== MYKET SETUP =====
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche> Get-Content ".\docs\MYKET_SETUP.md"
+# 💳 اتصال مایکت (Myket Billing) — راهنمای واقعی
+
+> کدها آماده‌اند؛ این قدم‌ها را که انجام بدهی، خرید واقعی کار می‌کند.
+> تا وقتی SDK اضافه نشده، `MyketBillingGateway.available == false` و خریدها با
+> پیام «در دسترس نیست» برمی‌گردند (هرگز mock به‌جای واقعی جا زده نمی‌شود).
+
+## ۱) پنل توسعه‌دهندگان مایکت
+
+1. در [پنل توسعه‌دهندگان مایکت](https://developer.myket.ir) اپ را ثبت کن
+   (packageName نهایی؛ مثلاً `com.baziche.app`).
+2. بخش «محصولات درون‌برنامه‌ای» همان اپ، این SKUها را **دقیقاً با همین ID** بساز
+   (بک‌اند همین‌ها را می‌شناسد — `backend/src/routes/billing.ts`):
+   - `sub_monthly` / `sub_quarterly` / `sub_yearly` / `sub_lifetime`
+   - `build_single` (تک‌بیلد؛ مصرف‌شدنی consumable)
+3. از همان بخش، **`X-Access-Token`** را کپی کن → سرور:
+   `wrangler secret put MYKET_ACCESS_TOKEN`
+4. **کلید عمومی RSA** اپ را هم از پنل بردار (برای تأیید امضا؛ در نسخه‌ی بعدی
+   سرور استفاده می‌شود).
+
+## ۲) سرور (بک‌اند)
+
+```bash
+wrangler secret put MYKET_ACCESS_TOKEN   # از قدم ۱
+# اگر packageName غیر از com.baziche.app است:
+# در wrangler.toml بخش [vars]: MYKET_PACKAGE = "com.example.app"
+```
+
+تست: خرید تستی در مایکت انجام بده، بعد:
+
+```bash
+curl -X POST https://<worker>/api/v1/billing/verify \
+  -H "Authorization: Bearer <access>" -H "Content-Type: application/json" \
+  -d '{"sku":"build_single","token":"<purchaseToken>"}'
+```
+
+## ۳) اپ اندروید (SDK مایکت)
+
+1. کتابخانه‌ی `myketbilling` (AAR) را از پنل مایکت دانلود کن.
+2. در `android/core/billing/libs/myketbilling.aar` بگذار و به
+   `core/billing/build.gradle.kts` اضافه کن:
+   `implementation(files("libs/myketbilling.aar"))`
+3. متدهای `MyketBillingGateway` را با همان API مستندات مایکت کامل کن
+   (`initialize(publicKey)` → `queryInventoryAsync` → `launchPurchaseFlow` →
+   `consumeAsync`) و `available` را واقعی کن.
+4. `developerPayload` را همیشه با userId پر کن (جلوگیری از replay).
+
+## ۴) فلو کامل خرید (وقتی SDK آمد)
+
+`PurchaseFlow.buy()` → مایکت → چک payload → `POST /billing/verify` (سرور با
+توکن X-Access-Token از مایکت استعلام می‌کند) → در صورت تأیید `consume()`.
+
+## تبلیغات (رزرو)
+
+پورت `AdsGateway` تعریف شده ولی پیاده‌سازی ندارد. وقتی شبکه‌ی تبلیغاتی انتخاب
+شد (تپسل و...)، ایمپل آن را اضافه کن؛ موتور از قبل `CAP-0028` را به
+`MonetizationSink` می‌فرستد.
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f\baziche>
