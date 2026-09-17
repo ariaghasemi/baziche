@@ -56,53 +56,48 @@ npm run db:migrate
 > ✅ SAFE TO SEND: اسم دیتابیس‌ها و `database_id`ها را می‌توانی برای من بفرستی (سکرت نیست).
 > ❌ چیزی برای فرستادن نیست: پسورد/توکنی در کار نیست.
 
-## گام ۴ — ساخت باکت‌های R2
+## گام ۴ — باکت R2 لازم نیست (حالت github)
 
-```bash
-npx wrangler r2 bucket create baziche-projects
-npx wrangler r2 bucket create baziche-assets
-npx wrangler r2 bucket create baziche-builds
-```
+در معماری MVP (`BINARY_STORAGE=github` در `wrangler.toml`) باینری‌ها در
+GitHub Releases ذخیره می‌شوند و **هیچ باکت R2 لازم نیست**.
+ریلیزها با ورک‌فلوی `infrastructure.yml` ساخته می‌شوند (خودکار).
 
-هر سه باید `Created bucket ...` بدهند.
+> اگر روزی خواستی به R2 برگردی (rollback): باکت‌های
+> `baziche-projects` / `baziche-assets` / `baziche-builds` را بساز،
+> سه بایندینگ `[[r2_buckets]]` را به `wrangler.toml` برگردان و
+> `BINARY_STORAGE=r2` بگذار — بدون مایگریشن دیتا.
 
-## گام ۵ — ساخت R2 API Token (برای Presigned URL)
+## گام ۵ — توکن GitHub برای Storage و بیلد (اجباری در حالت github)
 
-1. داشبورد → منوی **R2** → دکمه **Manage R2 API Tokens**.
-2. **Create API Token** → اسم: `baziche-presign`.
-3. Permissions: **Object Read & Write**.
-4. Specify bucket(s): هر سه باکت بالا را انتخاب کن.
-5. بقیه پیش‌فرض → **Create API Token**.
-6. سه مقدار نمایش داده می‌شود — **همین حالا کپی و نگه دار** (دوباره نشان داده نمی‌شود):
-   - `Access Key ID`
-   - `Secret Access Key`
-   - Endpoint (شامل Account ID است: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`)
+`GITHUB_DISPATCH_TOKEN` در حالت github هم تریگر بیلد است و هم دسترسی
+Storage به ریلیزها. یک Fine-grained PAT بساز:
 
-> ❌ NEVER SEND IN CHAT: این دو کلید را برای هیچ‌کس (از جمله من در چت) نفرست.
-> فقط با دستورهای گام ۶ داخل Secretهای Worker بگذار.
+1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained**.
+2. Repository access: فقط همین ریپو (`ariaghasemi/baziche`).
+3. Permissions: **Contents: Read and write** + **Actions: Read and write**.
+4. انقضا کوتاه بگذار و در تقویم برای چرخش یادداشت کن.
+
+> ❌ NEVER SEND IN CHAT: توکن را برای هیچ‌کس (از جمله من در چت) نفرست.
+> فقط با دستور گام ۶ داخل Secretهای Worker بگذار.
 
 ## گام ۶ — ثبت سکرت‌ها در Worker
 
 ```bash
 npx wrangler secret put JWT_SECRET
 # یک رشته تصادفی قوی بده (مثلاً خروجی: openssl rand -hex 32)
+# (هم امضای Access Token است، هم امضای لینک‌های دانلود HMAC)
 
 npx wrangler secret put PASSWORD_PEPPER
 # یک رشته تصادفی قوی و متفاوت بده
 
-npx wrangler secret put R2_ACCESS_KEY_ID
-# مقدار گام ۵ را بده
-
-npx wrangler secret put R2_SECRET_ACCESS_KEY
-# مقدار گام ۵ را بده
+npx wrangler secret put GITHUB_DISPATCH_TOKEN
+# PAT گام ۵ را بده (تریگر بیلد + GitHub Release Storage)
 ```
 
-مقادیر متنی ساده هم هستند:
+و در `wrangler.toml` بخش `[vars]` (مقدار غیرسکرت):
 
-```bash
-# R2_ACCOUNT_ID را از Endpoint گام ۵ بردار (بخش <ACCOUNT_ID>)
-# چون wrangler secret فقط برای سکرت است، این را موقتاً هم secret بگذار:
-npx wrangler secret put R2_ACCOUNT_ID
+```toml
+GITHUB_REPO = "ariaghasemi/baziche"
 ```
 
 ## گام ۷ — دیپلوی

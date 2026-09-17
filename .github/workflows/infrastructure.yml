@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  # write: bootstrap the Worker-managed binary-storage releases (idempotent)
+  contents: write
 
 concurrency:
   group: baziche-infrastructure
@@ -170,27 +171,26 @@ jobs:
           echo "Effective D1 configuration:"
           grep -A5 -B1 'd1_databases' wrangler.toml
 
-      - name: Provision R2 buckets
-        working-directory: backend
+      - name: Bootstrap GitHub storage releases
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
-          ensure_bucket() {
-            local bucket="$1"
-
-            echo "Checking R2 bucket: $bucket"
-
-            if npx wrangler r2 bucket info "$bucket" --json >/dev/null 2>&1; then
-              echo "R2 bucket exists: $bucket"
+          # Binary storage lives in Worker-managed releases (BINARY_STORAGE=github).
+          # The Worker also auto-creates them on first write; this step makes the
+          # setup explicit and fails fast on token/permission problems.
+          # R2 provisioning was removed (account error 10042); see wrangler.toml.
+          for tag in baziche-storage-projects baziche-storage-assets baziche-storage-builds baziche-storage-backups; do
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "Storage release exists: $tag"
             else
-              echo "Creating R2 bucket: $bucket"
-              npx wrangler r2 bucket create "$bucket"
+              echo "Creating storage release: $tag"
+              gh release create "$tag" \
+                --title "$tag" \
+                --notes "BAZICHE binary storage (Worker-managed). Do not delete."
             fi
-          }
-
-          ensure_bucket "baziche-projects"
-          ensure_bucket "baziche-assets"
-          ensure_bucket "baziche-builds"
+          done
 
       - name: Apply D1 migrations
         working-directory: backend

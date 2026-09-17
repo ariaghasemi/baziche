@@ -6,7 +6,7 @@ name = "baziche-api"
 main = "src/index.ts"
 compatibility_date = "2026-09-15"
 
-# Nightly D1 -> R2 backup (03:00 UTC). See src/lib/backup.ts + docs/RUNBOOK.md.
+# Nightly D1 -> BinaryStorage backup (03:00 UTC). See src/lib/backup.ts + docs/RUNBOOK.md.
 [triggers]
 crons = ["0 3 * * *"]
 
@@ -27,22 +27,16 @@ database_name = "baziche-data"
 database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "migrations/data"
 
-# --- R2 (bytes) ---
-[[r2_buckets]]
-binding = "R2_PROJECTS"
-bucket_name = "baziche-projects"
-
-[[r2_buckets]]
-binding = "R2_ASSETS"
-bucket_name = "baziche-assets"
-
-[[r2_buckets]]
-binding = "R2_BUILDS"
-bucket_name = "baziche-builds"
+# --- Binary storage (MVP: GitHub Releases; R2 bindings removed — account error 10042) ---
+# With BINARY_STORAGE=github the Worker never touches R2.
+# Rollback later = re-add the three [[r2_buckets]] bindings + set BINARY_STORAGE=r2
+# (no data migration: D1 `r2_*` columns stay valid as logical keys on both backends).
 
 # --- Non-secret vars ---
 [vars]
 ENVIRONMENT = "development"
+# 'github' (MVP) | 'r2' (rollback only — needs R2 bindings + R2_* secrets)
+BINARY_STORAGE = "github"
 ACCESS_TOKEN_TTL_SEC = "900"
 REFRESH_TOKEN_TTL_SEC = "2592000"
 REGISTRIES_VERSION = "1"

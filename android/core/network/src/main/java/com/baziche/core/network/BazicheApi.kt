@@ -1,10 +1,14 @@
 package com.baziche.core.network
 
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -57,6 +61,14 @@ interface BazicheApi {
 
     @POST("assets/commit")
     suspend fun commitAsset(@Body body: CommitRequest): OkResponse
+
+    @Multipart
+    @POST("assets/upload")
+    suspend fun uploadAsset(
+        @Part("projectId") projectId: RequestBody,
+        @Part("kind") kind: RequestBody,
+        @Part file: MultipartBody.Part,
+    ): UploadAssetResponse
 
     @GET("assets")
     suspend fun assets(@Query("projectId") projectId: String): AssetsResponse

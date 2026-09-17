@@ -5,12 +5,12 @@
 
 | Secret | مصرف‌کننده | محل نگهداری | روش ست کردن | چرخش |
 |---|---|---|---|---|
-| `JWT_SECRET` | Backend (امضای Access Token) | Cloudflare Secret + `.dev.vars` محلی | `wrangler secret put JWT_SECRET` | با `JWT_SECRET_PREV` بدون قطعی |
+| `JWT_SECRET` | Backend (امضای Access Token + امضای HMAC لینک‌های دانلود) | Cloudflare Secret + `.dev.vars` محلی | `wrangler secret put JWT_SECRET` | با `JWT_SECRET_PREV` بدون قطعی |
 | `JWT_SECRET_PREV` | Backend (دوره چرخش) | Cloudflare Secret | `wrangler secret put JWT_SECRET_PREV` | بعد از ۱۵ دقیقه پاک شود |
 | `PASSWORD_PEPPER` | Backend (هش نهایی پسورد) | Cloudflare Secret + `.dev.vars` محلی | `wrangler secret put PASSWORD_PEPPER` | نیازمند re-hash کاربران؛ با برنامه |
-| `R2_ACCESS_KEY_ID` | Backend (امضای Presigned URL) | Cloudflare Secret | `wrangler secret put R2_ACCESS_KEY_ID` | ساخت توکن جدید R2 + حذف قدیمی |
-| `R2_SECRET_ACCESS_KEY` | Backend (امضای Presigned URL) | Cloudflare Secret | `wrangler secret put R2_SECRET_ACCESS_KEY` | همراه بالایی |
-| `GITHUB_DISPATCH_TOKEN` | Backend فاز ۵ (تریگر بیلد) | Cloudflare Secret | dashboard → secrets | Fine-grained PAT، اسکوپ Actions |
+| `GITHUB_DISPATCH_TOKEN` | Backend (**اجباری** در حالت github: تریگر بیلد + GitHub Release Storage) | Cloudflare Secret | `wrangler secret put GITHUB_DISPATCH_TOKEN` | Fine-grained PAT روی همین ریپو: Contents خواندن/نوشتن + Actions خواندن/نوشتن |
+| `R2_ACCESS_KEY_ID` | فقط rollback حالت r2 (در MVP لازم نیست) | Cloudflare Secret | `wrangler secret put R2_ACCESS_KEY_ID` | ساخت توکن جدید R2 + حذف قدیمی |
+| `R2_SECRET_ACCESS_KEY` | فقط rollback حالت r2 (در MVP لازم نیست) | Cloudflare Secret | `wrangler secret put R2_SECRET_ACCESS_KEY` | همراه بالایی |
 | `MYKET_ACCESS_TOKEN` | Backend فاز ۶ (تأیید خرید) | Cloudflare Secret | از پنل توسعه‌دهنده Myket | طبق پنل Myket |
 | `AI_API_KEY` | Backend فاز ۹ (`/ai/expand`) | Cloudflare Secret | `wrangler secret put AI_API_KEY` | ساخت کلید جدید در provider |
 | `SIGNING_MASTER_KEY` | Backend فاز ۵ (رمز Keystoreها) | Cloudflare Secret | `wrangler secret put` | با re-encrypt برنامه‌ریزی‌شده |

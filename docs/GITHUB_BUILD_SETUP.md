@@ -1,35 +1,39 @@
-# 🏭 قرارداد بیلد بازی با GitHub Actions (فاز ۵)
+# 🏭 قرارداد بیلد بازی با GitHub Actions (فاز ۵ + Storage v2)
 
-> وضعیت: **DRAFT** — فایل `.github/workflows/game-build.yml` نوشته شده ولی تا فاز ۵ فعال نیست.
-> این سند قرارداد دقیق بین Backend و Runner است تا فاز ۵ بدون ابهام اجرا شود.
+> وضعیت: **FUNCTIONAL** — `.github/workflows/game-build.yml` واقعی است و با هر دو
+> حالت Storage کار می‌کند (`storage` در payload نسخه ۲ انتخاب می‌کند).
+> این سند قرارداد دقیق بین Backend و Runner است.
 
 ## ایده (۳۰ ثانیه‌ای)
 
 بک‌اند به‌جای داشتن سرور بیلد، برای هر بیلد یک **بسته رمزنگاری‌شده** می‌سازد:
 
 ```text
-bundle.zip (AES-256) = game.json + assets/ + keystore.jks + signing.json
+bundle.zip (AES-256) = game.json + manifest.json + assets/ (+ release: keystore.jks + signing.json)
 ```
 
-بعد به GitHub می‌گوید «این بسته را بگیر، بساز، APK/AAB را با این لینک‌ها آپلود کن، نتیجه را به من خبر بده». همه لینک‌ها **Presigned کوتاه‌عمر** هستند و هیچ Credential ابری در GitHub ذخیره نمی‌شود.
+بعد به GitHub می‌گوید «این بسته را بگیر، بساز، APK/AAB را آپلود کن، نتیجه را
+خبر بده». هیچ Credential ابری در GitHub ذخیره نمی‌شود.
 
 ## ورودی‌های workflow_dispatch
 
 | Input | نوع | توضیح |
 |---|---|---|
-| `payload` | JSON string | همه URLها + کانفیگ بیلد (جدول بعد) |
+| `payload` | JSON string | فیلد `storage` + مرجع‌های انتقال + کانفیگ بیلد (جدول بعد) |
 | `bundle_key` | string (secret) | پسورد AES بسته — بلافاصله mask می‌شود |
 | `callback_token` | string (secret) | Bearer کال‌بک به بک‌اند — بلافاصله mask می‌شود |
 
-فیلدهای `payload`:
+فیلدهای `payload` — حالت **github** (MVP):
 
 ```jsonc
 {
-  "bundleUrl": "https://…presigned GET…",
+  "storage": "github",
+  "releaseTag": "baziche-storage-builds",   // ریلیز Worker-managed (rollover با -2، -3…)
+  "bundleAsset": "build-<id>-bundle.enc",   // دانلود با: gh release download
   "bundleSha256": "hex…",
-  "apkUrl": "https://…presigned PUT…",
-  "aabUrl": "https://…presigned PUT…",
-  "logUrl": "https://…presigned PUT…",
+  "apkAsset": "build-<id>-game.apk",        // ("" اگر target=aab)
+  "aabAsset": "build-<id>-game.aab",        // ("" اگر target=apk یا mode=debug)
+  "logAsset": "build-<id>-build.log",       // آپلود با: gh release upload --clobber
   "callbackUrl": "https://api…/api/v1/builds/<id>/callback",
   "appId": "com.example.game",
   "appName": "My Game",
@@ -37,17 +41,37 @@ bundle.zip (AES-256) = game.json + assets/ + keystore.jks + signing.json
   "versionName": "1.0.0",
   "targetApi": 36,
   "minApi": 26,
-  "shellRef": "git sha/tags — نسخه قفل‌شده game-shell"
+  "shellRef": "git sha/tags — نسخه قفل‌شده game-shell",
+  "mode": "debug"
 }
 ```
+
+فیلدهای `payload` — حالت **r2** (legacy/rollback):
+
+```jsonc
+{
+  "storage": "r2",
+  "bundleUrl": "https://…presigned GET…",
+  "bundleSha256": "hex…",
+  "apkUrl": "https://…presigned PUT…",
+  "aabUrl": "https://…presigned PUT…",  // ("" اگر target=apk یا mode=debug)
+  "logUrl": "https://…presigned PUT…",
+  // … همان callbackUrl/appId/appName/versionCode/versionName/targetApi/minApi/shellRef/mode
+}
+```
+
+> قانون: Runner فقط شاخه‌ی `storage` خودش را می‌خواند. در حالت github انتقال
+> با `GITHUB_TOKEN` داخلی (`gh release download/upload`، دسترسی `contents: write`)
+> انجام می‌شود و هیچ باینری از Worker عبور نمی‌کند.
 
 ## فرمت bundle.zip (داخل بسته رمزگشایی‌شده)
 
 ```text
-game.json          # Project JSON نسخه‌دار
-assets/...         # فایل‌های بازی
-keystore.jks       # Keystore همان پروژه (فقط همین بیلد)
-signing.json       # { "alias": "...", "storePassword": "...", "keyPassword": "..." }
+game.json          # Project JSON نسخه‌دار (head revision)
+manifest.json      # { buildId, projectId, rev, files[] }
+assets/<assetId>   # فایل‌های بازی (تا سقف باندل)
+keystore.jks       # فقط بیلد release (آینده)
+signing.json       # فقط بیلد release (آینده)
 ```
 
 ## قرارداد Callback
@@ -63,11 +87,15 @@ Content-Type: application/json
 {"status":"FAILED","runId":"12345"}
 ```
 
-بک‌اند با `callback_token` یک‌بارمصرف هر بیلد، اصالت را بررسی می‌کند (Phase 5).
+بک‌اند اصالت را با `callback_token` یکتا هر بیلد بررسی می‌کند و در حالت
+COMPLETED ابتدا **نشستن واقعی APK** را راستی‌آزمایی می‌کند
+(حالت github: پیدا شدن asset در ریلیز؛ حالت r2: `head()`)؛
+اگر APK نباشد، بیلد `FAILED/UPLOAD_MISSING` می‌شود و هزینه برمی‌گردد.
 
 ## امنیت
 
 - باندل با AES-256-CBC + PBKDF2 رمز است؛ کلید فقط در حافظه Runner.
+- توکن بک‌اند (`GITHUB_DISPATCH_TOKEN`) هرگز وارد payload، URL، لاگ یا Runner نمی‌شود.
 - Keystore فقط همان پروژه است، نه کلید مادر.
 - بعد از هر Job، کل Workspace پاک می‌شود (`rm -rf` در گام Cleanup).
 - لاگ‌ها ممکن است نام فایل‌ها را داشته باشند ولی هرگز پسورد/توکن (mask) ندارند.
@@ -80,15 +108,15 @@ Content-Type: application/json
 | دقیقه بیلد | ~۲۰۰۰/ماه (ریپو Private) | ≈ ۱۳۰–۴۰۰ بیلد/ماه (هر بیلد ۵–۱۵ دقیقه) |
 | همزمانی | ۲۰ Job | صف بیلد در بک‌اند مدیریت می‌کند |
 | سقف هر Job | ۶ ساعت | کافی (بیلدها چند دقیقه‌اند) |
-| آرتیفکت | ۹۰ روز | ما همه‌چیز را در R2 نگه می‌داریم، نه گیت‌هاب |
+| Release asset | ۱۰۰۰ asset/ریلیز، هر فایل < ۲ GiB | rollover خودکار `-2`/`-3`… نزدیک ۹۰۰؛ D1 مرجع هر فایل را دارد |
 
-## چک‌لیست فعال‌سازی (فاز ۵ — فعلاً هیچ‌کدام)
+## چک‌لیست فعال‌سازی
 
 ```text
-[ ] android/game-shell ساخته شد
-[ ] Backend: POST /builds + BuildProvider.dispatch
-[ ] Backend: callback endpoint + توکن یک‌بارمصرف
-[ ] Backend: ساخت bundle رمزنگاری‌شده + presign آپلودها
-[ ] Fine-grained PAT گیت‌هاب (Actions:Write) → Secret در Cloudflare
+[x] android/game-shell ساخته شد
+[x] Backend: POST /builds + dispatch + bundle رمزنگاری‌شده
+[x] Backend: callback endpoint + توکن یک‌بارمصرف + راستی‌آزمایی APK
+[x] game-build.yml دوحالته (github + r2) با payload نسخه ۲
+[ ] Fine-grained PAT (Contents RW + Actions RW) → Secret در Cloudflare
 [ ] اولین بیلد آزمایشی موفق + دانلود APK
 ```

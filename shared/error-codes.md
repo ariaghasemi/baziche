@@ -43,6 +43,7 @@ HTTP status پیشنهادی کنار هر کد آمده. پیام فارسی د
 | `ASSET_TYPE_BLOCKED` | 400 | نوع فایل مجاز نیست |
 | `ASSET_NOT_FOUND` | 404 | آبجکت در R2 پیدا نشد (commit ناموفق) |
 | `STORAGE_QUOTA_EXCEEDED` | 403 | سقف فضای پلن |
+| `STORAGE_MODE` | 400 | endpoint مخصوص حالت r2 در حالت github صدا زده شد (از `/assets/upload` استفاده کن) |
 
 ## Builds (402/403/409) — فاز ۵
 

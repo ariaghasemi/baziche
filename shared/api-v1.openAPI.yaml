@@ -87,16 +87,27 @@ paths:
       responses: { '200': { description: '{ success, merged, conflicts[], serverRev }' } }
   /assets/presign:
     post:
-      summary: Presigned PUT URL for one asset
+      summary: '[r2 mode only] Presigned PUT URL for one asset (github mode: use /assets/upload)'
       security: [ { bearer: [] } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [projectId, kind, hash, bytes, contentType], properties: { projectId: { type: string }, kind: { type: string }, hash: { type: string }, bytes: { type: integer }, contentType: { type: string } } } } } }
       responses: { '200': { description: '{ success, key, uploadUrl, expiresIn }' } }
   /assets/commit:
     post:
-      summary: Confirm upload (server verifies object exists)
+      summary: '[r2 mode only] Confirm upload (server verifies object exists)'
       security: [ { bearer: [] } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [projectId, key, hash, bytes, kind], properties: { projectId: { type: string }, key: { type: string }, hash: { type: string }, bytes: { type: integer }, kind: { type: string } } } } } }
       responses: { '200': { description: '{ success, asset }' } }
+  /assets/upload:
+    post:
+      summary: Single-call upload, both storage modes (multipart projectId/kind/file; server verifies + stores + commits)
+      security: [ { bearer: [] } ]
+      requestBody: { required: true, content: { multipart/form-data: { schema: { type: object, required: [projectId, kind, file], properties: { projectId: { type: string }, kind: { type: string, enum: [image, audio, font, video] }, file: { type: string, format: binary } } } } } }
+      responses: { '200': { description: '{ success, asset: { id, key } }' }, '400': { $ref: '#/components/responses/Error' }, '404': { $ref: '#/components/responses/Error' }, '413': { $ref: '#/components/responses/Error' } }
+  /assets/content:
+    get:
+      summary: Public HMAC-signed byte download (?key=&exp=&token=); minted by /assets/{id}/url
+      parameters: [ { name: key, in: query, required: true, schema: { type: string } }, { name: exp, in: query, required: true, schema: { type: integer } }, { name: token, in: query, required: true, schema: { type: string } } ]
+      responses: { '200': { description: 'asset bytes' }, '401': { $ref: '#/components/responses/Error' }, '404': { $ref: '#/components/responses/Error' } }
   /assets:
     get:
       summary: List committed assets of one project (owner)
@@ -105,10 +116,15 @@ paths:
       responses: { '200': { description: '{ success, assets[] }' } }
   /assets/{id}/url:
     get:
-      summary: Short-lived presigned download URL (owner)
+      summary: 'Short-lived download URL, both modes (r2 presigned GET / github HMAC proxy)'
       security: [ { bearer: [] } ]
       parameters: [ { name: id, in: path, required: true, schema: { type: string } } ]
       responses: { '200': { description: '{ success, url, kind, expiresIn }' }, '404': { $ref: '#/components/responses/Error' } }
+  /builds/content:
+    get:
+      summary: Public HMAC-signed artifact download (?key=&exp=&token=); minted by build detail/download
+      parameters: [ { name: key, in: query, required: true, schema: { type: string } }, { name: exp, in: query, required: true, schema: { type: integer } }, { name: token, in: query, required: true, schema: { type: string } } ]
+      responses: { '200': { description: 'apk/aab/log bytes' }, '401': { $ref: '#/components/responses/Error' }, '404': { $ref: '#/components/responses/Error' } }
   /meta/registries:
     get:
       summary: Public versioned registries (capabilities/features/gameTypes/components)

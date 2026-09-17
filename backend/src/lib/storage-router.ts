@@ -6,6 +6,8 @@ export interface Shard {
   id: string;
   kind: ShardKind;
   bucket: string;
+  /** Per-shard BinaryStorage override ('r2' | 'github'); NULL = BINARY_STORAGE env decides. */
+  backend?: string | null;
   capacityBytes: number;
   usedBytes: number;
   status: string; // 'active' | 'readonly' | 'disabled'
@@ -65,6 +67,7 @@ export const storageRouter: IStorageRouter = {
            id,
            kind,
            bucket,
+           backend,
            capacity_bytes AS capacityBytes,
            used_bytes AS usedBytes,
            status,

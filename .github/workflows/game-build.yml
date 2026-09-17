@@ -1,14 +1,20 @@
 # ============================================================================
-# BAZICHE game-build — FUNCTIONAL (Phase 5)
+# BAZICHE game-build — FUNCTIONAL (Phase 5, storage v2)
 # ----------------------------------------------------------------------------
 # Builds ONE user game (debug APK, or release APK+AAB when signed) on free
-# GitHub-hosted runners. Trigger: backend POSTs workflow_dispatch with
-# presigned R2 URLs + an encrypted build bundle. No cloud credentials in GitHub.
+# GitHub-hosted runners. Trigger: backend POSTs workflow_dispatch with a
+# payload + an encrypted build bundle. No cloud credentials in GitHub.
 #
+# Payload v2 (`storage` selects the transfer branch):
+#   storage=github (MVP): {storage,releaseTag,bundleAsset,bundleSha256,
+#     apkAsset,aabAsset,logAsset,callbackUrl,appId,appName,versionCode,
+#     versionName,targetApi,minApi,shellRef,mode?} — transfer via
+#     `gh release download/upload` with the built-in GITHUB_TOKEN.
+#     (apkAsset/aabAsset may be "" per target; aabAsset "" when mode=debug.)
+#   storage=r2 (legacy): {storage,bundleUrl,bundleSha256,apkUrl,aabUrl,logUrl,
+#     callbackUrl,...} — transfer via presigned R2 URLs + curl.
 # Inputs:
-#   payload        JSON: {bundleUrl,bundleSha256,apkUrl,aabUrl,logUrl,callbackUrl,
-#                         appId,appName,versionCode,versionName,targetApi,minApi,
-#                         shellRef, mode?}  (aabUrl may be "" when mode=debug)
+#   payload        JSON (see above)
 #   bundle_key     AES-256 bundle password (masked, never logged)
 #   callback_token Bearer for backend callback (masked, never logged)
 # Full contract: docs/GITHUB_BUILD_SETUP.md
@@ -38,9 +44,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
-      contents: read
+      # read: checkout + bundle download; write: `gh release upload` (github branch)
+      contents: write
     env:
       STAGING: ${{ runner.temp }}/bundle
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Mask secrets
         run: |
@@ -51,15 +59,42 @@ jobs:
         id: p
         run: |
           echo '${{ inputs.payload }}' > payload.json
-          for k in bundleUrl bundleSha256 apkUrl logUrl callbackUrl appId appName versionCode versionName targetApi minApi shellRef; do
+          STORAGE="$(jq -r '.storage // "r2"' payload.json)"
+          if [ "$STORAGE" != "github" ] && [ "$STORAGE" != "r2" ]; then
+            echo "unknown payload storage: $STORAGE" >&2; exit 1
+          fi
+          echo "storage=$STORAGE" >> "$GITHUB_OUTPUT"
+          MODE="$(jq -r '.mode // "release"' payload.json)"
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          for k in callbackUrl appId appName versionCode versionName targetApi minApi shellRef bundleSha256; do
             v=$(jq -r ".$k // empty" payload.json)
             if [ -z "$v" ]; then echo "missing payload key: $k" >&2; exit 1; fi
             echo "$k=$v" >> "$GITHUB_OUTPUT"
           done
-          echo "mode=$(jq -r '.mode // "release"' payload.json)" >> "$GITHUB_OUTPUT"
-          echo "aabUrl=$(jq -r '.aabUrl // empty' payload.json)" >> "$GITHUB_OUTPUT"
-          if [ "$(jq -r '.mode // "release"' payload.json)" = "release" ] && [ -z "$(jq -r '.aabUrl // empty' payload.json)" ]; then
-            echo "release mode requires aabUrl" >&2; exit 1
+          if [ "$STORAGE" = "github" ]; then
+            for k in releaseTag bundleAsset logAsset; do
+              v=$(jq -r ".$k // empty" payload.json)
+              if [ -z "$v" ]; then echo "missing github payload key: $k" >&2; exit 1; fi
+              echo "$k=$v" >> "$GITHUB_OUTPUT"
+            done
+            echo "apkAsset=$(jq -r '.apkAsset // empty' payload.json)" >> "$GITHUB_OUTPUT"
+            echo "aabAsset=$(jq -r '.aabAsset // empty' payload.json)" >> "$GITHUB_OUTPUT"
+            if [ -z "$(jq -r '.apkAsset // empty' payload.json)" ]; then
+              echo "github payload requires apkAsset" >&2; exit 1
+            fi
+            if [ "$MODE" != "debug" ] && [ -z "$(jq -r '.aabAsset // empty' payload.json)" ]; then
+              echo "release mode requires aabAsset" >&2; exit 1
+            fi
+          else
+            for k in bundleUrl apkUrl logUrl; do
+              v=$(jq -r ".$k // empty" payload.json)
+              if [ -z "$v" ]; then echo "missing r2 payload key: $k" >&2; exit 1; fi
+              echo "$k=$v" >> "$GITHUB_OUTPUT"
+            done
+            echo "aabUrl=$(jq -r '.aabUrl // empty' payload.json)" >> "$GITHUB_OUTPUT"
+            if [ "$MODE" != "debug" ] && [ -z "$(jq -r '.aabUrl // empty' payload.json)" ]; then
+              echo "release mode requires aabUrl" >&2; exit 1
+            fi
           fi
 
       - name: Checkout game-shell template
@@ -92,10 +127,23 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Download + verify + decrypt bundle
+      - name: Download bundle (r2 branch)
+        if: steps.p.outputs.storage == 'r2'
         run: |
           mkdir -p "$STAGING"
           curl -fSL --retry 3 -o "$STAGING/bundle.enc" "${{ steps.p.outputs.bundleUrl }}"
+
+      - name: Download bundle (github branch)
+        if: steps.p.outputs.storage == 'github'
+        run: |
+          mkdir -p "$STAGING"
+          gh release download "${{ steps.p.outputs.releaseTag }}" \
+            --pattern "${{ steps.p.outputs.bundleAsset }}" \
+            --output "$STAGING/bundle.enc" \
+            --clobber
+
+      - name: Verify + decrypt bundle
+        run: |
           echo "${{ steps.p.outputs.bundleSha256 }}  $STAGING/bundle.enc" | sha256sum -c -
           openssl enc -d -aes-256-cbc -pbkdf2 -in "$STAGING/bundle.enc" -out "$STAGING/bundle.zip" -pass "env:BUNDLE_KEY"
           unzip -q "$STAGING/bundle.zip" -d "$STAGING/plain"
@@ -155,7 +203,7 @@ jobs:
           test -f game-shell/build/outputs/bundle/release/game-shell-release.aab
 
       - name: Upload artifacts to R2
-        if: success()
+        if: steps.p.outputs.storage == 'r2' && success()
         run: |
           if [ "${{ steps.p.outputs.mode }}" = "debug" ]; then
             APK="android/game-shell/build/outputs/apk/debug/game-shell-debug.apk"
@@ -168,6 +216,22 @@ jobs:
             --data-binary "@$APK" "${{ steps.p.outputs.apkUrl }}"
           curl -fSL -X PUT --retry 3 -H "Content-Type: text/plain" \
             --data-binary "@$STAGING/build.log" "${{ steps.p.outputs.logUrl }}"
+
+      - name: Upload artifacts to GitHub Release
+        if: steps.p.outputs.storage == 'github' && success()
+        run: |
+          TAG="${{ steps.p.outputs.releaseTag }}"
+          if [ "${{ steps.p.outputs.mode }}" = "debug" ]; then
+            APK="android/game-shell/build/outputs/apk/debug/game-shell-debug.apk"
+          else
+            APK="android/game-shell/build/outputs/apk/release/game-shell-release.apk"
+            cp "android/game-shell/build/outputs/bundle/release/game-shell-release.aab" "$STAGING/${{ steps.p.outputs.aabAsset }}"
+            gh release upload "$TAG" "$STAGING/${{ steps.p.outputs.aabAsset }}" --clobber
+          fi
+          # Backend verifies exact asset names (build-<id>-game.apk/...), so stage copies.
+          cp "$APK" "$STAGING/${{ steps.p.outputs.apkAsset }}"
+          cp "$STAGING/build.log" "$STAGING/${{ steps.p.outputs.logAsset }}"
+          gh release upload "$TAG" "$STAGING/${{ steps.p.outputs.apkAsset }}" "$STAGING/${{ steps.p.outputs.logAsset }}" --clobber
 
       - name: Callback (success)
         if: success()
@@ -182,8 +246,13 @@ jobs:
         if: failure()
         run: |
           if [ -f "$STAGING/build.log" ]; then
-            curl -fSL -X PUT --retry 3 -H "Content-Type: text/plain" \
-              --data-binary "@$STAGING/build.log" "${{ steps.p.outputs.logUrl }}" || true
+            if [ "${{ steps.p.outputs.storage }}" = "github" ] && [ -n "${{ steps.p.outputs.logAsset }}" ]; then
+              cp "$STAGING/build.log" "$STAGING/${{ steps.p.outputs.logAsset }}"
+              gh release upload "${{ steps.p.outputs.releaseTag }}" "$STAGING/${{ steps.p.outputs.logAsset }}" --clobber || true
+            elif [ "${{ steps.p.outputs.storage }}" = "r2" ]; then
+              curl -fSL -X PUT --retry 3 -H "Content-Type: text/plain" \
+                --data-binary "@$STAGING/build.log" "${{ steps.p.outputs.logUrl }}" || true
+            fi
           fi
           curl -fSL -X POST "${{ steps.p.outputs.callbackUrl }}" \
             -H "Authorization: Bearer $CALLBACK_TOKEN" -H "Content-Type: application/json" \

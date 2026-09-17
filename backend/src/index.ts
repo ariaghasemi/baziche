@@ -14,11 +14,15 @@ import { aiRoutes } from './routes/ai';
 export interface Env {
   DB_AUTH: D1Database; // identity, sessions, billing, admin, audit
   DB_DATA: D1Database; // projects, revisions, assets, builds
-  R2_PROJECTS: R2Bucket;
-  R2_ASSETS: R2Bucket;
-  R2_BUILDS: R2Bucket;
+  // R2 bindings are OPTIONAL: bound only when BINARY_STORAGE=r2 (rollback path).
+  // Production MVP runs BINARY_STORAGE=github with no R2 bindings at all.
+  R2_PROJECTS?: R2Bucket;
+  R2_ASSETS?: R2Bucket;
+  R2_BUILDS?: R2Bucket;
   // vars (non-secret)
   ENVIRONMENT: string;
+  /** 'r2' (default, legacy) | 'github' (MVP). See lib/binary-storage.ts. */
+  BINARY_STORAGE?: string;
   ACCESS_TOKEN_TTL_SEC: string;
   REFRESH_TOKEN_TTL_SEC: string;
   REGISTRIES_VERSION: string;
@@ -29,10 +33,13 @@ export interface Env {
   JWT_SECRET: string;
   JWT_SECRET_PREV?: string;
   PASSWORD_PEPPER: string;
-  R2_ACCOUNT_ID: string;
-  R2_ACCESS_KEY_ID: string;
-  R2_SECRET_ACCESS_KEY: string;
-  // Phase 5: GitHub dispatch (all optional — without them builds stay QUEUED)
+  // R2 presign credentials (only needed when BINARY_STORAGE=r2)
+  R2_ACCOUNT_ID?: string;
+  R2_ACCESS_KEY_ID?: string;
+  R2_SECRET_ACCESS_KEY?: string;
+  // Phase 5: GitHub dispatch (all optional — without them builds stay QUEUED).
+  // Storage migration: REQUIRED when BINARY_STORAGE=github — the same token+repo
+  // drive GitHubReleaseStorage (Contents read+write + Actions on this repo).
   GITHUB_DISPATCH_TOKEN?: string;
   GITHUB_REPO?: string;
   GAME_BUILD_REF?: string;

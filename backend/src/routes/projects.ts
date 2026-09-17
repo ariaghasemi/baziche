@@ -6,7 +6,7 @@ import { parse, zId } from '../lib/validate';
 import { requireAuth } from '../middleware/auth';
 import { GAME_TYPE_IDS, TIER1_IDS, GAME_TYPES } from '../registries/game-types';
 import { storageRouter } from '../lib/storage-router';
-import { getText, putText } from '../lib/r2';
+import { backendOfRow, storageFor, storageForBackend, type BinaryRef } from '../lib/binary-storage';
 import { threeWayMerge } from '../lib/merge';
 import { audit } from '../lib/audit';
 
@@ -78,8 +78,37 @@ async function ownProject(db: D1Database, userId: string, id: string): Promise<O
   return p;
 }
 
+interface RevisionRef {
+  r2key: string;
+  storage: string | null;
+  releaseTag: string | null;
+  releaseId: number | null;
+  assetId: number | null;
+  assetName: string | null;
+}
+
+function refOfRevision(r: RevisionRef, env: Env): BinaryRef {
+  return {
+    key: r.r2key,
+    storage: backendOfRow(r.storage, env),
+    releaseTag: r.releaseTag,
+    releaseId: r.releaseId,
+    assetId: r.assetId,
+    assetName: r.assetName,
+  };
+}
+
 async function getRevJson(env: Env, p: OwnedProject, rev: number): Promise<unknown | null> {
-  const text = await getText(env.R2_PROJECTS, revKey(p.shardId, p.id, rev));
+  const row = await env.DB_DATA.prepare(
+    `SELECT r2_key AS r2key, storage, release_tag AS releaseTag, release_id AS releaseId,
+            asset_id AS assetId, asset_name AS assetName
+     FROM project_revisions WHERE project_id = ? AND rev = ?`,
+  )
+    .bind(p.id, rev)
+    .first<RevisionRef>();
+  if (!row) return null;
+  const ref = refOfRevision(row, env);
+  const text = await storageForBackend(env, ref.storage).getText(ref);
   if (!text) return null;
   try {
     return JSON.parse(text);
@@ -102,7 +131,8 @@ async function writeNewRev(
   const { name: metaName } = validateProjectJson(json, maxBytes);
   const newRev = p.rev + 1;
   const text = JSON.stringify(json);
-  await putText(env.R2_PROJECTS, revKey(p.shardId, p.id, newRev), text);
+  const storage = storageFor(env);
+  const ref = await storage.put('project', revKey(p.shardId, p.id, newRev), text, 'application/json');
   const now = nowSec();
   const finalName = name ?? metaName ?? p.name;
   const r = await env.DB_DATA.prepare('UPDATE projects SET rev = ?, name = ?, updated_at = ? WHERE id = ? AND rev = ?')
@@ -111,8 +141,12 @@ async function writeNewRev(
   if ((r.meta.changes ?? 0) !== 1) {
     return -1; // concurrent write lost
   }
-  await env.DB_DATA.prepare('INSERT INTO project_revisions (id, project_id, rev, r2_key, bytes, created_at) VALUES (?, ?, ?, ?, ?, ?)')
-    .bind(newId('rev'), p.id, newRev, revKey(p.shardId, p.id, newRev), text.length, now)
+  await env.DB_DATA.prepare(
+    `INSERT INTO project_revisions (id, project_id, rev, r2_key, bytes, created_at,
+       storage, release_tag, release_id, asset_id, asset_name, sha256)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(newId('rev'), p.id, newRev, ref.key, text.length, now, ref.storage, ref.releaseTag ?? null, ref.releaseId ?? null, ref.assetId ?? null, ref.assetName ?? null, ref.sha256 ?? null)
     .run();
   await audit(env.DB_AUTH, action, userId, { projectId: p.id, rev: newRev });
   return newRev;
@@ -147,7 +181,8 @@ projectRoutes.post('/', async (c) => {
   const minApi = parseInt(c.env.DEFAULT_MIN_API || '26', 10);
   const json = blankProjectJson(b.name, b.gameType, targetApi, minApi);
   const key = storageRouter.keyFor(shard, 'project', shard.id, id, 'r1.json');
-  await putText(c.env.R2_PROJECTS, key, JSON.stringify(json));
+  const storage = storageFor(c.env, '', shard.backend ?? null);
+  const ref = await storage.put('project', key, JSON.stringify(json), 'application/json');
 
   await c.env.DB_DATA.prepare(
     `INSERT INTO projects (id, user_id, name, game_type, format_version, shard_id, rev, status, created_at, updated_at)
@@ -155,8 +190,12 @@ projectRoutes.post('/', async (c) => {
   )
     .bind(id, userId, b.name, b.gameType, shard.id, now, now)
     .run();
-  await c.env.DB_DATA.prepare('INSERT INTO project_revisions (id, project_id, rev, r2_key, bytes, created_at) VALUES (?, ?, 1, ?, ?, ?)')
-    .bind(newId('rev'), id, key, JSON.stringify(json).length, now)
+  await c.env.DB_DATA.prepare(
+    `INSERT INTO project_revisions (id, project_id, rev, r2_key, bytes, created_at,
+       storage, release_tag, release_id, asset_id, asset_name, sha256)
+     VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(newId('rev'), id, ref.key, JSON.stringify(json).length, now, ref.storage, ref.releaseTag ?? null, ref.releaseId ?? null, ref.assetId ?? null, ref.assetName ?? null, ref.sha256 ?? null)
     .run();
   await audit(c.env.DB_AUTH, 'project.create', userId, { projectId: id, gameType: b.gameType });
   return c.json({ success: true, project: { id, name: b.name, gameType: b.gameType, rev: 1, tier1: TIER1_IDS.includes(b.gameType) } });

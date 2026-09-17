@@ -1,7 +1,10 @@
-// D1 -> R2 disaster-recovery backup (runs on cron, see wrangler [triggers]).
-// One gzipped JSON document per run: {v, at, tables: {name: rows[]}}.
-// Includes credential hashes (needed for restore) — the bucket is private and
-// R2 encrypts at rest; never make R2_BUILDS public. Restore: docs/RUNBOOK.md.
+// D1 -> BinaryStorage disaster-recovery backup (runs on cron, see wrangler [triggers]).
+// One gzipped JSON document per run: {v, at, tables: {name: rows[]}} + a `latest.json` pointer.
+// Includes credential hashes (needed for restore) — the backend is private
+// (private R2 bucket / private GitHub repo); never make it public. Restore: docs/RUNBOOK.md.
+
+import { storageFor } from './binary-storage';
+import type { Env } from '../index';
 
 const AUTH_TABLES = ['users', 'refresh_tokens', 'plans', 'subscriptions', 'entitlements', 'purchases', 'admins', 'idempotency_keys', 'ai_usage'] as const;
 const DATA_TABLES = ['projects', 'project_revisions', 'assets', 'builds', 'signing_keys', 'storage_shards', 'agents', 'feature_flags'] as const;
@@ -20,7 +23,7 @@ export interface BackupSummary {
   rows: number;
 }
 
-export async function runBackup(env: { DB_AUTH: D1Database; DB_DATA: D1Database; R2_BUILDS: R2Bucket }): Promise<BackupSummary> {
+export async function runBackup(env: Env): Promise<BackupSummary> {
   const at = Math.floor(Date.now() / 1000);
   const tables: Record<string, Record<string, unknown>[]> = {};
   for (const t of AUTH_TABLES) tables[`auth.${t}`] = await dumpAll(env.DB_AUTH, t);
@@ -32,7 +35,8 @@ export async function runBackup(env: { DB_AUTH: D1Database; DB_DATA: D1Database;
   const gz = await new Response(new Blob([doc]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer();
   const day = new Date(at * 1000).toISOString().slice(0, 10);
   const key = `backups/${day}/d1-${at}.json.gz`;
-  await env.R2_BUILDS.put(key, gz, { httpMetadata: { contentType: 'application/gzip' } });
-  await env.R2_BUILDS.put('backups/latest.json', JSON.stringify({ key, at, tables: Object.keys(tables).length, rows }));
+  const storage = storageFor(env);
+  await storage.put('backup', key, new Uint8Array(gz), 'application/gzip');
+  await storage.put('backup', 'backups/latest.json', JSON.stringify({ key, at, tables: Object.keys(tables).length, rows }), 'application/json');
   return { key, at, tables: Object.keys(tables).length, rows };
 }

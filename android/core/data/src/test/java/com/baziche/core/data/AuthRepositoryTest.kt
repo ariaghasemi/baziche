@@ -28,6 +28,9 @@ import com.baziche.core.network.PresignRequest
 import com.baziche.core.network.PresignResponse
 import com.baziche.core.network.ProjectDetailResponse
 import com.baziche.core.network.ProjectsResponse
+import com.baziche.core.network.UploadAssetResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import com.baziche.core.network.RefreshRequest
 import com.baziche.core.network.RegisterRequest
 import com.baziche.core.network.RegistriesResponse
@@ -92,6 +95,7 @@ class FakeApi(
     override suspend fun assetUrl(id: String): AssetUrlResponse = throw NotImplementedError()
     override suspend fun presign(body: PresignRequest): PresignResponse = throw NotImplementedError()
     override suspend fun commitAsset(body: CommitRequest): OkResponse = throw NotImplementedError()
+    override suspend fun uploadAsset(projectId: RequestBody, kind: RequestBody, file: MultipartBody.Part): UploadAssetResponse = throw NotImplementedError()
     override suspend fun registries(): RegistriesResponse = throw NotImplementedError()
     override suspend fun plans(): PlansResponse = throw NotImplementedError()
 }

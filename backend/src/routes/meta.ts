@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import type { Env } from '../index';
+import { BACKUPS_TAG, backendOfRow, storageFor } from '../lib/binary-storage';
 import { CAPABILITIES, REGISTRIES_VERSION } from '../registries/capabilities';
 import { FEATURES } from '../registries/features';
 import { GAME_TYPES } from '../registries/game-types';
@@ -33,7 +34,9 @@ metaRoutes.get('/metrics', async (c) => {
     c.env.DB_DATA.prepare("SELECT COUNT(*) AS n FROM projects WHERE status = 'active'").first<{ n: number }>(),
     c.env.DB_DATA.prepare('SELECT status, COUNT(*) AS n FROM builds GROUP BY status').all<{ status: string; n: number }>(),
     c.env.DB_AUTH.prepare("SELECT COUNT(*) AS n FROM subscriptions WHERE status = 'active'").first<{ n: number }>(),
-    c.env.R2_BUILDS.get('backups/latest.json').then((o) => o?.text() ?? null),
+    storageFor(c.env)
+      .getText({ key: 'backups/latest.json', storage: backendOfRow(null, c.env), releaseTag: BACKUPS_TAG, assetName: 'latest.json' })
+      .catch(() => null),
   ]);
   const buildsByStatus: Record<string, number> = {};
   for (const b of builds.results ?? []) buildsByStatus[b.status] = b.n;

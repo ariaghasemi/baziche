@@ -22,7 +22,7 @@ dependencies {
     implementation(libs.serialization.json)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.serialization)
-    implementation(libs.okhttp)
+    api(libs.okhttp) // multipart upload types are part of BazicheApi's public signature
     implementation(libs.okhttp.logging)
     testImplementation(libs.junit4)
     testImplementation(libs.coroutines.test)
