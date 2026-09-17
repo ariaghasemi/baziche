@@ -106,7 +106,7 @@ jobs:
 
               npx wrangler d1 create "$name" \
                 --location "$location" \
-                --binding "$binding"
+                --binding "$binding" >&2
 
               id="$(get_d1_id "$name")"
             fi
@@ -133,8 +133,12 @@ jobs:
           path = Path("wrangler.toml")
           text = path.read_text(encoding="utf-8")
 
-          auth_id = os.environ["AUTH_ID"]
-          data_id = os.environ["DATA_ID"]
+          auth_id = os.environ["AUTH_ID"].strip()
+          data_id = os.environ["DATA_ID"].strip()
+
+          for name, value in (("baziche-auth", auth_id), ("baziche-data", data_id)):
+              if not value or "\n" in value or "\r" in value:
+                  raise SystemExit(f"Invalid D1 UUID resolved for {name}")
 
           placeholder = "00000000-0000-0000-0000-000000000000"
 
