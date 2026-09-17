@@ -904,4 +904,75 @@ class RuntimeTest {
         assertEquals(210f, fx.engine.objectById("o1")!!.transform().y)
         assertEquals(0, fx.engine.animCount())
     }
+
+    // ---------- phase 7: particles + shake ----------
+    @Test
+    fun particles_spawn_age_and_respect_config() {
+        val fx = Fx()
+        val base = project(scenes = listOf(scene("s1", true)))
+        assertEquals(0, Fx().let {
+            it.engine.load(base)
+            it.engine.start()
+            it.engine.tick(1000)
+            it.engine.particleCount()
+        }) // disabled by default
+        val sys = buildJsonObject {
+            put("ambientParticles", buildJsonObject {
+                put("enabled", true)
+                put("ratePerSec", 100)
+                put("max", 50)
+                put("lifeMs", 2000)
+            })
+        }
+        val withSys = JsonObject(base.toMutableMap().also { it["systems"] = sys })
+        fx.engine.load(withSys)
+        fx.engine.start()
+        assertEquals(0, fx.engine.particleCount())
+        fx.engine.tick(1000) // 100 requested, capped at max=50
+        assertEquals(50, fx.engine.particleCount())
+        assertEquals(50, fx.engine.snapshot().particles.size)
+        fx.engine.tick(5000) // all aged out, respawn capped again
+        assertTrue(fx.engine.particleCount() in 1..50)
+    }
+
+    @Test
+    fun camera_shake_fires_and_decays() {
+        val fx = Fx()
+        fx.engine.load(project(scenes = listOf(scene("s1", true))))
+        fx.engine.start()
+        val calm = fx.engine.snapshot().camera
+        assertEquals(0f, calm.x)
+        assertEquals(0f, calm.y)
+        fx.engine.addTrauma(1f)
+        assertEquals(1f, fx.engine.traumaLevel())
+        val shaken = fx.engine.snapshot().camera
+        assertTrue(kotlin.math.abs(shaken.x) + kotlin.math.abs(shaken.y) > 0f)
+        fx.engine.tick(1000) // full decay
+        assertEquals(0f, fx.engine.traumaLevel())
+        val rest = fx.engine.snapshot().camera
+        assertEquals(0f, rest.x)
+        assertEquals(0f, rest.y)
+    }
+
+    @Test
+    fun damage_fires_shake_and_burst() {
+        val fx = Fx()
+        val hp = buildJsonObject {
+            put("max", 100)
+            put("current", 100)
+            put("invincibleMs", 0)
+        }
+        fx.engine.load(
+            project(
+                scenes = listOf(scene("s1", true)),
+                objects = listOf(obj("hero", "s1", comps = mapOf("Health" to hp))),
+                events = listOf(ev("boot", "start", listOf(act("CAP-0022", "target" to v("hero"), "amount" to v(10))))),
+            ),
+        )
+        fx.engine.start() // damage fires on boot
+        assertTrue(fx.engine.traumaLevel() > 0f)
+        assertEquals(10, fx.engine.particleCount()) // exactly one burst, ambient off
+        fx.engine.tick(1000) // burst lifetime is 600ms
+        assertEquals(0, fx.engine.particleCount())
+    }
 }

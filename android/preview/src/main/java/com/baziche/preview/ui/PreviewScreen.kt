@@ -227,6 +227,14 @@ fun GameCanvas(snap: RenderState, orientation: String, images: Map<String, Image
                     }
                 }
             }
+            for (pt in snap.particles) {
+                drawCircle(
+                    parseColor(pt.color, Color.White),
+                    radius = (pt.size / 2f * scale).coerceAtLeast(1f),
+                    center = Offset((pt.x - camX) * scale, (pt.y - camY) * scale),
+                    alpha = pt.alpha,
+                )
+            }
         }
     }
 }

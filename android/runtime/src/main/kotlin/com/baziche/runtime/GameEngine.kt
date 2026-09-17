@@ -7,6 +7,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlin.random.Random
 
 data class Gravity(var gx: Double = 0.0, var gy: Double = 0.0)
 
@@ -53,6 +54,7 @@ data class RenderState(
     val camera: CameraState,
     val uiVisible: Map<String, Boolean>,
     val vars: Map<String, JsonElement>,
+    val particles: List<ParticleDrawable> = emptyList(),
 ) {
     companion object {
         val EMPTY = RenderState("", "#000000", "none", emptyList(), CameraState(null, 0f, 0f), emptyMap(), emptyMap())
@@ -101,6 +103,10 @@ class GameEngine(internal val sinks: EngineSinks) {
     private val anims = mutableListOf<ActiveAnim>()
     private val lastDamageAt = mutableMapOf<String, Long>()
     private val warnings = mutableListOf<String>()
+    private val particleSystem = ParticleSystem()
+    private var particleConfig = ParticleConfig()
+    private val particleRng = Random(7)
+    private var trauma = 0f
     private var clockMs: Long = 0
     private var spawnCounter: Int = 0
 
@@ -135,6 +141,9 @@ class GameEngine(internal val sinks: EngineSinks) {
         warnings.clear()
         clockMs = 0
         spawnCounter = 0
+        particleSystem.clear()
+        trauma = 0f
+        particleConfig = ParticleConfig.parse((root["systems"] as? JsonObject)?.get("ambientParticles") as? JsonObject)
     }
 
     fun start() {
@@ -170,6 +179,12 @@ class GameEngine(internal val sinks: EngineSinks) {
     fun tick(dtMs: Long) {
         val dt = dtMs.coerceAtLeast(0)
         clockMs += dt
+        if (dt > 0) {
+            trauma = (trauma - dt / 500f).coerceAtLeast(0f)
+            val w = if (orientation == "landscape") 800f else 480f
+            val h = if (orientation == "landscape") 480f else 800f
+            particleSystem.update(dt, particleConfig, w, h, particleRng)
+        }
         // Timers (collect first: firing may start/cancel timers).
         val fired = timers.filter { t ->
             t.remainingMs -= dt
@@ -297,14 +312,18 @@ class GameEngine(internal val sinks: EngineSinks) {
                 Drawable(o.id, o.kind, t.x, t.y, t.w, t.h, t.rotation, t.opacity, o.layer, o.text(), o.sprite(), o.button())
             }
         val follow = cameraFollowId?.let { objects[it] }?.transform()
+        val sh = trauma * trauma * 14f
+        val shx = if (sh > 0.01f) (particleRng.nextFloat() * 2f - 1f) * sh else 0f
+        val shy = if (sh > 0.01f) (particleRng.nextFloat() * 2f - 1f) * sh else 0f
         return RenderState(
             sceneId = sceneId,
             bgColor = scene.background.str("color", "#121212"),
             transition = transition,
             drawables = drawables,
-            camera = CameraState(cameraFollowId, follow?.x ?: 0f, follow?.y ?: 0f),
+            camera = CameraState(cameraFollowId, (follow?.x ?: 0f) + shx, (follow?.y ?: 0f) + shy),
             uiVisible = uiVisible.toMap(),
             vars = vars.snapshotAll(),
+            particles = particleSystem.drawables(),
         )
     }
 
@@ -327,6 +346,13 @@ class GameEngine(internal val sinks: EngineSinks) {
     internal fun tweenCount(): Int = tweens.size
     internal fun pendingCount(): Int = pending.size
     internal fun animCount(): Int = anims.size
+    internal fun particleCount(): Int = particleSystem.particles.size
+    internal fun traumaLevel(): Float = trauma
+
+    /** Screen-shake impulse 0..1 (decays automatically). CAP-0022 damage also fires it. */
+    fun addTrauma(x: Float) {
+        trauma = (trauma + x).coerceIn(0f, 1f)
+    }
 
     // ---------- events ----------
     fun fireEventById(id: String) {
@@ -463,6 +489,9 @@ class GameEngine(internal val sinks: EngineSinks) {
         lastDamageAt[target] = clockMs
         h.current = (h.current - amount).coerceAtLeast(0.0)
         o.setHealth(h)
+        addTrauma(0.35f)
+        val t = o.transform()
+        particleSystem.burst(t.x + t.w / 2f, t.y + t.h / 2f, 10, "#FF5252", 160f, 600, 5f, particleRng)
     }
 
     internal fun heal(target: String, amount: Double) {
