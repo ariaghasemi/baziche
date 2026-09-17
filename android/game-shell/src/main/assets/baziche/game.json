@@ -1,0 +1,22 @@
+{
+  "formatVersion": 1,
+  "meta": { "name": "Quiz", "gameType": "quiz", "orientation": "portrait" },
+  "settings": { "locale": "fa" },
+  "scenes": [
+    { "id": "s1", "name": "Q1", "entry": true, "background": { "color": "#1A1A2E" }, "objectIds": [], "transitions": [] },
+    { "id": "s2", "name": "Result", "entry": false, "background": { "color": "#16213E" }, "objectIds": [], "transitions": [] }
+  ],
+  "objects": [
+    { "id": "title", "sceneId": "s1", "kind": "text", "visible": true, "layer": 0, "components": { "Transform": { "x": 40, "y": 80, "w": 400, "h": 60 }, "Text": { "text": "2 + 2 = ?", "size": 40, "color": "#FFFFFF" } } },
+    { "id": "btnA", "sceneId": "s1", "kind": "button", "visible": true, "layer": 1, "components": { "Transform": { "x": 90, "y": 300, "w": 300, "h": 70 }, "Button": { "label": "3", "eventId": "evWrong", "enabled": true } } },
+    { "id": "btnB", "sceneId": "s1", "kind": "button", "visible": true, "layer": 1, "components": { "Transform": { "x": 90, "y": 390, "w": 300, "h": 70 }, "Button": { "label": "4", "eventId": "evCorrect", "enabled": true } } },
+    { "id": "btnC", "sceneId": "s1", "kind": "button", "visible": true, "layer": 1, "components": { "Transform": { "x": 90, "y": 480, "w": 300, "h": 70 }, "Button": { "label": "5", "eventId": "evWrong", "enabled": true } } },
+    { "id": "done", "sceneId": "s2", "kind": "text", "visible": true, "layer": 0, "components": { "Transform": { "x": 40, "y": 300, "w": 400, "h": 80 }, "Text": { "text": "Correct!", "size": 48, "color": "#4CAF50" } } }
+  ],
+  "events": [
+    { "id": "evCorrect", "trigger": { "type": "tap", "target": "btnB" }, "actions": [ { "capability": "CAP-0020", "params": { "variable": "score", "amount": 1 } }, { "capability": "CAP-0015", "params": { "sceneId": "s2" } } ] },
+    { "id": "evWrong", "trigger": { "type": "tap" }, "actions": [ { "capability": "CAP-0026", "params": { "durationMs": 120 } } ] }
+  ],
+  "variables": [ { "name": "score", "type": "number", "initial": 0 } ],
+  "assets": []
+}

@@ -20,5 +20,5 @@ include(":core:data")
 include(":editor")
 include(":runtime")
 include(":preview")
-// Phase 5+: :game-shell
+include(":game-shell")
 // Phase 8+: :iap-core, :iap-myket, ...

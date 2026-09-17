@@ -6,6 +6,7 @@ import { projectRoutes } from './routes/projects';
 import { assetRoutes } from './routes/assets';
 import { metaRoutes } from './routes/meta';
 import { adminRoutes } from './routes/admin';
+import { buildRoutes } from './routes/builds';
 
 export interface Env {
   DB_AUTH: D1Database; // identity, sessions, billing, admin, audit
@@ -28,6 +29,10 @@ export interface Env {
   R2_ACCOUNT_ID: string;
   R2_ACCESS_KEY_ID: string;
   R2_SECRET_ACCESS_KEY: string;
+  // Phase 5: GitHub dispatch (all optional — without them builds stay QUEUED)
+  GITHUB_TOKEN?: string;
+  GITHUB_REPO?: string;
+  GAME_BUILD_REF?: string;
 }
 
 export function createApp() {
@@ -44,7 +49,7 @@ export function createApp() {
   app.route('/api/v1/assets', assetRoutes);
   app.route('/api/v1/meta', metaRoutes);
   app.route('/api/v1/admin', adminRoutes);
-  // Phase 5: builds — NOT IMPLEMENTED (route intentionally absent)
+  app.route('/api/v1/builds', buildRoutes);
   // Phase 6: billing — NOT IMPLEMENTED (route intentionally absent)
 
   app.notFound((c) => c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Not found' } }, 404));

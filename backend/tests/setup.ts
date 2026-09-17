@@ -1,8 +1,14 @@
 // Test harness: REAL migration SQL executed on sql.js (SQLite), D1-compatible adapters,
 // in-memory R2 fakes, and Hono app.request() — no mocks of app logic.
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import initSqlJs, { type Database } from 'sql.js';
 import { createApp, type Env } from '../src/index';
+
+// Apply EVERY migration in order (001, 002, ...) so tests always match production D1.
+function migrateAll(db: Database, dirUrl: URL) {
+  const files = readdirSync(dirUrl).filter((f) => f.endsWith('.sql')).sort();
+  for (const f of files) db.exec(readFileSync(new URL(f, dirUrl), 'utf8'));
+}
 
 let SQL: Awaited<ReturnType<typeof initSqlJs>> | null = null;
 
@@ -99,8 +105,8 @@ export async function makeCtx(): Promise<TestCtx> {
   const lib = await sqlLib();
   const dbAuth = new lib.Database();
   const dbData = new lib.Database();
-  dbAuth.exec(readFileSync(new URL('../migrations/auth/001_init.sql', import.meta.url), 'utf8'));
-  dbData.exec(readFileSync(new URL('../migrations/data/001_init.sql', import.meta.url), 'utf8'));
+  migrateAll(dbAuth, new URL('../migrations/auth/', import.meta.url));
+  migrateAll(dbData, new URL('../migrations/data/', import.meta.url));
   const r2projects = makeR2();
   const r2assets = makeR2();
   const r2builds = makeR2();

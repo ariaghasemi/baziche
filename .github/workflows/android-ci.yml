@@ -20,6 +20,20 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Alias android-37 (platform-37 unpublished by Google; see docs/ENVIRONMENT_SETUP.md)
+        run: |
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          if [ ! -d "$SDK/platforms/android-37" ]; then
+            for v in 36 35 34; do
+              if [ -d "$SDK/platforms/android-$v" ]; then SRC="$v"; break; fi
+            done
+            if [ -z "${SRC:-}" ]; then echo "no android platform found in $SDK" >&2; exit 1; fi
+            cp -r "$SDK/platforms/android-$SRC" "$SDK/platforms/android-37"
+          fi
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
@@ -27,11 +41,13 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew :app:assembleDebug :app:testDebugUnitTest :core:data:testDebugUnitTest :core:network:testDebugUnitTest --stacktrace
+          ./gradlew :app:assembleDebug :game-shell:assembleDebug :runtime:test :editor:testDebugUnitTest :core:data:testDebugUnitTest :core:network:testDebugUnitTest --stacktrace
 
-      - name: Upload debug APK
+      - name: Upload debug APKs
         uses: actions/upload-artifact@v4
         with:
-          name: baziche-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: baziche-debug-apks
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/game-shell/build/outputs/apk/debug/game-shell-debug.apk
           retention-days: 14
