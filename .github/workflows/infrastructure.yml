@@ -1,0 +1,230 @@
+name: infrastructure
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: baziche-infrastructure
+  cancel-in-progress: false
+
+jobs:
+  provision-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Cloudflare credentials
+        run: |
+          set -euo pipefail
+
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN GitHub Secret is missing."
+            exit 1
+          fi
+
+          if [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "::error::CLOUDFLARE_ACCOUNT_ID GitHub Secret is missing."
+            exit 1
+          fi
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify Wrangler
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          npx wrangler --version
+
+      - name: Provision D1 databases
+        working-directory: backend
+        run: |
+          set -euo pipefail
+
+          get_d1_id() {
+            local name="$1"
+
+            npx wrangler d1 list --json > /tmp/d1-list.json
+
+            node - "$name" /tmp/d1-list.json <<'NODE'
+          const fs = require("fs");
+
+          const name = process.argv[2];
+          const file = process.argv[3];
+
+          const raw = fs.readFileSync(file, "utf8");
+          const data = JSON.parse(raw);
+
+          const rows = Array.isArray(data)
+            ? data
+            : Array.isArray(data.result)
+              ? data.result
+              : [];
+
+          const match = rows.find((row) => row.name === name);
+
+          if (match?.uuid) {
+            process.stdout.write(match.uuid);
+          }
+          NODE
+          }
+
+          create_or_get_d1() {
+            local name="$1"
+            local binding="$2"
+            local location="$3"
+
+            echo "Checking D1: $name" >&2
+
+            local id
+            id="$(get_d1_id "$name")"
+
+            if [ -z "$id" ]; then
+              echo "D1 does not exist. Creating: $name" >&2
+
+              npx wrangler d1 create "$name" \
+                --location "$location" \
+                --binding "$binding"
+
+              id="$(get_d1_id "$name")"
+            fi
+
+            if [ -z "$id" ]; then
+              echo "::error::Could not resolve D1 UUID for $name"
+              exit 1
+            fi
+
+            echo "Resolved $name -> $id" >&2
+
+            printf '%s\n' "$id"
+          }
+
+          AUTH_ID="$(create_or_get_d1 "baziche-auth" "DB_AUTH" "weur")"
+          DATA_ID="$(create_or_get_d1 "baziche-data" "DB_DATA" "weur")"
+
+          export AUTH_ID DATA_ID
+
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          path = Path("wrangler.toml")
+          text = path.read_text(encoding="utf-8")
+
+          auth_id = os.environ["AUTH_ID"]
+          data_id = os.environ["DATA_ID"]
+
+          placeholder = "00000000-0000-0000-0000-000000000000"
+
+          blocks = text.split("[[d1_databases]]")
+
+          if len(blocks) != 3:
+              raise SystemExit(
+                  f"Expected exactly 2 D1 database blocks, found {len(blocks) - 1}"
+              )
+
+          blocks[1] = blocks[1].replace(
+              f'database_id = "{placeholder}"',
+              f'database_id = "{auth_id}"',
+              1,
+          )
+
+          blocks[2] = blocks[2].replace(
+              f'database_id = "{placeholder}"',
+              f'database_id = "{data_id}"',
+              1,
+          )
+
+          path.write_text(
+              "[[d1_databases]]".join(blocks),
+              encoding="utf-8",
+          )
+          PY
+
+          echo "Effective D1 configuration:"
+          grep -A5 -B1 'd1_databases' wrangler.toml
+
+      - name: Provision R2 buckets
+        working-directory: backend
+        run: |
+          set -euo pipefail
+
+          ensure_bucket() {
+            local bucket="$1"
+
+            echo "Checking R2 bucket: $bucket"
+
+            if npx wrangler r2 bucket info "$bucket" --json >/dev/null 2>&1; then
+              echo "R2 bucket exists: $bucket"
+            else
+              echo "Creating R2 bucket: $bucket"
+              npx wrangler r2 bucket create "$bucket"
+            fi
+          }
+
+          ensure_bucket "baziche-projects"
+          ensure_bucket "baziche-assets"
+          ensure_bucket "baziche-builds"
+
+      - name: Apply D1 migrations
+        working-directory: backend
+        run: |
+          set -euo pipefail
+
+          echo "Applying auth migrations..."
+          npx wrangler d1 migrations apply baziche-auth --remote
+
+          echo "Applying data migrations..."
+          npx wrangler d1 migrations apply baziche-data --remote
+
+      - name: Backend typecheck and tests
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm test
+
+      - name: Deploy Worker
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          npx wrangler deploy
+
+      - name: Health check
+        working-directory: backend
+        run: |
+          set -euo pipefail
+
+          url="https://baziche-api.${CLOUDFLARE_ACCOUNT_ID}.workers.dev"
+
+          echo "Worker deployment completed."
+          echo "Health endpoint should be checked from the deployed Worker URL."
+          echo "Configured health path: /health"
+
+          # Deployment itself is the authoritative CI step here.
+          # The public URL can differ from the workers.dev default depending
+          # on the account's Worker routing configuration.
+          echo "Worker URL: $url/health"
+

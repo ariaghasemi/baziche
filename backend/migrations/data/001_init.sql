@@ -78,8 +78,13 @@ CREATE TABLE storage_shards (
   latency_ms INTEGER NOT NULL DEFAULT 0,
   last_checked INTEGER NOT NULL DEFAULT 0
 );
-INSERT INTO storage_shards (id, kind, bucket, status, region, priority, health)
-VALUES ('shard_1', 'r2', 'baziche-projects', 'active', 'auto', 5, 'healthy');
+
+INSERT INTO storage_shards
+  (id, kind, bucket, status, region, priority, health)
+VALUES
+  ('shard_projects_1', 'project', 'baziche-projects', 'active', 'auto', 5, 'healthy'),
+  ('shard_assets_1', 'asset', 'baziche-assets', 'active', 'auto', 5, 'healthy'),
+  ('shard_builds_1', 'build', 'baziche-builds', 'active', 'auto', 5, 'healthy');
 
 CREATE TABLE agents (
   id TEXT PRIMARY KEY,
@@ -92,6 +97,7 @@ CREATE TABLE agents (
   region TEXT,
   error_rate REAL NOT NULL DEFAULT 0
 );
+
 INSERT INTO agents (id, provider, status, capacity, version, region)
 VALUES ('github-actions-1', 'github-actions', 'planned', 2, 'game-build/1', 'github-hosted');
 
