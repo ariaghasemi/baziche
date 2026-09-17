@@ -1,0 +1,1834 @@
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f> Get-ChildItem -Force
+
+    Directory: C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----           9/17/2026  4:43 AM                .android
+d----           9/17/2026  4:43 AM                .config
+d----           9/17/2026  4:43 AM                baziche
+
+PS C:\Users\ariag\Downloads\Compressed\workspace-01a0acb6-341c-7e97-9797-3bc27a16649f> tree /F /A
+Folder PATH listing
+Volume serial number is 2C4D-5DEA
+C:.
++---.android
+|   |   analytics.settings
+|   |   debug.keystore
+|   |   debug.keystore.lock
+|   |
+|   \---cache
+|           sdkbin-1_029182a5-sys-img2-3_xml
+|           sdkbin-1_02adb1a7-sys-img2-5_xml
+|           sdkbin-1_02c91cf8-sys-img2-3_xml
+|           sdkbin-1_02e54bfa-sys-img2-5_xml
+|           sdkbin-1_2193743a-addon2-3_xml
+|           sdkbin-1_21a18bbb-addon2-4_xml
+|           sdkbin-1_3ba9aebd-sys-img2-3_xml
+|           sdkbin-1_3bc5ddbf-sys-img2-5_xml
+|           sdkbin-1_4842592b-sys-img2-3_xml
+|           sdkbin-1_485e882d-sys-img2-5_xml
+|           sdkbin-1_53ed092d-addon2-3_xml
+|           sdkbin-1_53fb20ae-addon2-4_xml
+|           sdkbin-1_67805722-sys-img2-3_xml
+|           sdkbin-1_679c8624-sys-img2-5_xml
+|           sdkbin-1_6dc81d35-sys-img2-3_xml
+|           sdkbin-1_6de44c37-sys-img2-5_xml
+|           sdkbin-1_705f9c93-sys-img2-3_xml
+|           sdkbin-1_707bcb95-sys-img2-5_xml
+|           sdkbin-1_72765e83-sys-img2-3_xml
+|           sdkbin-1_72928d85-sys-img2-5_xml
+|           sdkbin-1_75698f08-sys-img2-3_xml
+|           sdkbin-1_7585be0a-sys-img2-5_xml
+|           sdkbin-1_8f346d54-sys-img2-3_xml
+|           sdkbin-1_8f509c56-sys-img2-5_xml
+|           sdkbin-1_a36dd23c-sys-img2-3_xml
+|           sdkbin-1_a38a013e-sys-img2-5_xml
+|           sdkbin-1_b743781d-repository2-2_xml
+|           sdkbin-1_b7518f9e-repository2-3_xml
+|           sdkbin-1_b75fa71f-repository2-4_xml
+|           sdkbin-1_bda0cd14-sys-img2-3_xml
+|           sdkbin-1_bdbcfc16-sys-img2-5_xml
+|           sdkbin-1_c44bfcd2-sys-img2-3_xml
+|           sdkbin-1_c4682bd4-sys-img2-5_xml
+|           sdkbin-1_d1d90657-sys-img2-3_xml
+|           sdkbin-1_d1f53559-sys-img2-5_xml
+|           sdkbin-1_d2b9d222-addons_list-5_xml
+|           sdkbin-1_d2d60124-addons_list-7_xml
+|           sdkbin-1_da343b6b-sys-img2-3_xml
+|           sdkbin-1_da506a6d-sys-img2-5_xml
+|           sdkbin-1_df10ac17-sys-img2-3_xml
+|           sdkbin-1_df2cdb19-sys-img2-5_xml
+|           sdkinf-1_029182a5-sys-img2-3_xml
+|           sdkinf-1_02adb1a7-sys-img2-5_xml
+|           sdkinf-1_02c91cf8-sys-img2-3_xml
+|           sdkinf-1_02e54bfa-sys-img2-5_xml
+|           sdkinf-1_2193743a-addon2-3_xml
+|           sdkinf-1_21a18bbb-addon2-4_xml
+|           sdkinf-1_3ba9aebd-sys-img2-3_xml
+|           sdkinf-1_3bc5ddbf-sys-img2-5_xml
+|           sdkinf-1_4842592b-sys-img2-3_xml
+|           sdkinf-1_485e882d-sys-img2-5_xml
+|           sdkinf-1_53ed092d-addon2-3_xml
+|           sdkinf-1_53fb20ae-addon2-4_xml
+|           sdkinf-1_67805722-sys-img2-3_xml
+|           sdkinf-1_679c8624-sys-img2-5_xml
+|           sdkinf-1_6dc81d35-sys-img2-3_xml
+|           sdkinf-1_6de44c37-sys-img2-5_xml
+|           sdkinf-1_705f9c93-sys-img2-3_xml
+|           sdkinf-1_707bcb95-sys-img2-5_xml
+|           sdkinf-1_72765e83-sys-img2-3_xml
+|           sdkinf-1_72928d85-sys-img2-5_xml
+|           sdkinf-1_75698f08-sys-img2-3_xml
+|           sdkinf-1_7585be0a-sys-img2-5_xml
+|           sdkinf-1_8f346d54-sys-img2-3_xml
+|           sdkinf-1_8f509c56-sys-img2-5_xml
+|           sdkinf-1_a36dd23c-sys-img2-3_xml
+|           sdkinf-1_a38a013e-sys-img2-5_xml
+|           sdkinf-1_b743781d-repository2-2_xml
+|           sdkinf-1_b7518f9e-repository2-3_xml
+|           sdkinf-1_b75fa71f-repository2-4_xml
+|           sdkinf-1_bda0cd14-sys-img2-3_xml
+|           sdkinf-1_bdbcfc16-sys-img2-5_xml
+|           sdkinf-1_c44bfcd2-sys-img2-3_xml
+|           sdkinf-1_c4682bd4-sys-img2-5_xml
+|           sdkinf-1_d1d90657-sys-img2-3_xml
+|           sdkinf-1_d1f53559-sys-img2-5_xml
+|           sdkinf-1_d2b9d222-addons_list-5_xml
+|           sdkinf-1_d2d60124-addons_list-7_xml
+|           sdkinf-1_da343b6b-sys-img2-3_xml
+|           sdkinf-1_da506a6d-sys-img2-5_xml
+|           sdkinf-1_df10ac17-sys-img2-3_xml
+|           sdkinf-1_df2cdb19-sys-img2-5_xml
+|
++---.config
+|   \---.wrangler
+|       |   metrics.json
+|       |
+|       +---logs
+|       |       wrangler-2026-09-16_22-11-36_290.log
+|       |       wrangler-2026-09-16_22-12-08_494.log
+|       |       wrangler-2026-09-16_22-12-53_308.log
+|       |       wrangler-2026-09-16_22-12-53_631.log
+|       |       wrangler-2026-09-16_22-12-55_234.log
+|       |       wrangler-2026-09-16_23-19-47_472.log
+|       |       wrangler-2026-09-17_00-47-35_655.log
+|       |
+|       \---registry
+|               baziche-api
+|
+\---baziche
+    |   .gitignore
+    |   BAZICHE_MASTER_ARCHITECTURE.md
+    |   README.md
+    |
+    +---.git
+    |   |   COMMIT_EDITMSG
+    |   |   description
+    |   |   HEAD
+    |   |   index
+    |   |
+    |   +---hooks
+    |   |       applypatch-msg.sample
+    |   |       commit-msg.sample
+    |   |       fsmonitor-watchman.sample
+    |   |       post-update.sample
+    |   |       pre-applypatch.sample
+    |   |       pre-commit.sample
+    |   |       pre-merge-commit.sample
+    |   |       pre-push.sample
+    |   |       pre-rebase.sample
+    |   |       pre-receive.sample
+    |   |       prepare-commit-msg.sample
+    |   |       push-to-checkout.sample
+    |   |       sendemail-validate.sample
+    |   |       update.sample
+    |   |
+    |   +---info
+    |   |       exclude
+    |   |
+    |   +---logs
+    |   |   |   HEAD
+    |   |   |
+    |   |   \---refs
+    |   |       \---heads
+    |   |               main
+    |   |
+    |   +---objects
+    |   |   +---00
+    |   |   |       6724d91a1ad3677eb615c2b54f87075d0fc2af
+    |   |   |
+    |   |   +---01
+    |   |   |       264a59e6fc02a3a0245325ecccdb69a15ab0a9
+    |   |   |       86ecf782e331ab52f82b361aa4a8586fac4751
+    |   |   |       996e3e93595c69641a1ff98ca5fdbbf1b49fc6
+    |   |   |
+    |   |   +---02
+    |   |   |       6013bc1ac041f19dac3884b8f0f3f5f905881a
+    |   |   |       9d887cc6fd59dab1c22a2a9316badd446bd866
+    |   |   |       d69803c9dab3e9f88c8ffc6e2ed41320f97ee8
+    |   |   |
+    |   |   +---03
+    |   |   |       5d14234f15e199b6c0c2243e367120ea9835a1
+    |   |   |       6a15a879c2b3fe73aceda6515371f399966f07
+    |   |   |       9c3468839f7cee82f2242903a8ce20811b8099
+    |   |   |       b740f8c79cfd9b74b1ed1b8c5a4801bbb871c1
+    |   |   |       ed225f1a76a34c0d00c75c53343982d3c92200
+    |   |   |       febf0d77ff948626cdc523ed3a40e80344cd73
+    |   |   |
+    |   |   +---04
+    |   |   |       024e1bbb336fe64449f5a23145832a136e6a43
+    |   |   |       a9dfafa3dbe1a911f0385821971ce5e6eed952
+    |   |   |       ba2a46da8599f5fa88912616450fbfbfd025e3
+    |   |   |       e5959b2775df7f2bae5cfa1df49029562d40e0
+    |   |   |       ec476ed56f3263494ca6dd7b41556e87a51634
+    |   |   |
+    |   |   +---05
+    |   |   |       0c8e53cc7aea2534ce0f435a0286ce50627cde
+    |   |   |       44e3ac30859fdabfe612213d3d86d50aabc92d
+    |   |   |       ba73eecc325753b8425a873b0aad2a738f83df
+    |   |   |       ece90d3290dc10ff3aec2c44973016d7b165a0
+    |   |   |
+    |   |   +---06
+    |   |   |       3d2bbc6e690b3aec49efb4e66cc5e5a82b2267
+    |   |   |       b2dd032c613f75a923eb82a9ac6fdf75fdfe9e
+    |   |   |       fdad1f042ff28512394ac096c742fe4d978971
+    |   |   |
+    |   |   +---08
+    |   |   |       47d030d1d075e21b60eb611fb373ab8288cfd5
+    |   |   |       b24e8aa7cfcb3b47e2c11abe21e868f61414ca
+    |   |   |
+    |   |   +---09
+    |   |   |       226b3277a51ace9a48c1d03c754c706eb4a6d3
+    |   |   |       298704925838d74b23f855b4e24812cdfc7489
+    |   |   |       bffcbcdcfd4e62e91d43880db25c00d8a5b7be
+    |   |   |
+    |   |   +---0a
+    |   |   |       818c2160c1c5e78027762f7a6bc0b16f001737
+    |   |   |       d60a3b298a793570245fe1e20316d3685f240c
+    |   |   |
+    |   |   +---0b
+    |   |   |       5326f8e92eb9b92963a959d11eb4ed1ca5c428
+    |   |   |       5c651f51362852eaf0f9685c6a8e68427ce7d4
+    |   |   |       83efe6b3716b27e8700fdcc5610963f3a514f6
+    |   |   |       9a95f0250ffdf21a825544f0844175b26b8b93
+    |   |   |       ae33203b4ab0450587fd28f0397f6c33adf9fa
+    |   |   |
+    |   |   +---0c
+    |   |   |       2f6bf8f44434d5c2a500788a84c8cbed755cdc
+    |   |   |       38ae61128e6fb5bf5fcf9068614e9ae21a91ab
+    |   |   |       894e8b593100fbeaf2b718be9a923260346f7e
+    |   |   |       930187c4914020ba82cc708e906e8546f03e57
+    |   |   |       fe3f86dac5f9022f90ffdfeaf51410ef73ea83
+    |   |   |
+    |   |   +---0d
+    |   |   |       01d25ff14ce9e540648b79b6898247f1aa40e6
+    |   |   |       2df3fae78aae8bb15d5f777bbec01eadeea1d9
+    |   |   |       d9895ea9409f3d35d67f4d566bb95cd3af7efb
+    |   |   |
+    |   |   +---0e
+    |   |   |       9e7a6c85de67bbf1f611687f7bc8e0d9bae7ae
+    |   |   |       a01277c1d80ff3b54215d572ef4612b368ecf4
+    |   |   |       a1fa3d7e11150e3751c8387a967f39c89c8f3e
+    |   |   |       c3625d3671f068f9e63bc4ad7a2ff2946d682f
+    |   |   |       c916378e9677888b024ae81f96e6802c39fc1b
+    |   |   |
+    |   |   +---0f
+    |   |   |       05768511cfe8c4c397a73c74cbd32ef3f60fea
+    |   |   |       29d1c182e7d48126c32aff445fc8d122f166a7
+    |   |   |       d7df7c3bcc5d863c243558777aa5e87334b408
+    |   |   |       ec50e2fa98a1f4a5fca5f764d4adc6f5f8c3e3
+    |   |   |
+    |   |   +---10
+    |   |   |       e9423763c327492e0f35dd89239de0bb7646d1
+    |   |   |
+    |   |   +---11
+    |   |   |       6abd4b5a44e59f59b176a978e7bf02b9c3d4e0
+    |   |   |       ed4ab80751d122b38de4b3390c13370673a869
+    |   |   |       edfd973abd5cb255d5df0dc397d849829d736b
+    |   |   |
+    |   |   +---13
+    |   |   |       134359612bafc10c3613148bbeef2fec6ce7c2
+    |   |   |       66b5663acad375634acdc3eef7030900ee46ce
+    |   |   |       b067feab43b7045a000ef0f6472aecb5839abb
+    |   |   |       b3aa106c3124236afabd2f978faa369c49abba
+    |   |   |       c32eb250067101111445a148baf22d172684c5
+    |   |   |       cac6b3cca41b07ff7d29980477c33c0164b5bc
+    |   |   |
+    |   |   +---14
+    |   |   |       7db42806806c348fe64ec4e67e41edb03f6bf5
+    |   |   |
+    |   |   +---15
+    |   |   |       0723b8503ba67f6e462f559af3d9af576cf15d
+    |   |   |       26eef21160dc517c848888f86fd9f2f412c72b
+    |   |   |       fba5f379652617b534065f05bb00484818d384
+    |   |   |
+    |   |   +---16
+    |   |   |       07b42bfbc0a78b4ad818e2f0bb34d4b9c83530
+    |   |   |       3e90eda49497e549c4f9cb5880610991cd2b57
+    |   |   |       6174e1dd631d978f6ff818bd01dd6ccbeab12a
+    |   |   |
+    |   |   +---17
+    |   |   |       0696c3cbad3436c1c9ab9b5eff99b9c3dcc958
+    |   |   |       176cc25ed3d87cb0e65b95709326f70657fcf1
+    |   |   |       24bba5d4794527f8c5b61481bd0b994b7e31c5
+    |   |   |       2edb130e9b8d6bc4a010bd3fe731e135427c9e
+    |   |   |       623e539633e9bd6361125c02b5ef9c1af8d4c9
+    |   |   |       904f81b8ff3b43d27b9f63c6bd7f0dbf1cfd81
+    |   |   |       d8fb0a32656aa1ac5f203f4de5694bfc51acb6
+    |   |   |
+    |   |   +---18
+    |   |   |       0028ef46ec3aa1d64073f4c31fb091e5ce4973
+    |   |   |       35efce8e6217a3f4d7e778d29dc9c0ff5acba3
+    |   |   |       a979424c758844c259c82f7032d6b197f35ee8
+    |   |   |
+    |   |   +---19
+    |   |   |       11071d3b774e3aa6e6be7f81f6ecef9fcce3b3
+    |   |   |       dc9195966ca6ed975a23337f3b7fdbdb72496c
+    |   |   |       e41433b2044717c70fe922536d4c740f502f38
+    |   |   |
+    |   |   +---1a
+    |   |   |       34762e50f6a3c2d286b3e15177f9d32ed3f0d9
+    |   |   |       41f2e3b2d6666651f5a22feb41d0b8b276cef6
+    |   |   |       864c037f5b419bc69af54d47ae490ce48059a2
+    |   |   |       88fd6d6eb293905685574ac3abe51b8339bdb1
+    |   |   |
+    |   |   +---1b
+    |   |   |       a0d0198721c3ebe3549fa3ea1fe57334cb8a63
+    |   |   |       ba8e3fa2111b8218dd5ca91c12567a4c668319
+    |   |   |       d2c8b4914492a1ede5436b5c0f30e60327b465
+    |   |   |
+    |   |   +---1c
+    |   |   |       b454ab8c8d3087cede78157c0d379476e99817
+    |   |   |       e0ffca5160514f9ed6df78be5a34dad2f6d8b5
+    |   |   |
+    |   |   +---1d
+    |   |   |       051982d5dc5973e433fa403a2196f250990dd0
+    |   |   |       26182af0c3814a17768883213deea9070e8ced
+    |   |   |       97f71df27d10101f3422a29e85a667d529cfe3
+    |   |   |       9a5ca3068636c51309dc1b2db8da5b6eb2bce7
+    |   |   |
+    |   |   +---1e
+    |   |   |       2ba2d001c12d6b7a632f78c76755ce6be0541e
+    |   |   |       d550a12217750721e6e193ca447cc64f74907c
+    |   |   |
+    |   |   +---1f
+    |   |   |       5cb07323f00f77db9dc32ba00a1c871dfbd657
+    |   |   |       da2d9c18c083b30ddc1cc731168d7426906c0b
+    |   |   |
+    |   |   +---20
+    |   |   |       01a17443672fbd7e4de07e31a0736cf058e130
+    |   |   |       4dc5289e153e2a093bb31301f772d4ab9043b0
+    |   |   |       c0254cd0e8d223cdda2397663376505495161e
+    |   |   |       ea563d031748b5be41376aad4f0913ba8a470a
+    |   |   |
+    |   |   +---21
+    |   |   |       2a34c9a11a267876b62ea7aaff834f1021d576
+    |   |   |       33897133781eca7db724341475029c0ef4f0b5
+    |   |   |       3b7dbfba83749e6bc3c69aa2caab1a25dbcfe5
+    |   |   |
+    |   |   +---22
+    |   |   |       05fd13ff2d60493d98fec5aee54bdcabdd2feb
+    |   |   |       2ba15c547a2ecc717f68c289554375f274d214
+    |   |   |       43223dac214fa8f5e9fe1c7ebf9e4bb1bfb666
+    |   |   |
+    |   |   +---23
+    |   |   |       acfd7d72dbcfd84aab7c09329e2053e6ea67b4
+    |   |   |       ceb0607e998446025fe3aaca89c6192158bef0
+    |   |   |       f62210c63d4adb9d7907950bab8f4854c80963
+    |   |   |
+    |   |   +---24
+    |   |   |       6aa0dc8423e071d92f2a66fde0ebb613a66332
+    |   |   |       7d6d15488b5aea430beab51659185bd61e6c60
+    |   |   |       9efbb032ce46a80c687c0723eb172e85f6a136
+    |   |   |       a819587ca2a8d9ff3df0328aab0b6f031020e0
+    |   |   |
+    |   |   +---26
+    |   |   |       4ad74c90b68c4a4436e57ae5c96fcd28029bab
+    |   |   |       50203a1b72853aa76af55ca79a08b426201eea
+    |   |   |       7b76e34783ba89d0102ec7693d5483d3a605ac
+    |   |   |       ab50b91a166f7d50e1d27bb76a5490ecda97b8
+    |   |   |
+    |   |   +---27
+    |   |   |       01f595ac0d34b42e52f99d56859bb3bb72581a
+    |   |   |       2a4b435f9dbf709c39ff6b82cdd427cf3fc329
+    |   |   |       83ea15ce17f475248edf787da971318a49fbbf
+    |   |   |
+    |   |   +---28
+    |   |   |       46bc6ed395e8f1c911c3190a9ba8fdbc7d2c94
+    |   |   |
+    |   |   +---29
+    |   |   |       6df45d185720f0d49b974d3d71017801782f22
+    |   |   |       86827fc21247d339ec6c5e5f857130c8a99853
+    |   |   |       9bcae487fd115f7ea3f7a571965a4c6e35d789
+    |   |   |       e6c4740e6c00943dd975869af793cf0769ada2
+    |   |   |
+    |   |   +---2a
+    |   |   |       083bd00e720277a67143dd952f03b348455ea2
+    |   |   |       385018e62f06c700810a8aed9b037c19eb6b8c
+    |   |   |       9a71c8145b14457b0f028046e766d5703cdf62
+    |   |   |
+    |   |   +---2b
+    |   |   |       0ff5317772261075a00ecf9c54f3a42755256c
+    |   |   |       690ec6dd5c7e734ae8c4d26ea985ba67ff7c2f
+    |   |   |       d8c94e168143b6b3477db1a03eca6e57d08678
+    |   |   |       f433bf63c4680e99a9387c5f0c359de2bb5543
+    |   |   |
+    |   |   +---2c
+    |   |   |       38186f5b97c82bedea4050f0efd5907485d782
+    |   |   |
+    |   |   +---2d
+    |   |   |       07fc67503fcc454caa2fe39878387738535442
+    |   |   |       6986c85d30aeef8b2787b8a00c5c2a8e1f8db3
+    |   |   |       c930669c240c8506a93a29b2ddd98e0c18122b
+    |   |   |
+    |   |   +---2e
+    |   |   |       f4f0268432551a2b31dcace2258719ad8742c6
+    |   |   |
+    |   |   +---2f
+    |   |   |       41366f29dc8c323b91b6e10cbcbaebdb1d160d
+    |   |   |       5da5dd9475c5e64352f9e79fddcfca3d31678c
+    |   |   |       7711de674799bbb20a20d6e7b265f22ba381a7
+    |   |   |       787ca64765d3300b3f06a9f5b0e9c4286fd812
+    |   |   |
+    |   |   +---30
+    |   |   |       05501ac8dbb8ca2cd071440f2069313009e441
+    |   |   |       38397a57d2339e4fd5c8565c38e777405fcf4d
+    |   |   |       551d8c89ce320e4799c75561cfd51839f9380a
+    |   |   |       772404b215b0f5d9c646a3a444a575b76ee911
+    |   |   |       a2a9187268f2c5000a637c1b87d9b01e0a4012
+    |   |   |
+    |   |   +---31
+    |   |   |       b99e62374573d0cb4c7c580704d519e4f5c626
+    |   |   |       c92ae22f00a66c70566225c422a3fc55de30e1
+    |   |   |
+    |   |   +---32
+    |   |   |       094f7da86ae0fbca09a1f473db3be663e316fa
+    |   |   |       4b50fc867736b893181a1062b332568a28fdec
+    |   |   |       5b4f3f73322f05ca6fdaa9bc3e27dff1e5416c
+    |   |   |
+    |   |   +---33
+    |   |   |       1ba8d9aae8fe110f9ae5d90c66571f0ba1e169
+    |   |   |       92c23dda68a3f3c38eb09bd4d854444cba941b
+    |   |   |       fdd2015521112acdc932076eb8f4e8b0cecbb5
+    |   |   |
+    |   |   +---34
+    |   |   |       8e267745de999aa5dc06bb155f091d23ad010c
+    |   |   |       c893832064f6922e663b19f527f2fcf4bb8601
+    |   |   |
+    |   |   +---35
+    |   |   |       24b94d8275eccb3d4b91a24bcc6b4b4fd5f441
+    |   |   |
+    |   |   +---36
+    |   |   |       0b14b10ecf49be182703a2ff7dfedc859f16e1
+    |   |   |       3e07472744201cc358661a8160ff78a40be019
+    |   |   |       87d14f173213ace0f3c64123863b9ba6e983de
+    |   |   |       e72f613825b7aaf2a47b98ac288741dfb5d9ad
+    |   |   |
+    |   |   +---38
+    |   |   |       0abcc1a70a590b543edba9932d1270305a623f
+    |   |   |       39e29927d3f574bedfc0294fd6dd05dbcb9509
+    |   |   |       e298b3bb3ee3a3cc530ebe1c6786de2213aeda
+    |   |   |       f993a9c9439f1f519a9a7b8b9eb61667c1f719
+    |   |   |
+    |   |   +---39
+    |   |   |       782effbea8edb1c683f2b9b70b54c57a699c30
+    |   |   |       785aa1ddf82e01ef0bdc5ccb40104533a2637b
+    |   |   |       ba8d21100bf7cbfb745d746d3c8d2d552f806e
+    |   |   |
+    |   |   +---3a
+    |   |   |       01edb856d91e30360cbc569110edb0635d22b5
+    |   |   |       57921e6cd1cf4f301af48c5d0616db743dbee0
+    |   |   |       df5c80b864ee93173af01514abf0c8a8ecd3fe
+    |   |   |
+    |   |   +---3b
+    |   |   |       05685803f845635b0c5d9ceb645781ea9a77f6
+    |   |   |       7920203a2cea383ee96026f288e1899ad2537a
+    |   |   |       dd91bc0d67fa0c98190ec63326952721a15909
+    |   |   |
+    |   |   +---3c
+    |   |   |       1a184c89670503a3f2e10044ed88b966276580
+    |   |   |       4d8db5162d005d0ce5658751420e6bafdf6b4e
+    |   |   |       707e13a364b2634360fc177090d61cb00976a7
+    |   |   |
+    |   |   +---3d
+    |   |   |       12ac742d4e74dcfcb5bb11d7b601224af14fe8
+    |   |   |       18e9f08e52c7897473b5bd8975c8c31527c781
+    |   |   |       841fda40350e5d6789dfaf85a0a52ea1c6fe51
+    |   |   |       ee424f3519b16035043a9dd1b028af712860ee
+    |   |   |
+    |   |   +---3e
+    |   |   |       22a4ce8546a020e57faf2024406c22b213ec04
+    |   |   |       33b46bed7dc871462dd6bc85b704ecc2967390
+    |   |   |       fd5592dfdda9501daeb0eae8b142257b8dab07
+    |   |   |
+    |   |   +---3f
+    |   |   |       22e6f6d68fc76ab060048f34ecb7a30870a0b6
+    |   |   |       9cc8dc277b72cd68739d87f912c1e808f1ea55
+    |   |   |
+    |   |   +---40
+    |   |   |       0600d9c5b7d1501819d3736f3d72b6fb5dce5a
+    |   |   |       a7c208fa79d8ba38c1c5d86b5f862addc9624c
+    |   |   |
+    |   |   +---41
+    |   |   |       1473d19b377545dcd12df0a8e6a4d786207139
+    |   |   |       194d6e2a8b85138418c5d8871d42635bc68bba
+    |   |   |       257f2aae21f0070b9528f37b5dde3ed4cad716
+    |   |   |
+    |   |   +---42
+    |   |   |       032477a8cdd0075b42b32764221e4467868173
+    |   |   |       3ad2155f929df3dd06e3579d97ee1d14c08a7e
+    |   |   |       6e988d42701ea0de9ad5c876fd468d210e0e4b
+    |   |   |       a48054e472ab41a8434c88375d67280938769d
+    |   |   |       ab6f4265eefdf6bc1e55cd0090373bb8d1fb1b
+    |   |   |       ae2260b76a0a73bef6c362fa5a2adf8552c765
+    |   |   |
+    |   |   +---43
+    |   |   |       43a4413bc944ec65481cece1f69dd977cdf25f
+    |   |   |       57a8c1184e950ae7622b8a7460c0ae50e345a3
+    |   |   |       974e0743b7a649ce533c66d7e09aa264fba847
+    |   |   |
+    |   |   +---44
+    |   |   |       2c68ffbd5ccaacd234d08257a70b2c1fdb5c7c
+    |   |   |       ef748bbe353ecb5e524af00df83734fe8258f5
+    |   |   |
+    |   |   +---45
+    |   |   |       296826415356b3563f16db34e1c5394e2b1759
+    |   |   |       e3b4395aff3186e75d5404260587472f98a05d
+    |   |   |       e9be5232a53a25baeb845f9227793e04631263
+    |   |   |
+    |   |   +---46
+    |   |   |       093d2f233039ba5658cf503df425dbb695c29c
+    |   |   |       218a9b98b8d550a9aabfa24432152043746b13
+    |   |   |       2a6fea121ac4467d494292811bbf9bdfb49830
+    |   |   |       68ccd7c0995fcea95ef5543ac8626d02b72f28
+    |   |   |       696d2f83517ee6597b3f1d3afb5c24ad41a6a1
+    |   |   |
+    |   |   +---47
+    |   |   |       5e6a4a5ffe2501f3ef44e0654b87daadba4d92
+    |   |   |
+    |   |   +---48
+    |   |   |       91c1d3307b131a2471af4d9a7989043cc95db7
+    |   |   |       cf8c91d32a965fe78768b7530de64c0b601e8f
+    |   |   |
+    |   |   +---49
+    |   |   |       52f7eed70c8c0e47e5f69a78118f2baba7de2a
+    |   |   |       a28ff31483fbbf00adae4299772c5acc3a6bb9
+    |   |   |       e3fc2fd19159d284d621b4a5f8443ae782b2ca
+    |   |   |
+    |   |   +---4a
+    |   |   |       88cdf5d91de51ee3e55baf5671f82c41f30de9
+    |   |   |       b2e7d6daadf116f861f0d66497d4838cc426a2
+    |   |   |
+    |   |   +---4b
+    |   |   |       1a00b3d0c329200cec43206c434ef0c537e653
+    |   |   |       84be286d9687b85c0a18672d60683ffb45e740
+    |   |   |
+    |   |   +---4c
+    |   |   |       48a80a6cfe4b5abbc58b3b03887bb0f3793d6d
+    |   |   |       4fd527118e4d68010fa5f4d841398ad05097d8
+    |   |   |       9402432cde6eddffda71e6b17e5eb343e673bd
+    |   |   |       e9f8af8c8e722cd1a7ae48713d35bdeed2c07e
+    |   |   |
+    |   |   +---4d
+    |   |   |       6263bc288571ffb3889bc1da21c04ff6ed2237
+    |   |   |
+    |   |   +---4e
+    |   |   |       2fbf5d86f587ff57b350d26dc50a293f88f4d3
+    |   |   |       3daf6da4259da06297c987f82bdd4163768af2
+    |   |   |       cf8b22b8ff214e5c1aebf4e4ed9107fd8dc395
+    |   |   |
+    |   |   +---4f
+    |   |   |       238d00d3fabeaeec1d536d7bfee5fa2822a035
+    |   |   |       7aa4ee7804880c1ed5e1a4021d6412d0b4904b
+    |   |   |       e3804523a36bde34e2c830ab70ec904947c449
+    |   |   |
+    |   |   +---50
+    |   |   |       2550c793d29c7a3d08105ae0dc71273784eabb
+    |   |   |       3359529a464cac5611d7fc26c1a610e798b7d1
+    |   |   |       3b909228e176ff5f7754198a74b94574ce0688
+    |   |   |       853509712fba2132e51e006d301dd297061542
+    |   |   |       a61bceffe22157a03b19298f0794333a5b8639
+    |   |   |
+    |   |   +---51
+    |   |   |       6700520b5de9a7137f674bf0e11fa28f7248c9
+    |   |   |       f87abdafed3f947b2892d1b344fb7ad5195a4a
+    |   |   |       fcf392dc84f124439e9a2c7d37a283dbabca8a
+    |   |   |
+    |   |   +---52
+    |   |   |       1a9f7c0773588848ad5fa8a074ceca964a6b41
+    |   |   |       ea465d5ac0b4320e670727ed7a69ebfc748fcf
+    |   |   |       fbe7fe47fcf0157ef01f84dfc2df418d280b9d
+    |   |   |
+    |   |   +---53
+    |   |   |       320726a85bf991f01d570437d4bc208c459f0d
+    |   |   |       77385a28f53d653f88c49ef39d9a51268424f5
+    |   |   |       9e26296dc88687584231b8517c9169cab81acd
+    |   |   |       b254a5aa42e30235ab47f3bb8e1703c275a121
+    |   |   |       df6605c063bb3301cf1708218cf1042bbaccb0
+    |   |   |
+    |   |   +---55
+    |   |   |       23f7cb0c8c8f9e093753ffd53f39850062ccf8
+    |   |   |       5821e0731ceb511cd6ae413a8ef1e082557435
+    |   |   |       7950519bc4163804b70b45bae6d0191e6105e6
+    |   |   |       b91653a65295cfbba0c3da9701c532b6112cda
+    |   |   |
+    |   |   +---56
+    |   |   |       8f8b84c7fffabd58bdd4d5d28990d77db7cd4c
+    |   |   |       dd3ec07dc8e6fac98883b8489b6328e8a9e18b
+    |   |   |
+    |   |   +---57
+    |   |   |       265731933367ad1964f452f6350de7b53e99b6
+    |   |   |       2eb84dbad0073b41a1977649b6328cf09fc16d
+    |   |   |       ebe26cf0ac0b71f892fcaac7970901efb0fdfa
+    |   |   |
+    |   |   +---58
+    |   |   |       6771fe33bd3ed8e465d6fc2a1acfe38d714550
+    |   |   |       fbf09e4dec6fed10fb57f8bf53fc3972ee7fdd
+    |   |   |
+    |   |   +---59
+    |   |   |       19958c207f877dc80f5c176b77739414762582
+    |   |   |       3c00eed12a218668dc63a1750c4f580b678b9f
+    |   |   |
+    |   |   +---5a
+    |   |   |       5f818bf918aa1c6e3099397790668b76f25744
+    |   |   |
+    |   |   +---5c
+    |   |   |       3374ac15acab8a5bdd8a5d2b18ee12efc7590d
+    |   |   |       53309b906556f205d027dc4157f5258e43efc1
+    |   |   |       53f8fbf5252426aea4c826dee6a207749a408e
+    |   |   |       d6ab34996dcb074285f3c586903d28896eb549
+    |   |   |       eb3f6ebf1cbcfd62730d28f5af9b8cb23c2339
+    |   |   |       fe614ccf605d64f64eb1230a36dc92fbde6831
+    |   |   |       ff0dce11b2aa0dcdf320c6e880e5f924316623
+    |   |   |
+    |   |   +---5d
+    |   |   |       153e998183fcd61dd20ab9fba4cbb46c87d400
+    |   |   |       b6c7eb5871c370f2862dd30deeace93dd4b56f
+    |   |   |       bd73068e43388f817c766fd319278e4cff581f
+    |   |   |       e04b99c86c693d03fe968b940392629b9de8ff
+    |   |   |
+    |   |   +---5e
+    |   |   |       2d70f7b1de95506803fbf5ff97a6294454fe8c
+    |   |   |       43cc52167ada8744105ec965e975dc83fa115a
+    |   |   |       71372570bf893e871197ae1ce5469f4e144139
+    |   |   |       b6bd151c9b4a86ee6be4ab496ddae25362be1c
+    |   |   |
+    |   |   +---60
+    |   |   |       312240ce8e5814e6f95da5c42b98b51ccc7d37
+    |   |   |       991fbef54daf2bc226af8878f02021e53d5a3f
+    |   |   |       f5663a499939e2e70d7b97de67993d2dc25ea1
+    |   |   |
+    |   |   +---61
+    |   |   |       0600270d464a89e1f7ccc98355a475c4e54a84
+    |   |   |       112989528dae8bd215498935743f494e4aaa23
+    |   |   |       8b9b899c4aa10da29fac902628c4f9fdf2dbbd
+    |   |   |
+    |   |   +---62
+    |   |   |       5ae764feebba7a4499dfb3a3a89ccbb59126e0
+    |   |   |
+    |   |   +---64
+    |   |   |       485cbf92e4782d269504d241713696d3eee129
+    |   |   |       a812d5d96245554232e36d8c0514d62c00de36
+    |   |   |       b5350c630377a345211c39f9010c88a5e737ec
+    |   |   |       c107c0473b472013a689fc102e9ed914bbd570
+    |   |   |
+    |   |   +---65
+    |   |   |       33a381083df6c6880b46fddb00d3e4a89fa729
+    |   |   |       51aa1ddd45de4678e10e950a8fd8c93910a3c3
+    |   |   |       6bf58bf24fd9862477091bb2af33c12381fdbb
+    |   |   |       a6e2ec9c111b6951e4651e1fadce1aafd7e3d1
+    |   |   |       b2727ef7ed26c6fef0a0e553f826fc6bb4845b
+    |   |   |       ff469ba1a5d28d692a29e7a5e316b1dde5c89e
+    |   |   |
+    |   |   +---66
+    |   |   |       2530fe480737dbcad161cdfb5bd7605814dbc6
+    |   |   |       423c8b73c0be6c32405ee15555320c81da6cd7
+    |   |   |       57e0d3388ed8fc61b6d6a41847f2ad8cf5515f
+    |   |   |       5e46a1210faa67fe27433e1a3c4a27694a0f77
+    |   |   |       6aa661756d45dfed1279014c2e0b3f0fb9271a
+    |   |   |       9a4768f8b95ab5bac58172d45dc097524af79e
+    |   |   |       ec68e868655a471d35ab819df4e36152fc3698
+    |   |   |
+    |   |   +---67
+    |   |   |       feaf80cfd984c6ae7bee8c9c5a6895f1132a0a
+    |   |   |
+    |   |   +---68
+    |   |   |       8380ae631306d91419cb99a235e55441b37e5b
+    |   |   |
+    |   |   +---69
+    |   |   |       b68c988debc013c009e8e6592babc41eb7764e
+    |   |   |
+    |   |   +---6a
+    |   |   |       61e9b364c6cbf9b7c7d3126f25fb162c0d31f7
+    |   |   |       cb1e79fe4b7289a37a293d5c61ff7bedaa8eb2
+    |   |   |       ccc29731f893f678001aa001120f78e7209cb6
+    |   |   |
+    |   |   +---6b
+    |   |   |       5f2786765e5e4846639498b873be9f7fcf9d75
+    |   |   |
+    |   |   +---6c
+    |   |   |       5da341dc142201c19e3f1e45cd90696bd67801
+    |   |   |
+    |   |   +---6d
+    |   |   |       14d032cc852776f143885bf3aedf0065da5308
+    |   |   |       32ca3f137bcaa3ba0418272c61edfac771d123
+    |   |   |       7892a8e1e9a93e0605b1a476eff2a85f500f8a
+    |   |   |       c61f7146552b22e0ab2c74f1bd2b82a5e0e6b0
+    |   |   |
+    |   |   +---6e
+    |   |   |       09c59809f526876ad43f5faae173fa4da167a3
+    |   |   |       7a1e594361b6bca4a4bee1f44fab2d1dd5ae53
+    |   |   |       7ba8aa1ac69bfe9d337e747eb90140281900a7
+    |   |   |       9c345a0a576b98f09d0ddb35a81dbd8f20fb96
+    |   |   |       aebfd2e6440b774fd46f75b500a861fe220506
+    |   |   |       c12720ce67db967483ac823cbad708087053d4
+    |   |   |       f5e913baabfeff61a9cf5d0c55d41a3905c427
+    |   |   |
+    |   |   +---6f
+    |   |   |       4e76f8bf6136fd304a2478a1a226d74777112a
+    |   |   |       653bb31493988790efc846b6cb71e1db361c83
+    |   |   |       a613a64c3f5a6d036dcf2f11fb42b1c57c0d9a
+    |   |   |       d121c849e69cea43e80eb540093d5f79776228
+    |   |   |
+    |   |   +---70
+    |   |   |       010d63c02aa4d32930a5ab2889628513ec5d86
+    |   |   |       eef49a0664d055f1b8d0ea3987db418cd01424
+    |   |   |
+    |   |   +---71
+    |   |   |       7ac83f3d59776ab7093ac0c6ba6a92e73d29d9
+    |   |   |
+    |   |   +---72
+    |   |   |       2424a0f27beebc9ca56b584b160c4137112cc6
+    |   |   |       65e53d861626c80ea95327ebeab7c26e3171ae
+    |   |   |
+    |   |   +---73
+    |   |   |       0ba4c8dfaec1b384c21270f4f00ea7ef9401ee
+    |   |   |       b10c7cd2cfff6727b06ef2d2bbe42dde4ad040
+    |   |   |       baab45f6a470113e662f951cf5e0cb728d5595
+    |   |   |       bca5860db83cbe69eec84142fdc5ee91f2dd20
+    |   |   |
+    |   |   +---74
+    |   |   |       27cdf43c08b34d47568584775f82afed8a0a71
+    |   |   |       2c8b80dbd102e0155780a4d4b5751081527fdc
+    |   |   |       2eb7d45573c4b1781b9e93f2f26ca1b93fdd56
+    |   |   |       b4e110137882fd0865ba41106326a4d8f10e6a
+    |   |   |
+    |   |   +---75
+    |   |   |       5bfe7eb42d6e7f83f3618e0b5fc80cc0467c23
+    |   |   |       98790e8d147b9e97575cf243501a06a430db83
+    |   |   |
+    |   |   +---76
+    |   |   |       53e73633e2de06ccc472bb2810fbddb4871dda
+    |   |   |       5e1735c4c7d5b07925bb0103ed8642dd54cdcf
+    |   |   |
+    |   |   +---78
+    |   |   |       b71b840139aad4a3ffddfec57acab4aa7d0028
+    |   |   |       d420148eb104f4d7093dfa640787b729d97a94
+    |   |   |       f57478a053c01d3cfaca72cdb16c4ea17903d1
+    |   |   |
+    |   |   +---79
+    |   |   |       54229635cebd4f2b0080acba3980459c6d3ab3
+    |   |   |       54d5f16cc6068b7a0feaead9e1a6bb7149ebb3
+    |   |   |       5b9412a810bdd775d9bc5f9e44da299380aaf7
+    |   |   |       5e204ae8c66ce669a2f2d10359bb67aa0e0421
+    |   |   |       d5328ceca9b97d8030316beeca4ff8c6a129c9
+    |   |   |       d6331e5fbb2794a74f2abac32fb3569317073a
+    |   |   |       d85a7d51b8a4126947696e22e2f0072c337279
+    |   |   |
+    |   |   +---7a
+    |   |   |       0e042086c81dc3d1a29e223e87210271141bc0
+    |   |   |       7f5f5295ee2375414d7e1cdc96b9091dfbbacf
+    |   |   |       854e8ad0a71e871b530e5af9d01aa0becb7262
+    |   |   |       ad1835ba5395a2164ae92777e42d059bd12152
+    |   |   |       e365b1c8e6e83f3d1e2e0b18fc58f43a2d0a01
+    |   |   |
+    |   |   +---7b
+    |   |   |       5d8e9c8c24395f7f79febd3e302ea50cbb218d
+    |   |   |
+    |   |   +---7c
+    |   |   |       a3f6f52f52c6dcfe469fedce570020b999a655
+    |   |   |       d67448b43b487e70c96bee1e2772266b0c922f
+    |   |   |       ebd24c7dd5912510b5df85ed743820aff1a4ff
+    |   |   |
+    |   |   +---7d
+    |   |   |       bfacede4062fd50f23a95fca42e45c2757eb53
+    |   |   |
+    |   |   +---7e
+    |   |   |       26b153f03351af13515a97930688441f17844d
+    |   |   |       581907939b4dfa89f9c3508a4e72b54a5b8642
+    |   |   |       e52a37081d89384f48cdd196665cf1c1635b49
+    |   |   |
+    |   |   +---7f
+    |   |   |       8fd02a4e46123f0e7df1f586f2b41e6b438304
+    |   |   |       913f1fad16df9325dff90de9c8059a960e7087
+    |   |   |       ad901bc945445d26d6899f4b4276a561be56fe
+    |   |   |       e62a8f26a7ecd203d6dc302c94c6cb883b4fa9
+    |   |   |       eccbe426ddd9aa791ea87df345482eb3848c51
+    |   |   |
+    |   |   +---80
+    |   |   |       1221485adde90877e17390afe59894b4a5f3a6
+    |   |   |       72ee00dbf16d9161b7464ef3d2194a7d659bcc
+    |   |   |       b1479b3ca8604cac02b5b202a71f2ca4597997
+    |   |   |       b9ff8bbd92d481e0a865b0d264640f8c71b70e
+    |   |   |
+    |   |   +---81
+    |   |   |       1750b30d742b3d6ce12fcdb9ef0cb1e15b3312
+    |   |   |       1967752f7b11079503510b0fbd800d34db2bdc
+    |   |   |       49b08117b743c8f215ae48a62a86a7677d380e
+    |   |   |       56a605c3cb2ebbb03cdf54a1c0a561bfe362bc
+    |   |   |       733b590eb8a88ec20a33cefa2a34031c927140
+    |   |   |       ef253a75fa854ee13e8834b72d5d29c23215cc
+    |   |   |
+    |   |   +---82
+    |   |   |       ae16dc2214fcd094db3de1f6a494d5a123b607
+    |   |   |       d40a4d9ee4360037942ab46903f53e5d31ed6b
+    |   |   |       d7ef6fd97afdfee3e3685be45cd30c8e367d6e
+    |   |   |
+    |   |   +---83
+    |   |   |       3594c3df328ab58ab04c8c05f9f766a2ff8da8
+    |   |   |       404cfc4f725dd9d617406bf5fad166b6fa6c82
+    |   |   |       6d5905b05228955aed8958a0bb359c35fb9447
+    |   |   |       7207386e7a6550eb878c060abe3a4f9e3e55a7
+    |   |   |
+    |   |   +---84
+    |   |   |       404fbbb9fb8f59be42abea7b06575a2e460e05
+    |   |   |       63af4cd48dc57531bea2bca01ded09b049f536
+    |   |   |
+    |   |   +---85
+    |   |   |       08ef684d4e1f8473dcbbfdacf52a131beaee0e
+    |   |   |       27f5f9715ea65c273afb4f280d6b8633f2528c
+    |   |   |       e9652c3da94a88ca4d071f4a104307031ca887
+    |   |   |
+    |   |   +---86
+    |   |   |       10a512e51f72c1fd53948b7aabaccde6071c4b
+    |   |   |
+    |   |   +---87
+    |   |   |       196463e78a7125beaaa53d55fc505d54fb5a49
+    |   |   |       33dfaf8da49b33a4428e5c8e4b6b06e094e254
+    |   |   |       8b9f253d3b08054085a1ec8b8b5ec01165aba3
+    |   |   |
+    |   |   +---88
+    |   |   |       33de86d9e87bc98291a7c4b04eccf8ff2f215b
+    |   |   |       8f096824805ab9e697276b1ec83f90bc15a222
+    |   |   |
+    |   |   +---89
+    |   |   |       1f5abb5039a136c008fe5874d56d19911dfa81
+    |   |   |
+    |   |   +---8a
+    |   |   |       9e98aee44addee63e12d899d54df617ae46c7e
+    |   |   |       b59137546407d259fa928a46614a1ce18ee689
+    |   |   |       b6b1a933a0645ff8e2438f57523ea894bc6ce4
+    |   |   |
+    |   |   +---8b
+    |   |   |       4337616bbb1010b502c6bebe2088d530214031
+    |   |   |       640ed019c1fe8aee337d3319c49b95fcb8d094
+    |   |   |       9084051638e6155180e491db66a017e1452151
+    |   |   |
+    |   |   +---8c
+    |   |   |       3016052b24a4937dcfe188494db1c0f03504a9
+    |   |   |       898a81b919fe7a705c0f97999d01d780d0ec62
+    |   |   |       e261d7274ade348552637b31c67705949e20cb
+    |   |   |       fe21e5c989a43f195c83f2e2eb9791ab5108f3
+    |   |   |
+    |   |   +---8d
+    |   |   |       4cdd7ae1cd8664d769ffe7d853a6dfe31b209e
+    |   |   |       d18d6d091418048c1a19e93600286d4b3907bd
+    |   |   |
+    |   |   +---8e
+    |   |   |       5aa07ed85def924bc2a7db885ca01c19381533
+    |   |   |       a0f87db0ed92d79bdfef73ddafdbc104fc688e
+    |   |   |
+    |   |   +---8f
+    |   |   |       18f41e451e81c4cf0efd31fda3cd5fa9277a94
+    |   |   |       1b40c066b7ce328c1403b6ad25c3f7abb6e466
+    |   |   |       3d5a1203bae791ebd19713a43dc58ae24d5bdb
+    |   |   |       6f1ede6d2d3c1e1456cef77756554a31e1cd31
+    |   |   |       78b492d5bf3b9bb4cdea027137130725bac748
+    |   |   |       ec08fac96afc01517c3fa3cee4a262b545f322
+    |   |   |
+    |   |   +---90
+    |   |   |       15c72a8f3b6172be5c12fc81dd2b7cd1c14d2e
+    |   |   |       5b9850bba32146f25151046589e93faa33a11d
+    |   |   |       6666c76ba11b7f1289789c1da64c2931188f6b
+    |   |   |       e8da8a6ab1793c20d1191368e661179c48c554
+    |   |   |
+    |   |   +---91
+    |   |   |       09860c8712326bbcfba68e6920b2281b2d99a4
+    |   |   |       868460248fd81f04b5efa80d8961938d777599
+    |   |   |
+    |   |   +---92
+    |   |   |       1113bb6c2c0ad2237e6f5c0a2c1d393e32048b
+    |   |   |       3e7c187ff19a72dac7b8d1f57333a4467e66b4
+    |   |   |
+    |   |   +---93
+    |   |   |       fad43221a785ddcaf4aa5142ae1abfca920746
+    |   |   |
+    |   |   +---94
+    |   |   |       088e03bce8354ee95aab550ba9209a9f431460
+    |   |   |       9712607778537031c76bd941c872de8b7119ea
+    |   |   |
+    |   |   +---95
+    |   |   |       41abb83dcae21e476379b757693eec08fd26b6
+    |   |   |       61f8ca4c36f5858438751dce817806a58fec49
+    |   |   |       aa21eedd63feae74d5228c1b2ba6c7841da836
+    |   |   |       dceb33482b6003326012bc6b700a34a78d9ee0
+    |   |   |
+    |   |   +---97
+    |   |   |       3f19bf54dfebea6a106ce50a28000e7a175136
+    |   |   |       4061ae63651cd332a67e7a63a1533c6ce8e97f
+    |   |   |       8a648e2a6b3f8da245c00b9a96a9533840f698
+    |   |   |       8c68150966fc6cf6447cda39f261a616e868a8
+    |   |   |       a5444bdcb4961a032ed197e6de478e80c3d3bb
+    |   |   |       d9c91bb105a52ef51f43c8be94d5e0e793a0bc
+    |   |   |
+    |   |   +---98
+    |   |   |       91b99ab3e558ccfe1a783dd8b4ef71889a736d
+    |   |   |       f20e727b36aa83ab88059fb68567ee743ce026
+    |   |   |
+    |   |   +---9a
+    |   |   |       827b991d7cb2e0f6ef3991a19a40119960aebb
+    |   |   |
+    |   |   +---9b
+    |   |   |       0b8aebbbb27a362be1905feb657c4c59b9b474
+    |   |   |       17414bc482a8267c746093b85319c1ed20567f
+    |   |   |       63daca08d4b66ca3d478983f3e5e3a9cea0033
+    |   |   |       e3bc858b4b45282cef145b1f9a357f279c7099
+    |   |   |
+    |   |   +---9c
+    |   |   |       5e934255b40895536e700630d6dab541c3ee64
+    |   |   |       b4e624f0a11e55688b5f1fbdd25df232b5de9e
+    |   |   |       c2dae6cd1659a2b6541e07dd63fc114562961a
+    |   |   |
+    |   |   +---9d
+    |   |   |       bdac2cfb3561fd67b134d057db99dbd8128973
+    |   |   |
+    |   |   +---9e
+    |   |   |       36e0a4849ff6689a188907001a61e74afd48cf
+    |   |   |       9a6f73b4a54b5f00e0f68f1a40eff3331365ea
+    |   |   |       cd7136fbebe970830e3371b89d4bfffc2ac25d
+    |   |   |
+    |   |   +---9f
+    |   |   |       8c5dd23accf840473a075019e8dc997d0e2c6e
+    |   |   |       93f94144a095c60b7c9fca9056f9f943d3061b
+    |   |   |
+    |   |   +---a0
+    |   |   |       a874699c40934248a731f4037c1590e463e8ef
+    |   |   |
+    |   |   +---a1
+    |   |   |       0ad4304cf3092ea7a1c044ee54a0a030d288e8
+    |   |   |       5d7a0aa169223202c82f32c09d664bb4836c7f
+    |   |   |
+    |   |   +---a2
+    |   |   |       64631aaa40ecf5af80162abe112fec9c0c1447
+    |   |   |       c5fc5e23956caf9333f516ab9126b297b665fd
+    |   |   |       dbc6fcea655884a068bd230bad517fc17ebfa9
+    |   |   |
+    |   |   +---a3
+    |   |   |       3d14215dde01c9aea2ef73bb9ff17d70aefd6e
+    |   |   |       f79d7a54a3a644cef4435ed79c2b4543d1f36a
+    |   |   |
+    |   |   +---a4
+    |   |   |       56782940867889bb000f1bbbcc450a28502f7c
+    |   |   |       c420dd110ede7d89c60ad4279b22af47633968
+    |   |   |
+    |   |   +---a5
+    |   |   |       18eed2ce0828b36e054e88644a3cf235922e67
+    |   |   |       a52a18cc1b341fb8a0440f6abacddbe35a343c
+    |   |   |
+    |   |   +---a6
+    |   |   |       4a806f0090c2efdbe472be08b7537a8af894e4
+    |   |   |       9198d5ee4d619a2e9bbdb8829c57d9fe4dce8c
+    |   |   |
+    |   |   +---a7
+    |   |   |       75e244478839e6d5d7d6c5350ae24e43345dab
+    |   |   |       cd522812acf2a3fd5ca194e62189e478e8dc1a
+    |   |   |
+    |   |   +---a8
+    |   |   |       26309001fa11b9a461c2eab0eb5cf5acd93e90
+    |   |   |       e9f604ba7850dff74dd4622760428968b053aa
+    |   |   |       fd165ea4fbd9ad445435925e41331db9764a51
+    |   |   |
+    |   |   +---a9
+    |   |   |       1246ae2824034822e7618bc260d227b908758a
+    |   |   |       ba031f3b57900b3e3a94b7893f789ef18e8d41
+    |   |   |       c163dc848d81fb514a53cc17bc8bfc57d8b478
+    |   |   |
+    |   |   +---aa
+    |   |   |       45a0c87f70133ae788273cb42a22047a382420
+    |   |   |       551512cbf81fc9e23ce707fbed289130ad2688
+    |   |   |
+    |   |   +---ab
+    |   |   |       06f67871113d2883ab903fe1c996ca8c88b7fb
+    |   |   |       8d5b6deb8a7d3adab122423a3dadace2480015
+    |   |   |       a422e62fe925f79ae55c51a13f8f72b109b448
+    |   |   |       fd895ff928391efe1a4c9e7a92e0d072e6072d
+    |   |   |
+    |   |   +---ac
+    |   |   |       12e687fb5b3c17ce476835d77cb4a601c734ce
+    |   |   |       71af7e92540548c095b550d7d2461de000296c
+    |   |   |       a33188e0f2337c0fd7beca0ee4d5682a594532
+    |   |   |       d797095cac7431318384c76244868087525caa
+    |   |   |
+    |   |   +---ad
+    |   |   |       740a25ef39c21fa8233c1a0fa4c5007e8d5d5a
+    |   |   |       7845be3062ed90f3a53dd7dc4a279d74a239ef
+    |   |   |       fb42a8143bdbe1fc611ea24cc66a3d66ddd7c0
+    |   |   |
+    |   |   +---ae
+    |   |   |       5a26d79feb98f287bf408647a306087e24e113
+    |   |   |       a0ab96a496b22ce063b0cc60a2c6991d2445a9
+    |   |   |
+    |   |   +---af
+    |   |   |       a5f270d790079cab7f68c0fe9d575c84cbcd81
+    |   |   |       b977f7a8e8fb4e3173883745b4d1f54ffc0386
+    |   |   |
+    |   |   +---b1
+    |   |   |       023665a1f5161e69f947fc07f4d6dd0e5515b5
+    |   |   |       1535a6cc5b916cdc2da289a3297d1648f6a859
+    |   |   |       2cc075e611303e4b3ab7bc56043ea053265663
+    |   |   |       70d504f54a7e9562b02907a26a24cdf1358cab
+    |   |   |       825fcc7c3105303ff6f9a0a52771e4569b625f
+    |   |   |       c70a7fdf5f6c705b9919adcfff3d7e8a3072af
+    |   |   |
+    |   |   +---b2
+    |   |   |       2a8cf46a948ba7efa84d3fe47183ca304cca64
+    |   |   |       7daadfee225ce7fc97c0246bee4e674fb2f328
+    |   |   |       e5261f6ba434f600a1b588f6d79f1812e94ac0
+    |   |   |
+    |   |   +---b3
+    |   |   |       59f09129fe44bb67da05d067328669e33186ef
+    |   |   |       dcb9f4f708f4c2b802bb232f04abc7f091f02d
+    |   |   |       ffff04076b8eff77526307cad856c6e94b6b19
+    |   |   |
+    |   |   +---b4
+    |   |   |       4b98991fa14f74074aa1d9365320bdd87c6776
+    |   |   |       8f6bbfbaa63a16c7c396c861a9e9be990f56c8
+    |   |   |       f4bd1e6224a15da3d6b3c6e95d0f626d82ca22
+    |   |   |
+    |   |   +---b6
+    |   |   |       2775cc93093f263c5e48457115d96abc97a80c
+    |   |   |       85170c69ae7d3628c8a4272ec3048cf3dbd54a
+    |   |   |       bbddd76493038ab413a4ffb2f8f69a24cfdb28
+    |   |   |       c477ec0f2cb43f47d8719d4a217eb3812f2c88
+    |   |   |
+    |   |   +---b7
+    |   |   |       1dd3556c683f21bef3c67e8d9a22cabd572fd4
+    |   |   |       41d4609754c1ad9a3aedc540b441fa649e7cfa
+    |   |   |       54966b0e13f0f5c19548a27fd537cb6b7f8abd
+    |   |   |       5dee475b35686a66178837ffe4575620c8c62e
+    |   |   |       bc0822284cf8a7797071940ed386e83bb35a90
+    |   |   |       dd52e9e94e6da3ff93c1eebb067ee0b1f5e8d3
+    |   |   |
+    |   |   +---b9
+    |   |   |       02131d3e21b9da27805d6c9e823b126e377cf7
+    |   |   |       c2cc4aa8357e60434940060bb9f373e8198f63
+    |   |   |       d0f7796071bb95d76eca12d3b25771bf39c5df
+    |   |   |
+    |   |   +---ba
+    |   |   |       38497e8d7a7e3a91fe2711dc0e7c8b536b24a9
+    |   |   |       447d143c1b3905739a770d33dc57d09114731b
+    |   |   |
+    |   |   +---bb
+    |   |   |       1e61c34834196271ea063b40cbbb25d483742f
+    |   |   |       a76bdf79d9365274bde2c1bccf1cbb345e48db
+    |   |   |
+    |   |   +---bc
+    |   |   |       089e02dd06cba4fa1d6e5562f3b23f7224ffde
+    |   |   |       16c7bf042c4166c9ff2ce703e09f58875e7233
+    |   |   |       5917122b4a8dc5aa20db1e0593b9d4a82465c0
+    |   |   |
+    |   |   +---bd
+    |   |   |       0d7fb7499090cd0107d41803433be87778e183
+    |   |   |       1712dc9c86ee883617ab96ce9d0c64083f69ab
+    |   |   |       54bd8655e233ffb76e250313cdf743cf2b38d0
+    |   |   |       6dc2f248b6d4fc7006e35cf72fd0061b642c7f
+    |   |   |       e5cdfdb37ce254892dff5d6745aa9cf5c676a5
+    |   |   |
+    |   |   +---be
+    |   |   |       2efcafefe4ee84651ff4b1105207a839ea4c22
+    |   |   |       ef91eaa9f52c16b5035e0bdce501714113ff0c
+    |   |   |
+    |   |   +---bf
+    |   |   |       5ac9d78cf369492a38ade2d2938603fb3eb0e0
+    |   |   |       da2ead0b2fb349cea2e0bbeb37717859c61802
+    |   |   |
+    |   |   +---c0
+    |   |   |       2b8c3f139cd98283c3c13fd7cbd88da34d2804
+    |   |   |       dd1b8082ad70128669b5fb9b82fb7a669cce7f
+    |   |   |       e80451d2eb026a9343dc3778735ebbe55dec41
+    |   |   |
+    |   |   +---c1
+    |   |   |       619f1e999651a3ee76cdbbc43840624d29a3d2
+    |   |   |
+    |   |   +---c2
+    |   |   |       5d7bf877dcad0e76a984cef5b1ace1c9e3c214
+    |   |   |       70d645619e5c2161fb1fe20918f8e982d71e21
+    |   |   |       ab47abfdb12f425f60929a2c0b27b088e1940e
+    |   |   |
+    |   |   +---c4
+    |   |   |       5495fb9d39256fc03ba0bb79b87eead7df6d8a
+    |   |   |
+    |   |   +---c5
+    |   |   |       6c6f583f431176bca234634151d6d8023582dd
+    |   |   |       e566baf79633a93127f2f820796124047eda9c
+    |   |   |
+    |   |   +---c6
+    |   |   |       210a983155ddbb2c58eac48ffbf4964f9939e4
+    |   |   |       2bfb9743dfc5410576c3666ab57e8f43ac41fd
+    |   |   |
+    |   |   +---c7
+    |   |   |       67bcce2792a8940a757a5c109d807357c43706
+    |   |   |       b469d9764abd54d6b68be41b15b83bcfd48b7d
+    |   |   |
+    |   |   +---c8
+    |   |   |       02538bf7159d6c7e5815119d3d53e2af54db5c
+    |   |   |       5797bd0e9cfb360094bee6fdbaf40409a46ad5
+    |   |   |       bc1b92b0fab926b067a3299dce161b5c187dcf
+    |   |   |       ca4bda41d49cfb8cc05cb41b89277d9f0e4747
+    |   |   |
+    |   |   +---c9
+    |   |   |       1abbfb8f5beb87ca903cce9725bd55af11b151
+    |   |   |       94b27f318a0ff08f5e5dad16acc633486ce628
+    |   |   |       ecdc103d2fe85a49dfad6be4b0396d4e5a6e8d
+    |   |   |
+    |   |   +---ca
+    |   |   |       2546966d2a269b9cdd07321f11802ee6d779c3
+    |   |   |       4bc4acda0e9b4b680e610ce7e6654da243bcfe
+    |   |   |       5fa3c99e653e330d5545742208e493ad5fc11a
+    |   |   |       b326dfa3683586afd3aa677083ece5ff5c4d4f
+    |   |   |       cbf036a43c19968399ff862ea2e37bf67e013d
+    |   |   |
+    |   |   +---cb
+    |   |   |       2f37dae7b6c2e32f55c9d46953291ddf1428ee
+    |   |   |       40dc9dfa5374880c8c7dbf20aea36cdec42fc1
+    |   |   |       94dc9af66ab33d9e79e0ef754778a6c8caa7e4
+    |   |   |       a7337f8ebb6ee2bb77e18f65c9ac4a4bde3c66
+    |   |   |
+    |   |   +---cc
+    |   |   |       078385fe1d61a7b66261b304da414e5f1e8268
+    |   |   |       40c02c61fe578077f684338c92fdd4d8b33069
+    |   |   |       52f4a669b13015260316709b3d83042754cff4
+    |   |   |       8459bfeabb81ad25e3045ac1b758289bbeade5
+    |   |   |
+    |   |   +---cd
+    |   |   |       5771391c8c02a2c5326a17c4f3ecc150f78cfe
+    |   |   |       e6b3dee25c7815734fbab2f41eff04f4431d4a
+    |   |   |       ea45abee1add2c771372291459b8bd268e81b1
+    |   |   |
+    |   |   +---ce
+    |   |   |       252d9d0af94d4c76c01114cc907eceeecd6db7
+    |   |   |       473e11e51f18ec40ad572731278e24a42e5a85
+    |   |   |
+    |   |   +---cf
+    |   |   |       0ad11db71b71279cfd6a3db5e66de0b73ffa3e
+    |   |   |       20234aa90bf706f5b5032730abf5ae8dc1ed56
+    |   |   |       3767e0ad54872be38dfb2f78a706bc27df2075
+    |   |   |       8b02fabc91b7275400d78fbf0cc90325bc98e1
+    |   |   |       c9c8b6a62299890d8e4dd7f429c817daafacef
+    |   |   |
+    |   |   +---d0
+    |   |   |       5389b1f0f852112020b07651911747dc5a9366
+    |   |   |
+    |   |   +---d1
+    |   |   |       0669e5b83fc317c170dd535f1128c1f998185f
+    |   |   |       f8f971cfb38b137975d4c44576f65c97d0aec6
+    |   |   |
+    |   |   +---d3
+    |   |   |       28dbe770ff72f8a6e50beea29ffa077f0db662
+    |   |   |
+    |   |   +---d4
+    |   |   |       282f75e5f9acb3d71c10d5132967762a97166e
+    |   |   |       8c93527e6b54206edbd4b6c699e1c2fa1f8cf9
+    |   |   |       ba5a1db11b55bee954118772115f3e00cd7c7a
+    |   |   |
+    |   |   +---d5
+    |   |   |       043ffaf8b037e95f04f31c345562afa6fc0a6d
+    |   |   |       698684d2de6251c7f2b945de7f2b0aa91c1fd8
+    |   |   |       d864552e265e1746e0528b130bf3f2253c9987
+    |   |   |       ee1545677a20e2420c8549b2aedcc654eadb74
+    |   |   |       f8bb8694a4ed85853993c8a214cb226750a253
+    |   |   |
+    |   |   +---d6
+    |   |   |       374241325a7c94733171bdd2e2e090f4f9c2fa
+    |   |   |
+    |   |   +---d7
+    |   |   |       1f7c38407ddebacfc4c31c62284096be2196d9
+    |   |   |       c87d8db3c44a1cf2bc3b1e9b12fc894d2465b8
+    |   |   |
+    |   |   +---d8
+    |   |   |       0b290c6e4e8d315f6cd05051e42cb00059a22e
+    |   |   |       23739ee2cbf042a27ab42e76bbcf40fd4cc552
+    |   |   |       b26822a95250d69518addb0a31cb8122f20427
+    |   |   |
+    |   |   +---da
+    |   |   |       6f7eebeb2304af30478d8c878307d75660c8f9
+    |   |   |       d0382e38854bd7d6b02b158a6c4bc1b4e618f6
+    |   |   |
+    |   |   +---db
+    |   |   |       340373ee5a2c613aa287ad448e4ac5b8aade73
+    |   |   |       52638831b1fdf2025ad4bcf9e7fbecf2eb2c4a
+    |   |   |       8d3b2de90fbd552799288e14bef5dc4765db34
+    |   |   |       ed16958653a0458a63674b64d9c3cedb4a94e2
+    |   |   |
+    |   |   +---dc
+    |   |   |       273d2e179e0c8df238ae351de4ead7e553e490
+    |   |   |       74fbac8543eb0b1b1c6df81a2709256f6eae25
+    |   |   |       7675e5cb54b41802942202a7db3b3414a620f1
+    |   |   |       93ff8498d51f5b11fbf0b4ce9a9fdf0b6e7857
+    |   |   |
+    |   |   +---dd
+    |   |   |       52fb4c2eaa7febac0d68e51d8918affcb47d75
+    |   |   |       6a1c8e2c41bdc6ad04494aca8d997e977aa28c
+    |   |   |       a996c7c2e374c78fd57bb0f4404a9ae420f3fd
+    |   |   |       d1d5376ca77153f3dde2dd52be55f81ccd3d3d
+    |   |   |
+    |   |   +---de
+    |   |   |       5838dbe6605a0622e6b603963df523d24e465d
+    |   |   |       96c08cc8badc4ba545f0e9380b355b377128ee
+    |   |   |       be807292baddd91ebd45cbd0b527d42ac8e118
+    |   |   |
+    |   |   +---df
+    |   |   |       44236f61893f3c3e293c8d9b249847eaf3e74e
+    |   |   |       4956419e06cef9cc334288788c7f54c0f34454
+    |   |   |       7453d8185ec0c87eaa3a18fbf91d7f64c066eb
+    |   |   |       7d8f6a8bc4a40eb2106982b87436ebcc5cb30e
+    |   |   |
+    |   |   +---e0
+    |   |   |       98a4a40df62b8a87fca35bba7b8ea5b9392a96
+    |   |   |
+    |   |   +---e1
+    |   |   |       50f2b7059109ef0f49e8b6cfe7127b5ee292a7
+    |   |   |
+    |   |   +---e2
+    |   |   |       2c8ff82146360583c2cfc9f9c91488ead672a8
+    |   |   |
+    |   |   +---e3
+    |   |   |       8f2166fb6f10468eb9e97067487064e5080acf
+    |   |   |       f52f450951bee27e012ac84b558a420d5dcd17
+    |   |   |
+    |   |   +---e4
+    |   |   |       89db8e31da6f08aec0413d4b8bbaefcec5657b
+    |   |   |       9c51dc99e2fc3c0d3eb6e9c82f04ce1cd0a484
+    |   |   |       e14dd63b61f3472c9eebccc6ebc96d3c074af2
+    |   |   |
+    |   |   +---e5
+    |   |   |       52b65da117b2ebb543f24613d92c0cb11e8707
+    |   |   |       914638239b9abb39cfec1195d46dbf6c524615
+    |   |   |       e8cce591dfd2533558d1fb2f7863c478f85905
+    |   |   |       fe01064065eee1d2fffdd8502967a21318703e
+    |   |   |
+    |   |   +---e6
+    |   |   |       3557c4ccf1723c7712d01fbafefaa07405e692
+    |   |   |       aa6029327f209647a0498d99f610f91866469e
+    |   |   |
+    |   |   +---e8
+    |   |   |       695c568a1e6f82351a50ccd44b2650bdd04cd1
+    |   |   |       b002e7b05d7fcfb6decb343e9664db83e7420b
+    |   |   |       fb5ae00253ed5dda96f2787a257e31bfb481b7
+    |   |   |
+    |   |   +---e9
+    |   |   |       0e603656456453737b3e481d7a4eaac93c6560
+    |   |   |       9d9a5236d148cb11ac86bbda7f3aa00f370507
+    |   |   |
+    |   |   +---ea
+    |   |   |       3376c49e6c579c07ea87b079585261cbec852c
+    |   |   |       700d3e125ef1d11e2f2ec4cae4695e4e118bbc
+    |   |   |       8bfc838e321a346d46c2ce207f575be4fb514f
+    |   |   |       c2dfc4f7ddd4896fe8e5f4bd392abea0517a03
+    |   |   |       dfd2875639fe1bcd14840c7b373119eaebe1fd
+    |   |   |
+    |   |   +---eb
+    |   |   |       0bfe7db14335cb1485cb7f6c7bc481794980fd
+    |   |   |       3e416073481b0f82f124dba070da1774bd967d
+    |   |   |       d414ee5682764d950b709e1576fcf2ac94a23c
+    |   |   |
+    |   |   +---ec
+    |   |   |       6f194609c6e7253eb765747654d632f48f11dc
+    |   |   |       e6e0eda08c8215637ee69db1e0b3213b213e86
+    |   |   |       f886a40b9a1db4d5e1aaa95dd0f3df75592381
+    |   |   |
+    |   |   +---ed
+    |   |   |       17ef0bb96b22369dd88cd32981487d9b9b0288
+    |   |   |       dabd2eef8d94a5437d6168ff9c87a78ff725b3
+    |   |   |
+    |   |   +---ee
+    |   |   |       46adb899402a34824193707c199adccf1733b0
+    |   |   |       6abbdca218a2a0d0bb635030cca9c4d0e54f0d
+    |   |   |       b9c461741ceed9136de83d7c23cfd1ef444e79
+    |   |   |
+    |   |   +---ef
+    |   |   |       670c2694b91262bc6065371a7d6d3df3bb0535
+    |   |   |       ddfa4caf7f76f32a8756dcd269813ece11f247
+    |   |   |
+    |   |   +---f0
+    |   |   |       0ecba9e2d14d6f8ce3daf0eb1dd9f2ec988684
+    |   |   |       c6a45390a812afb20d4162a8821f1f5cde394b
+    |   |   |
+    |   |   +---f1
+    |   |   |       2c2bbd1c9292ce8ebc2714bdffb0100ccf67ba
+    |   |   |       364947012a0e8b96e72ba484f9cc09448e22d6
+    |   |   |       a300ab6ae04188174a1ca0ecca980ca2088cbe
+    |   |   |
+    |   |   +---f3
+    |   |   |       c629593cb74aa19fd643082347aa6f7e872b84
+    |   |   |
+    |   |   +---f4
+    |   |   |       0135724d8eeab9c48f5126078cf230e93fbfaa
+    |   |   |
+    |   |   +---f5
+    |   |   |       35de1e91758452aa04bf6f35ca7fa1bcbd3116
+    |   |   |
+    |   |   +---f6
+    |   |   |       1fb4711c990f1af5a7b4ca0d36e38efb5a74ef
+    |   |   |       27c8e7ea5d1397a1ff7e9e93a04053acdc14da
+    |   |   |       41a81c06c7ed6448d6920228204cad94f90995
+    |   |   |       47264fcf5407ea2afb7ed62ab14cbb36ef1c0e
+    |   |   |       93f2b923966cf1d163d2d16e513d5517ad01f8
+    |   |   |       b3048281c78c7d110d8de2678812f9328176c9
+    |   |   |       c044e5ac679ecc68036ac00a8670bafe824902
+    |   |   |       dedcd78c98734cacf596f1aab84925e0eee542
+    |   |   |       e9ed04e597208d0cdc15f49a9dc69f5dc3e351
+    |   |   |
+    |   |   +---f7
+    |   |   |       125daffd9899a55e17527c27d63b0deb1cf4de
+    |   |   |       230d1e04915e15e595d395ae37ab8a7b2e00e5
+    |   |   |       f63a5f8d6c8fd1df003813acc9d213aeb0407b
+    |   |   |
+    |   |   +---f8
+    |   |   |       5a0a2a0b9f1c5bf2272f93af6dc847ae6c5973
+    |   |   |       644f5e4d75dc2bf25033369a8be25108c46879
+    |   |   |       8fdcbe7b84dc3fa86ab791a6fb81f57947cba0
+    |   |   |       ad9473c54228a198c0fbc596c25d3e85f154e9
+    |   |   |
+    |   |   +---f9
+    |   |   |       5e782a5b377c7ae688fe690938449c4dfe46f7
+    |   |   |
+    |   |   +---fa
+    |   |   |       3ed7813c741586eecf306521b7599f3cd33d1b
+    |   |   |       43a0be14eed7ab7f1a5eeff5a320d5c71bda6b
+    |   |   |
+    |   |   +---fb
+    |   |   |       0f47ad50957fd910cb980da78ea33b17cff148
+    |   |   |       5231e5585ee2758abee13ced9b2f6b12f85710
+    |   |   |
+    |   |   +---fc
+    |   |   |       18540fb521cb8f94577fcbf8fd26e78475e821
+    |   |   |
+    |   |   +---fd
+    |   |   |       abf91f5119585339ba29e4a607ca86899c8ca6
+    |   |   |       e208d8a725f1f3aeeb79ded164af048a229466
+    |   |   |
+    |   |   +---fe
+    |   |   |       3c65de3c305d5aecb5d3c242c2f943a5f5bf32
+    |   |   |       54b45c9cf8a4b1bb5778e44bf116b0c4d09d8b
+    |   |   |       a1fc4bdc561613803a08bfb999aa5bf7d75585
+    |   |   |
+    |   |   \---ff
+    |   |           754efb3a7bf4f4eaa89a9721d5895858b5c9b2
+    |   |           860660e9bf2b453851dbcc0d5f95bf2cdf1fa8
+    |   |           9e6bf3323635122375ddf3c6a076700527f2b9
+    |   |
+    |   \---refs
+    |       \---heads
+    |               main
+    |
+    +---.github
+    |   \---workflows
+    |           android-ci.yml
+    |           backend-ci.yml
+    |           game-build.yml
+    |
+    +---android
+    |   |   build.gradle.kts
+    |   |   gradle.properties
+    |   |   gradlew
+    |   |   gradlew.bat
+    |   |   local.properties
+    |   |   settings.gradle.kts
+    |   |   toolchain-bootstrap.sh
+    |   |
+    |   +---.gradle
+    |   |   +---9.7.1
+    |   |   |   |   gc.properties
+    |   |   |   |
+    |   |   |   +---checksums
+    |   |   |   |       checksums.lock
+    |   |   |   |       md5-checksums.bin
+    |   |   |   |       sha1-checksums.bin
+    |   |   |   |
+    |   |   |   +---executionHistory
+    |   |   |   |       executionHistory.bin
+    |   |   |   |       executionHistory.lock
+    |   |   |   |
+    |   |   |   +---fileChanges
+    |   |   |   |       last-build.bin
+    |   |   |   |
+    |   |   |   +---fileHashes
+    |   |   |   |       fileHashes.bin
+    |   |   |   |       fileHashes.lock
+    |   |   |   |       resourceHashesCache.bin
+    |   |   |   |
+    |   |   |   \---kotlin-dsl-plugin-entries
+    |   |   |           kotlin-dsl-plugin-entries.lock
+    |   |   |
+    |   |   +---buildOutputCleanup
+    |   |   |       buildOutputCleanup.lock
+    |   |   |       cache.properties
+    |   |   |       outputFiles.bin
+    |   |   |
+    |   |   \---vcs-1
+    |   |           gc.properties
+    |   |
+    |   +---app
+    |   |   |   build.gradle.kts
+    |   |   |
+    |   |   \---src
+    |   |       +---debug
+    |   |       |   \---res
+    |   |       |       \---xml
+    |   |       |               network_security_config.xml
+    |   |       |
+    |   |       \---main
+    |   |           |   AndroidManifest.xml
+    |   |           |
+    |   |           +---assets
+    |   |           |   \---templates
+    |   |           |           arcade.json
+    |   |           |           card.json
+    |   |           |           match3.json
+    |   |           |           platformer.json
+    |   |           |           puzzle.json
+    |   |           |           quiz.json
+    |   |           |           runner.json
+    |   |           |           word.json
+    |   |           |
+    |   |           +---java
+    |   |           |   \---com
+    |   |           |       \---baziche
+    |   |           |           \---app
+    |   |           |               |   BazicheApp.kt
+    |   |           |               |   MainActivity.kt
+    |   |           |               |
+    |   |           |               +---di
+    |   |           |               |       AppContainer.kt
+    |   |           |               |
+    |   |           |               +---ui
+    |   |           |               |   +---components
+    |   |           |               |   |       CommonUi.kt
+    |   |           |               |   |
+    |   |           |               |   +---navigation
+    |   |           |               |   |       NavGraph.kt
+    |   |           |               |   |
+    |   |           |               |   +---screens
+    |   |           |               |   |       AuthScreens.kt
+    |   |           |               |   |       DashboardScreen.kt
+    |   |           |               |   |       ProjectDetailScreen.kt
+    |   |           |               |   |       ProjectsScreen.kt
+    |   |           |               |   |       SettingsScreen.kt
+    |   |           |               |   |       SplashScreen.kt
+    |   |           |               |   |
+    |   |           |               |   +---theme
+    |   |           |               |   |       Color.kt
+    |   |           |               |   |       Theme.kt
+    |   |           |               |   |
+    |   |           |               |   \---util
+    |   |           |               |           LanguageManager.kt
+    |   |           |               |           VmFactory.kt
+    |   |           |               |
+    |   |           |               \---work
+    |   |           |                       SyncWorker.kt
+    |   |           |
+    |   |           \---res
+    |   |               +---values
+    |   |               |       strings.xml
+    |   |               |       themes.xml
+    |   |               |
+    |   |               +---values-fa
+    |   |               |       strings.xml
+    |   |               |
+    |   |               \---xml
+    |   |                       data_extraction_rules.xml
+    |   |                       network_security_config.xml
+    |   |
+    |   +---core
+    |   |   +---billing
+    |   |   |   |   build.gradle.kts
+    |   |   |   |
+    |   |   |   \---src
+    |   |   |       +---main
+    |   |   |       |   \---java
+    |   |   |       |       \---com
+    |   |   |       |           \---baziche
+    |   |   |       |               \---core
+    |   |   |       |                   \---billing
+    |   |   |       |                           AdsGateway.kt
+    |   |   |       |                           BillingGateway.kt
+    |   |   |       |
+    |   |   |       \---test
+    |   |   |           \---java
+    |   |   |               \---com
+    |   |   |                   \---baziche
+    |   |   |                       \---core
+    |   |   |                           \---billing
+    |   |   |                                   BillingTest.kt
+    |   |   |
+    |   |   +---common
+    |   |   |   |   build.gradle.kts
+    |   |   |   |
+    |   |   |   \---src
+    |   |   |       \---main
+    |   |   |           |   AndroidManifest.xml
+    |   |   |           |
+    |   |   |           \---java
+    |   |   |               \---com
+    |   |   |                   \---baziche
+    |   |   |                       \---core
+    |   |   |                           \---common
+    |   |   |                                   ApiResult.kt
+    |   |   |
+    |   |   +---data
+    |   |   |   |   build.gradle.kts
+    |   |   |   |
+    |   |   |   \---src
+    |   |   |       +---main
+    |   |   |       |   |   AndroidManifest.xml
+    |   |   |       |   |
+    |   |   |       |   \---java
+    |   |   |       |       \---com
+    |   |   |       |           \---baziche
+    |   |   |       |               \---core
+    |   |   |       |                   \---data
+    |   |   |       |                       +---crypto
+    |   |   |       |                       |       PasswordStretcher.kt
+    |   |   |       |                       |
+    |   |   |       |                       +---db
+    |   |   |       |                       |       BazicheDb.kt
+    |   |   |       |                       |
+    |   |   |       |                       +---repo
+    |   |   |       |                       |       AuthRepository.kt
+    |   |   |       |                       |       ProjectRepository.kt
+    |   |   |       |                       |
+    |   |   |       |                       +---session
+    |   |   |       |                       |       SessionStore.kt
+    |   |   |       |                       |
+    |   |   |       |                       \---util
+    |   |   |       |                               PhoneUtils.kt
+    |   |   |       |
+    |   |   |       \---test
+    |   |   |           \---java
+    |   |   |               \---com
+    |   |   |                   \---baziche
+    |   |   |                       \---core
+    |   |   |                           \---data
+    |   |   |                                   AuthRepositoryTest.kt
+    |   |   |                                   PasswordStretcherTest.kt
+    |   |   |                                   PhoneUtilsTest.kt
+    |   |   |
+    |   |   \---network
+    |   |       |   build.gradle.kts
+    |   |       |
+    |   |       \---src
+    |   |           +---main
+    |   |           |   |   AndroidManifest.xml
+    |   |           |   |
+    |   |           |   \---java
+    |   |           |       \---com
+    |   |           |           \---baziche
+    |   |           |               \---core
+    |   |           |                   \---network
+    |   |           |                           ApiException.kt
+    |   |           |                           BazicheApi.kt
+    |   |           |                           Dto.kt
+    |   |           |                           NetworkModule.kt
+    |   |           |
+    |   |           \---test
+    |   |               \---java
+    |   |                   \---com
+    |   |                       \---baziche
+    |   |                           \---core
+    |   |                               \---network
+    |   |                                       DtoParsingTest.kt
+    |   |
+    |   +---editor
+    |   |   |   build.gradle.kts
+    |   |   |
+    |   |   \---src
+    |   |       +---main
+    |   |       |   |   AndroidManifest.xml
+    |   |       |   |
+    |   |       |   +---java
+    |   |       |   |   \---com
+    |   |       |   |       \---baziche
+    |   |       |   |           \---editor
+    |   |       |   |               |   EditorViewModel.kt
+    |   |       |   |               |
+    |   |       |   |               +---core
+    |   |       |   |               |       EditorDoc.kt
+    |   |       |   |               |
+    |   |       |   |               \---ui
+    |   |       |   |                       EditorDialogs.kt
+    |   |       |   |                       ObjectInspector.kt
+    |   |       |   |                       SceneEditorScreen.kt
+    |   |       |   |
+    |   |       |   \---res
+    |   |       |       +---values
+    |   |       |       |       strings.xml
+    |   |       |       |
+    |   |       |       \---values-fa
+    |   |       |               strings.xml
+    |   |       |
+    |   |       \---test
+    |   |           \---java
+    |   |               \---com
+    |   |                   \---baziche
+    |   |                       \---editor
+    |   |                               EditorDocTest.kt
+    |   |
+    |   +---game-shell
+    |   |   |   build.gradle.kts
+    |   |   |
+    |   |   \---src
+    |   |       \---main
+    |   |           |   AndroidManifest.xml
+    |   |           |
+    |   |           +---assets
+    |   |           |   \---baziche
+    |   |           |           game.json
+    |   |           |
+    |   |           \---java
+    |   |               \---com
+    |   |                   \---baziche
+    |   |                       \---gameshell
+    |   |                               GameShellActivity.kt
+    |   |                               ShellSinks.kt
+    |   |
+    |   +---gradle
+    |   |   |   libs.versions.toml
+    |   |   |
+    |   |   \---wrapper
+    |   |           gradle-wrapper.jar
+    |   |           gradle-wrapper.properties
+    |   |
+    |   +---preview
+    |   |   |   build.gradle.kts
+    |   |   |
+    |   |   \---src
+    |   |       \---main
+    |   |           |   AndroidManifest.xml
+    |   |           |
+    |   |           +---java
+    |   |           |   \---com
+    |   |           |       \---baziche
+    |   |           |           \---preview
+    |   |           |               |   PreviewViewModel.kt
+    |   |           |               |
+    |   |           |               +---sinks
+    |   |           |               |       AndroidSinks.kt
+    |   |           |               |
+    |   |           |               \---ui
+    |   |           |                       PreviewScreen.kt
+    |   |           |
+    |   |           \---res
+    |   |               +---values
+    |   |               |       strings.xml
+    |   |               |
+    |   |               \---values-fa
+    |   |                       strings.xml
+    |   |
+    |   +---runtime
+    |   |   |   build.gradle.kts
+    |   |   |   README.md
+    |   |   |
+    |   |   \---src
+    |   |       +---main
+    |   |       |   \---kotlin
+    |   |       |       \---com
+    |   |       |           \---baziche
+    |   |       |               \---runtime
+    |   |       |                       Capabilities.kt
+    |   |       |                       GameEngine.kt
+    |   |       |                       model.kt
+    |   |       |                       Monetization.kt
+    |   |       |                       Particles.kt
+    |   |       |                       Patterns.kt
+    |   |       |                       ProjectLoader.kt
+    |   |       |                       Sinks.kt
+    |   |       |                       VariableStore.kt
+    |   |       |
+    |   |       \---test
+    |   |           \---kotlin
+    |   |               \---com
+    |   |                   \---baziche
+    |   |                       \---runtime
+    |   |                               PatternsTest.kt
+    |   |                               RuntimeTest.kt
+    |   |
+    |   \---scaffolder
+    |       |   build.gradle.kts
+    |       |
+    |       \---src
+    |           +---main
+    |           |   \---kotlin
+    |           |       \---com
+    |           |           \---baziche
+    |           |               \---scaffolder
+    |           |                       Scaffolder.kt
+    |           |
+    |           \---test
+    |               \---kotlin
+    |                   \---com
+    |                       \---baziche
+    |                           \---scaffolder
+    |                                   ScaffolderTest.kt
+    |
+    +---backend
+    |   |   .dev.vars
+    |   |   .dev.vars.example
+    |   |   .npmrc
+    |   |   package-lock.json
+    |   |   package.json
+    |   |   README.md
+    |   |   tsconfig.json
+    |   |   vitest.config.ts
+    |   |   wrangler.toml
+    |   |
+    |   +---.wrangler
+    |   |   +---state
+    |   |   |   \---v3
+    |   |   |       +---cache
+    |   |   |       |   \---miniflare-CacheObject
+    |   |   |       |           metadata.sqlite
+    |   |   |       |           metadata.sqlite-shm
+    |   |   |       |           metadata.sqlite-wal
+    |   |   |       |
+    |   |   |       +---d1
+    |   |   |       |   \---miniflare-D1DatabaseObject
+    |   |   |       |           9ba2b04bf514d9facfd57ed57d849e77241a7adc99d1c1545d06688b43d84248.sqlite
+    |   |   |       |           9ba2b04bf514d9facfd57ed57d849e77241a7adc99d1c1545d06688b43d84248.sqlite-shm
+    |   |   |       |           9ba2b04bf514d9facfd57ed57d849e77241a7adc99d1c1545d06688b43d84248.sqlite-wal
+    |   |   |       |           metadata.sqlite
+    |   |   |       |           metadata.sqlite-shm
+    |   |   |       |           metadata.sqlite-wal
+    |   |   |       |
+    |   |   |       +---kv
+    |   |   |       |   \---miniflare-KVNamespaceObject
+    |   |   |       |           metadata.sqlite
+    |   |   |       |           metadata.sqlite-shm
+    |   |   |       |           metadata.sqlite-wal
+    |   |   |       |
+    |   |   |       +---observability
+    |   |   |       |   \---miniflare-wobs-trace-store
+    |   |   |       |           a590acd76969f996ec6e4b599c3c09f58c283a76f2d61392b5d3046caf557602.sqlite
+    |   |   |       |           a590acd76969f996ec6e4b599c3c09f58c283a76f2d61392b5d3046caf557602.sqlite-shm
+    |   |   |       |           a590acd76969f996ec6e4b599c3c09f58c283a76f2d61392b5d3046caf557602.sqlite-wal
+    |   |   |       |           metadata.sqlite
+    |   |   |       |           metadata.sqlite-shm
+    |   |   |       |           metadata.sqlite-wal
+    |   |   |       |
+    |   |   |       \---r2
+    |   |   |           \---miniflare-R2BucketObject
+    |   |   |                   metadata.sqlite
+    |   |   |                   metadata.sqlite-shm
+    |   |   |                   metadata.sqlite-wal
+    |   |   |
+    |   |   \---tmp
+    |   |       +---bundle-3gh5Om
+    |   |       |       middleware-insertion-facade.js
+    |   |       |       middleware-loader.entry.ts
+    |   |       |
+    |   |       +---bundle-ZYzO5V
+    |   |       |       middleware-insertion-facade.js
+    |   |       |       middleware-loader.entry.ts
+    |   |       |
+    |   |       +---dev-aPFy9i
+    |   |       |       index.js
+    |   |       |       index.js.map
+    |   |       |
+    |   |       \---dev-nitSug
+    |   |               index.js
+    |   |               index.js.map
+    |   |
+    |   +---migrations
+    |   |   +---auth
+    |   |   |       001_init.sql
+    |   |   |       002_ai_usage.sql
+    |   |   |
+    |   |   \---data
+    |   |           001_init.sql
+    |   |           002_builds_callback.sql
+    |   |           003_builds_spent.sql
+    |   |
+    |   +---src
+    |   |   |   index.ts
+    |   |   |
+    |   |   +---lib
+    |   |   |       audit.ts
+    |   |   |       backup.ts
+    |   |   |       bundle.ts
+    |   |   |       entitlements.ts
+    |   |   |       errors.ts
+    |   |   |       jwt.ts
+    |   |   |       magic.ts
+    |   |   |       merge.ts
+    |   |   |       myket.ts
+    |   |   |       password.ts
+    |   |   |       phone.ts
+    |   |   |       r2.ts
+    |   |   |       ratelimit.ts
+    |   |   |       storage-router.ts
+    |   |   |       validate.ts
+    |   |   |
+    |   |   +---middleware
+    |   |   |       auth.ts
+    |   |   |
+    |   |   +---registries
+    |   |   |       capabilities.ts
+    |   |   |       components.ts
+    |   |   |       features.ts
+    |   |   |       game-types.ts
+    |   |   |
+    |   |   \---routes
+    |   |           admin.ts
+    |   |           ai.ts
+    |   |           assets.ts
+    |   |           auth.ts
+    |   |           billing.ts
+    |   |           builds.ts
+    |   |           meta.ts
+    |   |           projects.ts
+    |   |
+    |   \---tests
+    |           ai.test.ts
+    |           assets.test.ts
+    |           auth.test.ts
+    |           backup.test.ts
+    |           billing.test.ts
+    |           builds.test.ts
+    |           entitlements.test.ts
+    |           merge.test.ts
+    |           projects.test.ts
+    |           registries.test.ts
+    |           setup.ts
+    |           templates.test.ts
+    |
+    +---docs
+    |       ARCHITECTURE.md
+    |       BUILD_SERVER_SETUP.md
+    |       CLOUDFLARE_SETUP.md
+    |       ENVIRONMENT_SETUP.md
+    |       FINAL_SETUP_INPUTS.md
+    |       GAME_PATTERNS.md
+    |       GITHUB_BUILD_SETUP.md
+    |       GITHUB_SETUP.md
+    |       MYKET_SETUP.md
+    |       RUNBOOK.md
+    |       SECRETS.md
+    |
+    \---shared
+        |   api-v1.openAPI.yaml
+        |   error-codes.md
+        |   project-format.schema.json
+        |
+        \---registries
+                components.json
