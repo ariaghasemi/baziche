@@ -8,6 +8,7 @@ import { storageRouter } from '../lib/storage-router';
 import { getText, putText, presignGetUrl, presignPutUrl, type R2Creds } from '../lib/r2';
 import { buildBundleZip, encryptOpensslAes256Cbc, sha256Hex, randomHex } from '../lib/bundle';
 import { audit } from '../lib/audit';
+import { getEntitlement, claimFreeBuild, consumeFreeBuild, releaseFreeBuild } from '../lib/entitlements';
 
 export const buildRoutes = new Hono<{ Bindings: Env; Variables: { userId: string } }>();
 
@@ -91,7 +92,7 @@ async function tryDispatch(
   json: Record<string, unknown>,
   target: string,
 ): Promise<DispatchResult> {
-  if (!env.GITHUB_TOKEN || !env.GITHUB_REPO) return { status: 'QUEUED', dispatch: 'skipped' };
+  if (!env.GITHUB_DISPATCH_TOKEN || !env.GITHUB_REPO) return { status: 'QUEUED', dispatch: 'skipped' };
   const now = nowSec();
   try {
     // 1. Collect asset bytes (best effort per file; bundle cap enforced).
@@ -167,7 +168,7 @@ async function tryDispatch(
       method: 'POST',
       headers: {
         Accept: 'application/vnd.github+json',
-        Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+        Authorization: `Bearer ${env.GITHUB_DISPATCH_TOKEN}`,
         'Content-Type': 'application/json',
         'User-Agent': 'baziche-api',
       },
@@ -195,9 +196,9 @@ async function tryDispatch(
 buildRoutes.post('/:id/callback', async (c) => {
   const id = parse(zId, c.req.param('id'));
   const b = parse(z.object({ status: z.enum(['COMPLETED', 'FAILED']), runId: z.string().min(1).max(64) }), await c.req.json());
-  const row = await c.env.DB_DATA.prepare('SELECT id, user_id AS userId, status, apk_r2_key AS apkKey, callback_token AS token FROM builds WHERE id = ?')
+  const row = await c.env.DB_DATA.prepare('SELECT id, user_id AS userId, status, apk_r2_key AS apkKey, callback_token AS token, spent FROM builds WHERE id = ?')
     .bind(id)
-    .first<{ id: string; userId: string; status: string; apkKey: string | null; token: string | null }>();
+    .first<{ id: string; userId: string; status: string; apkKey: string | null; token: string | null; spent: string | null }>();
   if (!row) throw err('BUILD_NOT_FOUND', 'Build not found', 404);
   const h = c.req.header('authorization') ?? '';
   const m = /^Bearer (.+)$/.exec(h);
@@ -208,23 +209,40 @@ buildRoutes.post('/:id/callback', async (c) => {
     await c.env.DB_DATA.prepare("UPDATE builds SET status = 'FAILED', run_ref = ?, finished_at = ?, error_code = 'WORKFLOW_FAILED' WHERE id = ?")
       .bind(b.runId, now, id)
       .run();
-    // Phase 6 hook: releaseFreeBuild(row.userId, id) on real failure (free-build refund).
+    if (row.spent === 'free') await releaseFreeBuild(c.env.DB_AUTH, row.userId, id);
+    if (row.spent === 'oneshot') {
+      await c.env.DB_AUTH.prepare(
+        `INSERT INTO entitlements (id, user_id, type, source, expires_at, created_at) VALUES (?, ?, 'build_single', 'refund', NULL, ?)`,
+      )
+        .bind(newId('ent'), row.userId, now)
+        .run();
+    }
     await audit(c.env.DB_AUTH, 'build.failed', row.userId, { buildId: id, runId: b.runId });
     return c.json({ success: true, status: 'FAILED' });
   }
   // COMPLETED: verify the APK actually landed in R2 before telling the user.
-  const head = row.apkKey ? await c.env.R2_BUILDS.head(row.apkKey) : null;
+  // (Dispatched builds store apk_r2_key; QUEUED/manual builds fall back to the conventional key.)
+  const apkKey = row.apkKey ?? `builds/${id}/game.apk`;
+  const head = await c.env.R2_BUILDS.head(apkKey);
   if (!head) {
     await c.env.DB_DATA.prepare("UPDATE builds SET status = 'FAILED', run_ref = ?, finished_at = ?, error_code = 'UPLOAD_MISSING' WHERE id = ?")
       .bind(b.runId, now, id)
       .run();
+    if (row.spent === 'free') await releaseFreeBuild(c.env.DB_AUTH, row.userId, id);
+    if (row.spent === 'oneshot') {
+      await c.env.DB_AUTH.prepare(
+        `INSERT INTO entitlements (id, user_id, type, source, expires_at, created_at) VALUES (?, ?, 'build_single', 'refund', NULL, ?)`,
+      )
+        .bind(newId('ent'), row.userId, now)
+        .run();
+    }
     await audit(c.env.DB_AUTH, 'build.failed', row.userId, { buildId: id, runId: b.runId, reason: 'UPLOAD_MISSING' });
     return c.json({ success: true, status: 'FAILED', error: 'UPLOAD_MISSING' });
   }
   await c.env.DB_DATA.prepare("UPDATE builds SET status = 'COMPLETED', run_ref = ?, finished_at = ? WHERE id = ?")
     .bind(b.runId, now, id)
     .run();
-  // Phase 6 hook: consumeFreeBuild(row.userId, id) when this build spent the free build.
+  if (row.spent === 'free') await consumeFreeBuild(c.env.DB_AUTH, row.userId, id);
   await audit(c.env.DB_AUTH, 'build.completed', row.userId, { buildId: id, runId: b.runId });
   return c.json({ success: true, status: 'COMPLETED' });
 });
@@ -234,7 +252,6 @@ buildRoutes.use('*', requireAuth);
 buildRoutes.post('/', async (c) => {
   const userId = c.get('userId');
   const b = parse(z.object({ projectId: zId, target: z.enum(['apk', 'aab', 'both']).default('apk') }), await c.req.json());
-  // Phase 6 hook: free-build / subscription gate goes here (entitlements.claimFreeBuild).
   const project = await ownActiveProject(c.env.DB_DATA, userId, b.projectId);
   const text = await getText(c.env.R2_PROJECTS, revKey(project.shardId, project.id, project.rev));
   if (!text) throw err('BUILD_VALIDATION_FAILED', 'Head revision content missing', 400);
@@ -253,6 +270,29 @@ buildRoutes.post('/', async (c) => {
   )
     .bind(id, userId, project.id, project.rev, b.target, now)
     .run();
+  // Gate: subscription > one-shot entitlement > free build (single atomic claim).
+  const ent = await getEntitlement(c.env.DB_AUTH, userId);
+  let spent: 'free' | 'oneshot' | null = null;
+  if (!ent.subscribed) {
+    const one = await c.env.DB_AUTH.prepare(
+      `SELECT id FROM entitlements WHERE user_id = ? AND type = 'build_single' AND (expires_at IS NULL OR expires_at > ?) LIMIT 1`,
+    )
+      .bind(userId, now)
+      .first<{ id: string }>();
+    if (one) {
+      await c.env.DB_AUTH.prepare('DELETE FROM entitlements WHERE id = ?').bind(one.id).run();
+      spent = 'oneshot';
+    } else if (ent.freeBuild !== 'AVAILABLE' || !(await claimFreeBuild(c.env.DB_AUTH, userId, id))) {
+      await c.env.DB_DATA.prepare('DELETE FROM builds WHERE id = ?').bind(id).run();
+      await audit(c.env.DB_AUTH, 'build.denied', userId, { projectId: project.id, freeBuild: ent.freeBuild });
+      if (ent.freeBuild === 'RESERVED') throw err('FREE_BUILD_RACE_LOST', 'Another build is using your free build right now', 409);
+      throw err('FREE_BUILD_UNAVAILABLE', 'Free build already used — subscription required', 403);
+    } else {
+      spent = 'free';
+    }
+    await c.env.DB_DATA.prepare('UPDATE builds SET spent = ? WHERE id = ?').bind(spent, id).run();
+  }
+
   await putText(c.env.R2_BUILDS, `builds/${id}/game.json`, JSON.stringify(json));
 
   const origin = new URL(c.req.url).origin;

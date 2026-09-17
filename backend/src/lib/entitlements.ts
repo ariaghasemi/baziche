@@ -40,8 +40,9 @@ export async function getEntitlement(db: D1Database, userId: string): Promise<En
   } else {
     const grant = await db
       .prepare(
+        // One-shot entitlements (build_single) are spent per build, not subscriptions.
         `SELECT type AS t, expires_at AS exp FROM entitlements
-         WHERE user_id = ? AND (expires_at IS NULL OR expires_at > ?) LIMIT 1`,
+         WHERE user_id = ? AND type <> 'build_single' AND (expires_at IS NULL OR expires_at > ?) LIMIT 1`,
       )
       .bind(userId, now)
       .first<{ t: string; exp: number | null }>();
