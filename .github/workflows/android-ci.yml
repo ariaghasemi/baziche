@@ -21,7 +21,9 @@ jobs:
           java-version: "17"
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
 
       - name: Alias android-37 (platform-37 unpublished by Google; see docs/ENVIRONMENT_SETUP.md)
         run: |
@@ -51,3 +53,5 @@ jobs:
             android/app/build/outputs/apk/debug/app-debug.apk
             android/game-shell/build/outputs/apk/debug/game-shell-debug.apk
           retention-days: 14
+
+
