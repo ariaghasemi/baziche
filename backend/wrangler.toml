@@ -6,6 +6,10 @@ name = "baziche-api"
 main = "src/index.ts"
 compatibility_date = "2026-09-15"
 
+# Nightly D1 -> R2 backup (03:00 UTC). See src/lib/backup.ts + docs/RUNBOOK.md.
+[triggers]
+crons = ["0 3 * * *"]
+
 # --- D1: TWO databases, one account (separated but connected via this API) ---
 # baziche-auth: identity, sessions, plans, subscriptions, admin, audit
 # baziche-data: projects, revisions, assets, builds, shards, agents

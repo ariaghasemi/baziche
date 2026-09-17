@@ -6,6 +6,7 @@ import { projectRoutes } from './routes/projects';
 import { assetRoutes } from './routes/assets';
 import { metaRoutes } from './routes/meta';
 import { adminRoutes, adminUiRoutes } from './routes/admin';
+import { runBackup } from './lib/backup';
 import { buildRoutes } from './routes/builds';
 import { billingRoutes } from './routes/billing';
 import { aiRoutes } from './routes/ai';
@@ -80,4 +81,17 @@ export function createApp() {
 }
 
 const app = createApp();
-export default app;
+
+/** Cron entry (wrangler [triggers]): nightly D1 -> R2 backup. Exported for tests. */
+export async function handleScheduled(env: Env): Promise<{ key: string; rows: number }> {
+  const s = await runBackup(env);
+  console.log(`backup done: ${s.key} (${s.rows} rows)`);
+  return { key: s.key, rows: s.rows };
+}
+
+export default {
+  fetch: app.fetch,
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(handleScheduled(env));
+  },
+};
