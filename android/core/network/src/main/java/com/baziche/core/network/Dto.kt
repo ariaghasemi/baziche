@@ -8,7 +8,11 @@ data class ErrorBody(val code: String = "INTERNAL", val message: String = "")
 
 // ---------- auth ----------
 @Serializable
-data class ChallengeRequest(val phone: String)
+data class ChallengeRequest(
+    val phone: String? = null,
+    val email: String? = null,
+    val identifier: String? = null,
+)
 
 @Serializable
 data class ChallengeResponse(
@@ -20,6 +24,35 @@ data class ChallengeResponse(
 )
 
 @Serializable
+data class SendEmailCodeRequest(
+    val email: String,
+    val phone: String? = null,
+)
+
+@Serializable
+data class SendEmailCodeResponse(
+    val success: Boolean = false,
+    val message: String? = null,
+    val cooldownSec: Int? = null,
+    val expiresInSec: Int? = null,
+    val error: ErrorBody? = null,
+)
+
+@Serializable
+data class VerifyEmailCodeRequest(
+    val email: String,
+    val code: String,
+)
+
+@Serializable
+data class VerifyEmailCodeResponse(
+    val success: Boolean = false,
+    val verified: Boolean = false,
+    val verificationToken: String? = null,
+    val error: ErrorBody? = null,
+)
+
+@Serializable
 data class RegisterRequest(
     val phone: String,
     val username: String,
@@ -27,13 +60,28 @@ data class RegisterRequest(
     val clientHash: String,
     val iterations: Int,
     val device: String? = null,
+    val email: String? = null,
+    val verificationCode: String? = null,
+    val verificationToken: String? = null,
 )
 
 @Serializable
-data class LoginRequest(val phone: String, val clientHash: String, val device: String? = null)
+data class LoginRequest(
+    val phone: String? = null,
+    val email: String? = null,
+    val identifier: String? = null,
+    val clientHash: String,
+    val device: String? = null,
+)
 
 @Serializable
 data class RefreshRequest(val refreshToken: String)
+
+@Serializable
+data class ProfileUpdateRequest(
+    val username: String? = null,
+    val avatar: String? = null,
+)
 
 @Serializable
 data class ApiUser(
@@ -41,6 +89,9 @@ data class ApiUser(
     val phone: String,
     val username: String,
     val status: String,
+    val email: String? = null,
+    val emailVerified: Boolean? = null,
+    val avatar: String? = null,
     val createdAt: Long? = null,
     val projects: Int? = null,
 )
@@ -151,6 +202,8 @@ data class GameTypeDto(
     val features: List<String> = emptyList(),
     val orientation: String = "portrait",
     val description: String = "",
+    val nameFa: String = "",
+    val descriptionFa: String = "",
 )
 
 @Serializable
@@ -190,3 +243,31 @@ data class AssetsResponse(val success: Boolean = false, val assets: List<AssetDt
 
 @Serializable
 data class AssetUrlResponse(val success: Boolean = false, val url: String? = null, val kind: String? = null, val expiresIn: Int? = null, val error: ErrorBody? = null)
+
+// ---------- builds ----------
+@Serializable
+data class CreateBuildRequest(val projectId: String, val target: String = "apk")
+
+@Serializable
+data class BuildDto(
+    val id: String,
+    val projectId: String,
+    val rev: Int,
+    val status: String,
+    val target: String? = null,
+    val runRef: String? = null,
+    val apkUrl: String? = null,
+    val errorCode: String? = null,
+    val queuedAt: Long? = null,
+    val startedAt: Long? = null,
+    val finishedAt: Long? = null,
+)
+
+@Serializable
+data class CreateBuildResponse(val success: Boolean = false, val build: BuildDto? = null, val error: ErrorBody? = null)
+
+@Serializable
+data class BuildsResponse(val success: Boolean = false, val builds: List<BuildDto> = emptyList(), val error: ErrorBody? = null)
+
+@Serializable
+data class BuildDetailResponse(val success: Boolean = false, val build: BuildDto? = null, val error: ErrorBody? = null)

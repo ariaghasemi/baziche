@@ -34,6 +34,18 @@ object Scaffolder {
         "platformer" to "landscape",
         "match3" to "portrait",
         "card" to "portrait",
+        "board" to "landscape",
+        "towerdefense" to "landscape",
+        "racing" to "landscape",
+        "shooter" to "landscape",
+        "adventure" to "landscape",
+        "idle" to "portrait",
+        "tycoon" to "landscape",
+        "merge" to "portrait",
+        "survival" to "landscape",
+        "detective" to "landscape",
+        "zombie" to "landscape",
+        "minigames" to "portrait",
     )
 
     val THEMES = mapOf(
@@ -42,6 +54,8 @@ object Scaffolder {
         "candy" to listOf("#3E1F3D", "#FF4D8D", "#FFD166", "#7BDFF2"),
         "desert" to listOf("#2B2118", "#C97B3F", "#F2D398", "#7A9E7E"),
         "ocean" to listOf("#062A3A", "#0E7C7B", "#17C3B2", "#FFCB77"),
+        "cyberpunk" to listOf("#0A0A12", "#00F0FF", "#FF0055", "#FFE600"),
+        "sunset" to listOf("#1C0A28", "#E040FB", "#FF6E40", "#FFD740"),
     )
 
     private val TITLES = mapOf(
@@ -53,6 +67,18 @@ object Scaffolder {
         "platformer" to ("سکوبازی" to "Platformer"),
         "match3" to ("سه‌تایی" to "Match-3"),
         "card" to ("کارت" to "Cards"),
+        "board" to ("تخته" to "Board"),
+        "towerdefense" to ("دفاع از قلعه" to "Tower Defense"),
+        "racing" to ("مسابقه" to "Racing"),
+        "shooter" to ("تیراندازی" to "Shooter"),
+        "adventure" to ("ماجراجویی" to "Adventure"),
+        "idle" to ("آیدل" to "Idle"),
+        "tycoon" to ("مدیریت" to "Tycoon"),
+        "merge" to ("ادغام" to "Merge"),
+        "survival" to ("بقا" to "Survival"),
+        "detective" to ("کارآگاهی" to "Detective"),
+        "zombie" to ("زامبی" to "Zombie"),
+        "minigames" to ("مینی‌گیم" to "Mini Games"),
     )
 
     fun generate(req: ScaffoldRequest): JsonObject {

@@ -6,7 +6,9 @@ import com.baziche.core.data.db.ProjectCache
 import com.baziche.core.network.ApiErrors
 import com.baziche.core.network.ApiException
 import com.baziche.core.network.BazicheApi
+import com.baziche.core.network.BuildDto
 import com.baziche.core.network.ConflictResponse
+import com.baziche.core.network.CreateBuildRequest
 import com.baziche.core.network.CreateProjectRequest
 import com.baziche.core.network.GameTypeDto
 import com.baziche.core.network.MergeRequest
@@ -62,7 +64,6 @@ class ProjectRepository(
     suspend fun createProject(name: String, gameType: String): ApiResult<ProjectDto> = withContext(Dispatchers.IO) {
         try {
             val res = auth.withAuthRetry { api.createProject(CreateProjectRequest(name.trim(), gameType)) }
-            // Locals first: cross-module public vals don't smartcast (Kotlin 2.x).
             val project = res.project
             if (!res.success || project == null) {
                 return@withContext ApiResult.Error(res.error?.code ?: "INTERNAL", res.error?.message ?: "Create failed")
@@ -123,7 +124,6 @@ class ProjectRepository(
             val e = ApiErrors.map(t)
             if (e.code == "REVISION_CONFLICT") return@withContext SaveResult.Conflict(-1, null)
             if (e.httpCode == 0) {
-                // Offline: keep the JSON in the dirty cache; SyncWorker pushes it later.
                 val c = cache.get(id)
                 cache.upsert(
                     CachedProject(
@@ -151,14 +151,13 @@ class ProjectRepository(
         auth.withAuthRetry { api.revisions(id) }.revisions
     }
 
-    /** Restores [rev] as a new head revision. Returns the new rev. Throws [ApiException] on failure. */
     suspend fun restoreRevision(id: String, rev: Int, baseRev: Int): Int = withContext(Dispatchers.IO) {
         val res = auth.withAuthRetry { api.restore(id, RestoreRequest(rev, baseRev)) }
-        val rev = res.rev
-        if (!res.success || rev == null) {
+        val newRev = res.rev
+        if (!res.success || newRev == null) {
             throw ApiException(res.error?.code ?: "RESTORE_FAILED", res.error?.message ?: "Restore failed", 0)
         }
-        rev
+        newRev
     }
 
     suspend fun deleteProject(id: String): ApiResult<Unit> = withContext(Dispatchers.IO) {
@@ -172,26 +171,82 @@ class ProjectRepository(
         }
     }
 
-    /** Game types from server registries; static Tier-1 fallback when offline. */
+    // ---------- Build & Export Methods ----------
+
+    suspend fun createBuild(projectId: String, target: String = "apk"): ApiResult<BuildDto> = withContext(Dispatchers.IO) {
+        try {
+            val res = auth.withAuthRetry { api.createBuild(CreateBuildRequest(projectId, target)) }
+            val b = res.build
+            if (!res.success || b == null) {
+                return@withContext ApiResult.Error(res.error?.code ?: "BUILD_FAILED", res.error?.message ?: "شروع بیلد با خطا مواجه شد")
+            }
+            ApiResult.Success(b)
+        } catch (t: Throwable) {
+            val e = ApiErrors.map(t)
+            ApiResult.Error(e.code, e.message ?: "خطا در برقراری ارتباط برای ساخت بیلد", e.httpCode)
+        }
+    }
+
+    suspend fun listBuilds(): ApiResult<List<BuildDto>> = withContext(Dispatchers.IO) {
+        try {
+            val res = auth.withAuthRetry { api.builds() }
+            if (!res.success) {
+                return@withContext ApiResult.Error(res.error?.code ?: "INTERNAL", res.error?.message ?: "دریافت فهرست بیلدها ناموفق بود")
+            }
+            ApiResult.Success(res.builds)
+        } catch (t: Throwable) {
+            val e = ApiErrors.map(t)
+            ApiResult.Error(e.code, e.message ?: "خطا در اتصال به سرور", e.httpCode)
+        }
+    }
+
+    suspend fun getBuild(buildId: String): ApiResult<BuildDto> = withContext(Dispatchers.IO) {
+        try {
+            val res = auth.withAuthRetry { api.buildDetail(buildId) }
+            val b = res.build
+            if (!res.success || b == null) {
+                return@withContext ApiResult.Error(res.error?.code ?: "BUILD_NOT_FOUND", res.error?.message ?: "بیلد یافت نشد")
+            }
+            ApiResult.Success(b)
+        } catch (t: Throwable) {
+            val e = ApiErrors.map(t)
+            ApiResult.Error(e.code, e.message ?: "خطا در دریافت وضعیت بیلد", e.httpCode)
+        }
+    }
+
+    /** Game types from server registries; comprehensive 20-game-type fallback when offline. */
     suspend fun getGameTypes(): List<GameTypeDto> = withContext(Dispatchers.IO) {
         try {
             val res = api.registries()
             if (res.success && res.gameTypes.isNotEmpty()) return@withContext res.gameTypes
         } catch (_: Throwable) {
         }
-        FALLBACK_TIER1
+        FALLBACK_ALL_20
     }
 
     companion object {
-        val FALLBACK_TIER1 = listOf(
-            GameTypeDto("puzzle", "Puzzle", 1, orientation = "portrait", description = ""),
-            GameTypeDto("quiz", "Quiz", 1, orientation = "portrait", description = ""),
-            GameTypeDto("word", "Word Game", 1, orientation = "portrait", description = ""),
-            GameTypeDto("arcade", "Arcade", 1, orientation = "portrait", description = ""),
-            GameTypeDto("runner", "Runner", 1, orientation = "landscape", description = ""),
-            GameTypeDto("platformer", "Platformer", 1, orientation = "landscape", description = ""),
-            GameTypeDto("match3", "Match-3", 1, orientation = "portrait", description = ""),
-            GameTypeDto("card", "Card Game", 1, orientation = "portrait", description = ""),
+        val FALLBACK_ALL_20 = listOf(
+            GameTypeDto("puzzle", "Puzzle", 1, orientation = "portrait", description = "Tile puzzles & boards", nameFa = "معمایی و جورچین", descriptionFa = "پازل‌های چیدمانی و حل معما"),
+            GameTypeDto("quiz", "Quiz", 1, orientation = "portrait", description = "Trivia Q&A", nameFa = "کوئیز و دانستنی‌ها", descriptionFa = "مسابقه هوش و چهارگزینه‌ای"),
+            GameTypeDto("word", "Word Game", 1, orientation = "portrait", description = "Word scramble & letters", nameFa = "کلمات و حدس واژه", descriptionFa = "حدس کلمات و جدول فارسی"),
+            GameTypeDto("arcade", "Arcade", 1, orientation = "portrait", description = "Action & high score", nameFa = "آرکید و رکوردی", descriptionFa = "هیجانی و رکوردی سریع"),
+            GameTypeDto("runner", "Runner", 1, orientation = "landscape", description = "Endless run & dodge", nameFa = "دونده بی‌پایان", descriptionFa = "دویدن و پرش از روی موانع"),
+            GameTypeDto("platformer", "Platformer", 1, orientation = "landscape", description = "Jump & run levels", nameFa = "سکوبازی و پرش", descriptionFa = "پرش میان سکوها و گذر از مراحل"),
+            GameTypeDto("match3", "Match-3", 1, orientation = "portrait", description = "Match 3 tiles", nameFa = "تطبیق سه تایی", descriptionFa = "اتصال و حذف مهره‌های هم‌رنگ"),
+            GameTypeDto("card", "Card Game", 1, orientation = "portrait", description = "Turn-based cards", nameFa = "کارتی و پاسور", descriptionFa = "دست‌های کارت و بازی‌های کارتی"),
+            GameTypeDto("board", "Board Game", 2, orientation = "landscape", description = "Turn-based boards", nameFa = "تخته و منچ", descriptionFa = "بازی‌های نوبتی و پرتاب تاس"),
+            GameTypeDto("towerdefense", "Tower Defense", 2, orientation = "landscape", description = "Towers & waves", nameFa = "دفاع از قلعه", descriptionFa = "ساخت برج‌های دفاعی"),
+            GameTypeDto("racing", "Racing", 2, orientation = "landscape", description = "Speed & racing tracks", nameFa = "ماشینی و مسابقه‌ای", descriptionFa = "سرعت، سبقت و مسابقه اتومبیل"),
+            GameTypeDto("shooter", "Shooter", 2, orientation = "landscape", description = "Target & projectile", nameFa = "شوتر و تیراندازی", descriptionFa = "شلیک به هدف‌ها و دفاع موشکی"),
+            GameTypeDto("adventure", "Adventure", 2, orientation = "landscape", description = "Story & quest", nameFa = "ماجراجویی و داستانی", descriptionFa = "کاوش در دنیاها و مکالمه با شخصیت‌ها"),
+            GameTypeDto("idle", "Idle Game", 2, orientation = "portrait", description = "Incremental clicker", nameFa = "آیدل و کلیکی", descriptionFa = "کلیک، ارتقا و تولید ثروت"),
+            GameTypeDto("tycoon", "Tycoon", 2, orientation = "landscape", description = "Business simulation", nameFa = "سرمایه‌داری و مدیریت", descriptionFa = "مدیریت کسب‌وکار و رشد شرکت"),
+            GameTypeDto("merge", "Merge Game", 2, orientation = "portrait", description = "Merge & level up", nameFa = "ترکیب و ادغام", descriptionFa = "ترکیب آیتم‌های مشابه و ارتقا"),
+            GameTypeDto("survival", "Survival", 3, orientation = "landscape", description = "Gather & craft", nameFa = "بقا و نجات", descriptionFa = "جمع‌آوری منابع و زنده ماندن"),
+            GameTypeDto("detective", "Detective", 3, orientation = "landscape", description = "Find clues & mystery", nameFa = "کارآگاهی و اشیاء مخفی", descriptionFa = "پیدا کردن سرنخ‌ها و حل پرونده‌ها"),
+            GameTypeDto("zombie", "Zombie Defense", 3, orientation = "landscape", description = "Defend against undead", nameFa = "دفاع در برابر زامبی‌ها", descriptionFa = "سنگربندی و مقابله با زامبی‌ها"),
+            GameTypeDto("minigames", "Mini Games", 3, orientation = "portrait", description = "Party mini challenges", nameFa = "مینی‌گیم‌های متنوع", descriptionFa = "مجموعه‌ای از بازی‌های کوچک و جذاب"),
         )
+        val FALLBACK_TIER1 = FALLBACK_ALL_20.filter { it.tier == 1 }
     }
 }

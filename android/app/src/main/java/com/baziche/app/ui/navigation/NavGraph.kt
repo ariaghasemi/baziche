@@ -55,22 +55,32 @@ fun NavGraph(c: AppContainer) {
         }
         composable(Routes.LOGIN) {
             val vm: SharedAuthViewModel = viewModel(factory = vmFactory { SharedAuthViewModel(c.authRepository) })
-            LoginScreen(vm,
+            LoginScreen(
+                vm,
                 onLoggedIn = { nav.navigate(Routes.DASHBOARD) { popUpTo(Routes.LOGIN) { inclusive = true } } },
-                onGoRegister = { nav.navigate(Routes.REGISTER) })
+                onGoRegister = { nav.navigate(Routes.REGISTER) },
+            )
         }
         composable(Routes.REGISTER) {
             val vm: SharedAuthViewModel = viewModel(factory = vmFactory { SharedAuthViewModel(c.authRepository) })
-            RegisterScreen(vm,
+            RegisterScreen(
+                vm,
                 onRegistered = { nav.navigate(Routes.DASHBOARD) { popUpTo(Routes.REGISTER) { inclusive = true } } },
-                onGoLogin = { nav.popBackStack() })
+                onGoLogin = { nav.popBackStack() },
+            )
         }
         composable(Routes.DASHBOARD) {
-            val vm: DashboardViewModel = viewModel(factory = vmFactory { DashboardViewModel(c.authRepository) })
-            DashboardScreen(vm,
+            val vm: DashboardViewModel = viewModel(factory = vmFactory { DashboardViewModel(c.authRepository, c.projectRepository) })
+            DashboardScreen(
+                vm = vm,
+                onNewProject = { nav.navigate(Routes.PROJECTS) },
                 onProjects = { nav.navigate(Routes.PROJECTS) },
+                onOpenEditor = { id -> nav.navigate(Routes.editor(id)) },
+                onOpenPreview = { id -> nav.navigate(Routes.preview(id)) },
+                onOpenDetail = { id -> nav.navigate(Routes.detail(id)) },
                 onSettings = { nav.navigate(Routes.SETTINGS) },
-                onLoggedOut = { nav.navigate(Routes.LOGIN) { popUpTo(Routes.DASHBOARD) { inclusive = true } } })
+                onLoggedOut = { nav.navigate(Routes.LOGIN) { popUpTo(Routes.DASHBOARD) { inclusive = true } } },
+            )
         }
         composable(Routes.PROJECTS) {
             val vm: ProjectsViewModel = viewModel(factory = vmFactory { ProjectsViewModel(c.projectRepository) })
@@ -79,17 +89,21 @@ fun NavGraph(c: AppContainer) {
         composable(Routes.DETAIL, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStack ->
             val id = backStack.arguments?.getString("id").orEmpty()
             val vm: ProjectDetailViewModel = viewModel(factory = vmFactory { ProjectDetailViewModel(c.projectRepository, id) })
-            ProjectDetailScreen(vm,
+            ProjectDetailScreen(
+                vm,
                 onBack = { nav.popBackStack() },
                 onOpenEditor = { nav.navigate(Routes.editor(id)) },
-                onPreview = { nav.navigate(Routes.preview(id)) })
+                onPreview = { nav.navigate(Routes.preview(id)) },
+            )
         }
         composable(Routes.EDITOR, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStack ->
             val id = backStack.arguments?.getString("id").orEmpty()
             val vm: EditorViewModel = viewModel(factory = vmFactory { EditorViewModel(c.projectRepository, id) })
-            SceneEditorScreen(vm,
+            SceneEditorScreen(
+                vm,
                 onBack = { nav.popBackStack() },
-                onPreview = { nav.navigate(Routes.preview(id)) })
+                onPreview = { nav.navigate(Routes.preview(id)) },
+            )
         }
         composable(Routes.PREVIEW, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStack ->
             val id = backStack.arguments?.getString("id").orEmpty()
@@ -99,9 +113,11 @@ fun NavGraph(c: AppContainer) {
         }
         composable(Routes.SETTINGS) {
             val vm: SettingsViewModel = viewModel(factory = vmFactory { SettingsViewModel(c.authRepository, c.languageManager, c.apiBaseUrl) })
-            SettingsScreen(vm,
+            SettingsScreen(
+                vm,
                 onLoggedOut = { nav.navigate(Routes.LOGIN) { popUpTo(Routes.SETTINGS) { inclusive = true } } },
-                onBack = { nav.popBackStack() })
+                onBack = { nav.popBackStack() },
+            )
         }
     }
 }

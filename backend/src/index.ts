@@ -50,6 +50,11 @@ export interface Env {
   AI_API_KEY?: string;
   AI_BASE_URL?: string;
   AI_MODEL?: string;
+  // Email provider (optional — fallback to DevEmailProvider when omitted)
+  RESEND_API_KEY?: string;
+  GMAIL_USER?: string;
+  GMAIL_APP_PASSWORD?: string;
+  EMAIL_FROM?: string;
 }
 
 export function createApp() {

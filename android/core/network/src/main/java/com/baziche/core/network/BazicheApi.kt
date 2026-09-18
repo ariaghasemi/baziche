@@ -12,10 +12,16 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-/** Retrofit interface mirroring shared/api-v1.openAPI.yaml (Phase 1 surface). */
+/** Retrofit interface mirroring shared/api-v1.openAPI.yaml. */
 interface BazicheApi {
     @POST("auth/challenge")
     suspend fun challenge(@Body body: ChallengeRequest): ChallengeResponse
+
+    @POST("auth/email/send-code")
+    suspend fun sendEmailCode(@Body body: SendEmailCodeRequest): SendEmailCodeResponse
+
+    @POST("auth/email/verify-code")
+    suspend fun verifyEmailCode(@Body body: VerifyEmailCodeRequest): VerifyEmailCodeResponse
 
     @POST("auth/register")
     suspend fun register(@Body body: RegisterRequest): SessionResponse
@@ -31,6 +37,9 @@ interface BazicheApi {
 
     @GET("me")
     suspend fun me(): MeResponse
+
+    @PATCH("me/profile")
+    suspend fun updateProfile(@Body body: ProfileUpdateRequest): MeResponse
 
     @GET("projects")
     suspend fun projects(): ProjectsResponse
@@ -81,4 +90,14 @@ interface BazicheApi {
 
     @GET("meta/plans")
     suspend fun plans(): PlansResponse
+
+    // ---------- builds ----------
+    @POST("builds")
+    suspend fun createBuild(@Body body: CreateBuildRequest): CreateBuildResponse
+
+    @GET("builds")
+    suspend fun builds(): BuildsResponse
+
+    @GET("builds/{id}")
+    suspend fun buildDetail(@Path("id") id: String): BuildDetailResponse
 }

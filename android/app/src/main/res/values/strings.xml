@@ -4,6 +4,16 @@
     <string name="tagline">Build Android games — no code</string>
     <string name="phone">Phone number</string>
     <string name="phone_hint">0912…</string>
+    <string name="email">Email address</string>
+    <string name="email_hint">name@gmail.com</string>
+    <string name="gmail_only_hint">Only @gmail.com addresses are supported</string>
+    <string name="email_code">Verification code</string>
+    <string name="email_code_hint">6-digit code</string>
+    <string name="send_code">Send code</string>
+    <string name="resend_code">Resend code</string>
+    <string name="code_sent">Verification code sent to your email</string>
+    <string name="verify_code">Verify code</string>
+    <string name="code_expires_in">Code expires in %1$d seconds</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="password_hint">At least 8 characters</string>
@@ -15,11 +25,15 @@
     <string name="passwords_no_match">Passwords do not match</string>
     <string name="dashboard">Dashboard</string>
     <string name="hello">Hello %1$s</string>
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
     <string name="plan">Plan</string>
     <string name="builds">Builds</string>
     <string name="projects">Projects</string>
     <string name="my_projects">My projects</string>
     <string name="new_project">New project</string>
+    <string name="new_game_cta">Create New Game</string>
     <string name="project_name">Project name</string>
     <string name="game_type">Game type</string>
     <string name="create">Create</string>
@@ -30,8 +44,6 @@
     <string name="no_projects">No projects yet — create your first game.</string>
     <string name="open">Open</string>
     <string name="open_in_editor">Open in Editor</string>
-    <string name="editor_phase2">The visual Editor arrives in Phase 2. Your project is saved and synced.</string>
-    <string name="got_it">Got it</string>
     <string name="revision">Revision</string>
     <string name="settings">Settings</string>
     <string name="language">Language</string>
@@ -44,18 +56,42 @@
     <string name="free_build_used">Free build used</string>
     <string name="subscribed">Active subscription</string>
     <string name="not_subscribed">No subscription</string>
-    <string name="err_INVALID_CREDENTIALS">Wrong phone number or password.</string>
-    <string name="err_INVALID_PHONE">Phone number is not valid.</string>
-    <string name="err_PHONE_TAKEN">This phone number is already registered.</string>
-    <string name="err_USERNAME_TAKEN">This username is already taken.</string>
-    <string name="err_RATE_LIMITED">Too many attempts. Try again later.</string>
-    <string name="err_NETWORK">No connection. Check your internet.</string>
-    <string name="err_ACCOUNT_SUSPENDED">This account is suspended.</string>
-    <string name="err_generic">Something went wrong. Try again.</string>
     <string name="history">History</string>
     <string name="preview">Preview</string>
     <string name="restore">Restore</string>
     <string name="restore_confirm">Restore revision r%1$d as a new revision? Your current work stays in history.</string>
     <string name="no_revisions">No history yet.</string>
     <string name="current">current</string>
+
+    <!-- Errors -->
+    <string name="err_INVALID_CREDENTIALS">Wrong phone number, email or password.</string>
+    <string name="err_INVALID_PHONE">Phone number is not valid.</string>
+    <string name="err_INVALID_EMAIL">Only valid @gmail.com addresses are accepted.</string>
+    <string name="err_PHONE_TAKEN">This phone number is already registered.</string>
+    <string name="err_EMAIL_TAKEN">This Gmail address is already registered.</string>
+    <string name="err_USERNAME_TAKEN">This username is already taken.</string>
+    <string name="err_CODE_COOLDOWN">Please wait 60 seconds before requesting another code.</string>
+    <string name="err_CODE_EXPIRED">Verification code has expired. Request a new one.</string>
+    <string name="err_INVALID_CODE">Invalid verification code.</string>
+    <string name="err_EMAIL_NOT_VERIFIED">Please verify your Gmail address first.</string>
+    <string name="err_MAX_ATTEMPTS_EXCEEDED">Too many failed attempts. Request a new code.</string>
+    <string name="err_RATE_LIMITED">Too many attempts. Try again later.</string>
+    <string name="err_NETWORK">No connection. Check your internet.</string>
+    <string name="err_ACCOUNT_SUSPENDED">This account is suspended.</string>
+    <string name="err_generic">Something went wrong. Try again.</string>
+
+    <!-- Editor & Context Aware -->
+    <string name="tab_context_editor">Content</string>
+    <string name="tab_visual_editor">Scene Canvas</string>
+    <string name="tab_monetization">Monetization</string>
+    <string name="tab_export">Build &amp; Export</string>
+    <string name="image_permission_banner">This game can use your custom photos and graphics.</string>
+    <string name="add_image">Add Image</string>
+    <string name="save">Save</string>
+    <string name="saved">Saved</string>
+    <string name="saving">Saving…</string>
+    <string name="export_apk">Build APK</string>
+    <string name="build_started">Build queued on server</string>
+    <string name="download_apk">Download APK</string>
+    <string name="build_status">Build status</string>
 </resources>
