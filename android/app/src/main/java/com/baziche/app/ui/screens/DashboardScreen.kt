@@ -36,9 +36,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-data class DashUi(val loading: Boolean = true, val me: MeInfo? = null, val errorCode: String? = null, val errorMsg: String = "", val loggedOut: Boolean = false)
+data class DashUi(
+    val loading: Boolean = true,
+    val me: MeInfo? = null,
+    val errorCode: String? = null,
+    val errorMsg: String = "",
+    val loggedOut: Boolean = false,
+)
 
-class DashboardViewModel(private val repo: AuthRepository) : ViewModel() {
+class DashboardViewModel(
+    private val repo: AuthRepository
+) : ViewModel() {
+
     private val _ui = MutableStateFlow(DashUi())
     val ui: StateFlow<DashUi> = _ui
 
@@ -47,11 +56,28 @@ class DashboardViewModel(private val repo: AuthRepository) : ViewModel() {
     }
 
     fun refresh() {
-        _ui.value = _ui.value.copy(loading = true, errorCode = null)
+        _ui.value = _ui.value.copy(
+            loading = true,
+            errorCode = null,
+            errorMsg = "",
+        )
+
         viewModelScope.launch {
             when (val r = repo.me()) {
-                is ApiResult.Success -> _ui.value = DashUi(me = r.data)
-                is ApiResult.Error -> _ui.value = DashUi(loading = false, errorCode = r.code, errorMsg = r.message)
+                is ApiResult.Success -> {
+                    _ui.value = DashUi(
+                        loading = false,
+                        me = r.data,
+                    )
+                }
+
+                is ApiResult.Error -> {
+                    _ui.value = DashUi(
+                        loading = false,
+                        errorCode = r.code,
+                        errorMsg = r.message,
+                    )
+                }
             }
         }
     }
@@ -59,40 +85,137 @@ class DashboardViewModel(private val repo: AuthRepository) : ViewModel() {
     fun logout() {
         viewModelScope.launch {
             repo.logout()
-            _ui.value = _ui.value.copy(loggedOut = true)
+            _ui.value = _ui.value.copy(
+                loggedOut = true,
+                loading = false,
+            )
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(vm: DashboardViewModel, onProjects: () -> Unit, onSettings: () -> Unit, onLoggedOut: () -> Unit) {
+fun DashboardScreen(
+    vm: DashboardViewModel,
+    onProjects: () -> Unit,
+    onSettings: () -> Unit,
+    onLoggedOut: () -> Unit,
+) {
     val ui by vm.ui.collectAsState()
-    LaunchedEffect(ui.loggedOut) { if (ui.loggedOut) onLoggedOut() }
-    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.dashboard)) }) }) { pad ->
-        Column(modifier = Modifier.fillMaxSize().padding(pad).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
+    LaunchedEffect(ui.loggedOut) {
+        if (ui.loggedOut) {
+            onLoggedOut()
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(stringResource(R.string.dashboard))
+                }
+            )
+        }
+    ) { pad ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+
             when {
                 ui.loading -> {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) { CircularProgressIndicator() }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
+
                 ui.errorCode != null -> {
-                    ErrorCard(ui.errorCode!!, ui.errorMsg) { vm.refresh() }
+                    ErrorCard(
+                        ui.errorCode!!,
+                        ui.errorMsg,
+                    ) {
+                        vm.refresh()
+                    }
                 }
+
                 ui.me != null -> {
                     val me = ui.me!!
-                    Text(stringResource(R.string.hello, me.username), style = MaterialTheme.typography.headlineSmall)
-                    Card(Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text("${stringResource(R.string.plan)}: ${me.entitlement.planId}")
-                            Text(if (me.entitlement.subscribed) stringResource(R.string.subscribed) else stringResource(R.string.not_subscribed))
-                            Text(if (me.entitlement.freeBuild == "AVAILABLE") stringResource(R.string.free_build_available) else stringResource(R.string.free_build_used))
-                            Text("${stringResource(R.string.projects)}: ${me.projects}")
+
+                    Text(
+                        text = stringResource(
+                            R.string.hello,
+                            me.username,
+                        ),
+                        style = MaterialTheme.typography.headlineSmall,
+                    )
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(
+                                "${stringResource(R.string.plan)}: ${me.entitlement.planId}"
+                            )
+
+                            Text(
+                                if (me.entitlement.subscribed) {
+                                    stringResource(R.string.subscribed)
+                                } else {
+                                    stringResource(R.string.not_subscribed)
+                                }
+                            )
+
+                            Text(
+                                if (me.entitlement.freeBuild == "AVAILABLE") {
+                                    stringResource(R.string.free_build_available)
+                                } else {
+                                    stringResource(R.string.free_build_used)
+                                }
+                            )
+
+                            Text(
+                                "${stringResource(R.string.projects)}: ${me.projects}"
+                            )
                         }
                     }
-                    Button(onClick = onProjects, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.my_projects)) }
-                    OutlinedButton(onClick = onSettings, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.settings)) }
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedButton(onClick = { vm.logout() }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.logout)) }
+
+                    Button(
+                        onClick = onProjects,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.my_projects))
+                    }
+
+                    OutlinedButton(
+                        onClick = onSettings,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.settings))
+                    }
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+                    OutlinedButton(
+                        onClick = {
+                            vm.logout()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.logout))
+                    }
                 }
             }
         }
