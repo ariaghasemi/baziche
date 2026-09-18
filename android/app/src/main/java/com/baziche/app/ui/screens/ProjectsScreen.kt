@@ -52,7 +52,10 @@ data class ProjectsUi(
     val errorMsg: String = "",
 )
 
-class ProjectsViewModel(private val repo: ProjectRepository) : ViewModel() {
+class ProjectsViewModel(
+    private val repo: ProjectRepository
+) : ViewModel() {
+
     private val _ui = MutableStateFlow(ProjectsUi())
     val ui: StateFlow<ProjectsUi> = _ui
 
@@ -61,24 +64,56 @@ class ProjectsViewModel(private val repo: ProjectRepository) : ViewModel() {
     }
 
     fun refresh() {
-        _ui.value = _ui.value.copy(loading = true, errorCode = null)
+        _ui.value = _ui.value.copy(
+            loading = true,
+            errorCode = null,
+            errorMsg = "",
+        )
+
         viewModelScope.launch {
             val types = repo.getGameTypes()
+
             when (val r = repo.listProjects()) {
-                is ApiResult.Success -> _ui.value = ProjectsUi(items = r.data, types = types)
-                is ApiResult.Error -> _ui.value = _ui.value.copy(loading = false, errorCode = r.code, errorMsg = r.message, types = types)
+                is ApiResult.Success -> {
+                    _ui.value = ProjectsUi(
+                        loading = false,
+                        items = r.data,
+                        types = types,
+                    )
+                }
+
+                is ApiResult.Error -> {
+                    _ui.value = ProjectsUi(
+                        loading = false,
+                        items = emptyList(),
+                        types = types,
+                        errorCode = r.code,
+                        errorMsg = r.message,
+                    )
+                }
             }
         }
     }
 
-    fun create(name: String, gameType: String, onDone: () -> Unit) {
+    fun create(
+        name: String,
+        gameType: String,
+        onDone: () -> Unit,
+    ) {
         viewModelScope.launch {
             when (val r = repo.createProject(name, gameType)) {
                 is ApiResult.Success -> {
                     onDone()
                     refresh()
                 }
-                is ApiResult.Error -> _ui.value = _ui.value.copy(errorCode = r.code, errorMsg = r.message)
+
+                is ApiResult.Error -> {
+                    _ui.value = _ui.value.copy(
+                        loading = false,
+                        errorCode = r.code,
+                        errorMsg = r.message,
+                    )
+                }
             }
         }
     }
@@ -86,31 +121,106 @@ class ProjectsViewModel(private val repo: ProjectRepository) : ViewModel() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProjectsScreen(vm: ProjectsViewModel, onOpen: (String) -> Unit, onBack: () -> Unit) {
+fun ProjectsScreen(
+    vm: ProjectsViewModel,
+    onOpen: (String) -> Unit,
+    onBack: () -> Unit,
+) {
     val ui by vm.ui.collectAsState()
-    var showCreate by rememberSaveable { mutableStateOf(false) }
+
+    var showCreate by rememberSaveable {
+        mutableStateOf(false)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.my_projects)) },
-                navigationIcon = { IconButton(onClick = onBack) { Text("‹") } },
+                title = {
+                    Text(stringResource(R.string.my_projects))
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBack
+                    ) {
+                        Text("‹")
+                    }
+                },
             )
         },
+
         floatingActionButton = {
-            FloatingActionButton(onClick = { showCreate = true }) { Text("+") }
+            FloatingActionButton(
+                onClick = {
+                    showCreate = true
+                }
+            ) {
+                Text("+")
+            }
         },
     ) { pad ->
-        Column(Modifier.fillMaxSize().padding(pad).padding(16.dp)) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .padding(16.dp),
+        ) {
+
             when {
-                ui.loading -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) { CircularProgressIndicator() }
-                ui.errorCode != null && ui.items.isEmpty() -> ErrorCard(ui.errorCode!!, ui.errorMsg) { vm.refresh() }
-                ui.items.isEmpty() -> Text(stringResource(R.string.no_projects))
-                else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(ui.items) { p ->
-                        Card(Modifier.fillMaxWidth().clickable { onOpen(p.id) }) {
-                            Column(Modifier.padding(12.dp)) {
-                                Text(p.name, style = MaterialTheme.typography.titleMedium)
-                                Text("${p.gameType} · ${stringResource(R.string.revision)} ${p.rev}", style = MaterialTheme.typography.bodySmall)
+                ui.loading -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                ui.errorCode != null && ui.items.isEmpty() -> {
+                    ErrorCard(
+                        ui.errorCode!!,
+                        ui.errorMsg,
+                    ) {
+                        vm.refresh()
+                    }
+                }
+
+                ui.items.isEmpty() -> {
+                    Text(
+                        stringResource(R.string.no_projects)
+                    )
+                }
+
+                else -> {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(ui.items) { p ->
+
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onOpen(p.id)
+                                    },
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp),
+                                ) {
+                                    Text(
+                                        p.name,
+                                        style = MaterialTheme.typography.titleMedium,
+                                    )
+
+                                    Text(
+                                        "${p.gameType} · ${
+                                            stringResource(
+                                                R.string.revision
+                                            )
+                                        } ${p.rev}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
                             }
                         }
                     }
@@ -118,33 +228,130 @@ fun ProjectsScreen(vm: ProjectsViewModel, onOpen: (String) -> Unit, onBack: () -
             }
         }
     }
-    if (showCreate) CreateDialog(ui.types, onDismiss = { showCreate = false }, onCreate = { n, t ->
-        vm.create(n, t) { showCreate = false }
-    })
+
+    if (showCreate) {
+        CreateDialog(
+            types = ui.types,
+            onDismiss = {
+                showCreate = false
+            },
+            onCreate = { n, t ->
+                vm.create(n, t) {
+                    showCreate = false
+                }
+            },
+        )
+    }
 }
 
 @Composable
-private fun CreateDialog(types: List<GameTypeDto>, onDismiss: () -> Unit, onCreate: (String, String) -> Unit) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var picked by rememberSaveable { mutableStateOf(types.firstOrNull()?.id ?: "quiz") }
+private fun CreateDialog(
+    types: List<GameTypeDto>,
+    onDismiss: () -> Unit,
+    onCreate: (String, String) -> Unit,
+) {
+    var name by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var picked by rememberSaveable {
+        mutableStateOf(
+            types.firstOrNull()?.id ?: "quiz"
+        )
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.new_project)) },
+
+        title = {
+            Text(
+                stringResource(R.string.new_project)
+            )
+        },
+
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.project_name)) }, singleLine = true)
-                Text(stringResource(R.string.game_type), style = MaterialTheme.typography.labelLarge)
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(types.ifEmpty { ProjectRepository.FALLBACK_TIER1 }) { t ->
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { picked = t.id }) {
-                            RadioButton(selected = picked == t.id, onClick = { picked = t.id })
-                            Text("${t.name} · T${t.tier}")
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it
+                    },
+                    label = {
+                        Text(
+                            stringResource(
+                                R.string.project_name
+                            )
+                        )
+                    },
+                    singleLine = true,
+                )
+
+                Text(
+                    stringResource(R.string.game_type),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    items(
+                        types.ifEmpty {
+                            ProjectRepository.FALLBACK_TIER1
+                        }
+                    ) { t ->
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    picked = t.id
+                                },
+                        ) {
+
+                            RadioButton(
+                                selected = picked == t.id,
+                                onClick = {
+                                    picked = t.id
+                                },
+                            )
+
+                            Text(
+                                "${t.name} · T${t.tier}"
+                            )
                         }
                     }
                 }
             }
         },
-        confirmButton = { TextButton(onClick = { onCreate(name.trim(), picked) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.create)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onCreate(
+                        name.trim(),
+                        picked,
+                    )
+                },
+                enabled = name.isNotBlank(),
+            ) {
+                Text(
+                    stringResource(R.string.create)
+                )
+            }
+        },
+
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+            ) {
+                Text(
+                    stringResource(R.string.cancel)
+                )
+            }
+        },
     )
 }
