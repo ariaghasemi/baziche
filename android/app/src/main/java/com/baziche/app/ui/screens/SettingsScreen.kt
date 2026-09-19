@@ -161,9 +161,9 @@ fun SettingsScreen(vm: SettingsViewModel, onLoggedOut: () -> Unit, onBack: () ->
                         Column(modifier = Modifier.weight(1f)) {
                             Text(me.username, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = BazicheTextPrimary)
                             Text(me.phone, style = MaterialTheme.typography.bodySmall, color = BazicheTextSecondary)
-                            if (me.email != null) {
+                            me.email?.let { email ->
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(me.email, style = MaterialTheme.typography.labelSmall, color = BazicheTextMuted)
+                                    Text(email, style = MaterialTheme.typography.labelSmall, color = BazicheTextMuted)
                                     Spacer(Modifier.width(6.dp))
                                     if (me.emailVerified) {
                                         BazicheBadge(text = "تأیید شده", color = BazicheLime)

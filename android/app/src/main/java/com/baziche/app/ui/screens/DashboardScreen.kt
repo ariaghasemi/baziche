@@ -356,10 +356,10 @@ private fun UserGreetingCard(me: MeInfo) {
                     style = MaterialTheme.typography.bodySmall,
                     color = BazicheTextSecondary,
                 )
-                if (me.email != null) {
+                me.email?.let { email ->
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = me.email,
+                        text = email,
                         style = MaterialTheme.typography.labelSmall,
                         color = BazicheTextMuted,
                     )
