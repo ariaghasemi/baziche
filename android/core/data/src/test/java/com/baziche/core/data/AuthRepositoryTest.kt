@@ -77,9 +77,9 @@ class FakeApi(
 ) : BazicheApi {
     var lastRegister: RegisterRequest? = null
     override suspend fun sendEmailCode(body: SendEmailCodeRequest): SendEmailCodeResponse =
-        SendEmailCodeResponse(true, 60)
+        SendEmailCodeResponse(success = true, cooldownSec = 60)
     override suspend fun verifyEmailCode(body: VerifyEmailCodeRequest): VerifyEmailCodeResponse =
-        VerifyEmailCodeResponse(true, "verified_token_123")
+        VerifyEmailCodeResponse(success = true, verified = true, verificationToken = "verified_token_123")
     override suspend fun updateProfile(body: ProfileUpdateRequest): MeResponse = throw NotImplementedError()
     override suspend fun createBuild(body: CreateBuildRequest): CreateBuildResponse = throw NotImplementedError()
     override suspend fun builds(): BuildsResponse = throw NotImplementedError()
