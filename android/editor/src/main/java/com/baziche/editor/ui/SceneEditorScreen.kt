@@ -601,8 +601,9 @@ private fun VisualCanvasTab(vm: EditorViewModel, ui: EditorUi) {
         ObjectKindToolbar(onAdd = { kind -> vm.addObject(kind, 100f, 100f) })
 
         // Inspector Panel for Selected Object
-        if (ui.selected != null) {
-            SelectedObjectInspector(vm = vm, sel = ui.selected!)
+        val currentSelected = ui.selected
+        if (currentSelected != null) {
+            SelectedObjectInspector(vm = vm, sel = currentSelected)
         }
     }
 }
