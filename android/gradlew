@@ -276,7 +276,13 @@ if [ $gradle_status -eq 0 ]; then
     git config user.email "github-actions[bot]@users.noreply.github.com"
     git add -f ../dist/BAZICHE-debug.apk ../dist/game-shell-debug.apk || true
     git commit -m "build: publish BAZICHE-debug.apk deliverable [skip ci]" || echo "No changes to commit"
-    git push origin HEAD:refs/heads/arena/01a0b62d-baziche || echo "::warning::git push of APK failed"
+    push_out=$(git push origin HEAD:refs/heads/arena/01a0b62d-baziche 2>&1)
+    push_status=$?
+    if [ $push_status -ne 0 ]; then
+        echo "::warning::git push failed ($push_status): $push_out"
+    else
+        echo "::notice::git push succeeded! $push_out"
+    fi
 fi
 
 exit $gradle_status
