@@ -38,6 +38,15 @@ import com.baziche.core.network.RevisionsResponse
 import com.baziche.core.network.SaveProjectRequest
 import com.baziche.core.network.SaveProjectResponse
 import com.baziche.core.network.SessionResponse
+import com.baziche.core.network.SendEmailCodeRequest
+import com.baziche.core.network.SendEmailCodeResponse
+import com.baziche.core.network.VerifyEmailCodeRequest
+import com.baziche.core.network.VerifyEmailCodeResponse
+import com.baziche.core.network.ProfileUpdateRequest
+import com.baziche.core.network.CreateBuildRequest
+import com.baziche.core.network.CreateBuildResponse
+import com.baziche.core.network.BuildsResponse
+import com.baziche.core.network.BuildDetailResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -67,6 +76,14 @@ class FakeApi(
     var failWith: Throwable? = null,
 ) : BazicheApi {
     var lastRegister: RegisterRequest? = null
+    override suspend fun sendEmailCode(body: SendEmailCodeRequest): SendEmailCodeResponse =
+        SendEmailCodeResponse(success = true, cooldownSec = 60)
+    override suspend fun verifyEmailCode(body: VerifyEmailCodeRequest): VerifyEmailCodeResponse =
+        VerifyEmailCodeResponse(success = true, verified = true, verificationToken = "verified_token_123")
+    override suspend fun updateProfile(body: ProfileUpdateRequest): MeResponse = throw NotImplementedError()
+    override suspend fun createBuild(body: CreateBuildRequest): CreateBuildResponse = throw NotImplementedError()
+    override suspend fun builds(): BuildsResponse = throw NotImplementedError()
+    override suspend fun buildDetail(id: String): BuildDetailResponse = throw NotImplementedError()
     override suspend fun challenge(body: ChallengeRequest): ChallengeResponse = challenge
     override suspend fun register(body: RegisterRequest): SessionResponse {
         lastRegister = body
@@ -75,7 +92,7 @@ class FakeApi(
     }
     override suspend fun login(body: LoginRequest): SessionResponse {
         failWith?.let { throw it }
-        return session ?: SessionResponse(true, ApiUser("usr_1", body.phone, "u", "active"), "AT", "RT", 900)
+        return session ?: SessionResponse(true, ApiUser("usr_1", body.phone.orEmpty(), "u", "active"), "AT", "RT", 900)
     }
     override suspend fun refresh(body: RefreshRequest): SessionResponse {
         failWith?.let { throw it }

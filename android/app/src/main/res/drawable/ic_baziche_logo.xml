@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="128dp"
+    android:height="128dp"
+    android:viewportWidth="128"
+    android:viewportHeight="128">
+
+    <!-- Solid deep black background -->
+    <path
+        android:pathData="M0,0h128v128h-128z"
+        android:fillColor="#080B0A" />
+
+    <!-- Subtle dark cyber grid accents in background -->
+    <path
+        android:pathData="M16,16h96v96h-96z"
+        android:strokeColor="#14211B"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000" />
+
+    <!-- Outer Glow for stylized B -->
+    <path
+        android:pathData="M34,24 L72,24 C84,24 94,33 94,44 C94,52 89,58 82,62 C91,66 97,76 97,86 C97,99 86,108 72,108 L34,108 Z"
+        android:strokeColor="#1E382B"
+        android:strokeWidth="8"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+
+    <!-- Main Stylized Gaming 'B' Body -->
+    <path
+        android:pathData="M36,26 L70,26 C81,26 90,34 90,44 C90,52 84,59 76,62 C86,65 92,74 92,84 C92,96 82,106 70,106 L36,106 L36,26 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="36"
+                android:startY="26"
+                android:endX="92"
+                android:endY="106"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#0E7C5B" />
+                <item android:offset="0.5" android:color="#10B981" />
+                <item android:offset="1.0" android:color="#B8E62E" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Upper Inner Cutout (Hexagonal Gamer Bevel) -->
+    <path
+        android:pathData="M52,38 L68,38 C74,38 78,41 78,46 C78,51 74,54 68,54 L52,54 Z"
+        android:fillColor="#080B0A" />
+
+    <!-- Lower Inner Cutout (Dynamic Play Polygon) -->
+    <path
+        android:pathData="M52,68 L70,68 C76,68 81,72 81,78 C81,84 76,88 70,88 L52,88 Z"
+        android:fillColor="#080B0A" />
+
+    <!-- Forward Edge Neon Bevel Accent -->
+    <path
+        android:pathData="M48,26 L70,26 C81,26 90,34 90,44 C90,52 84,59 76,62"
+        android:strokeColor="#B8E62E"
+        android:strokeWidth="2.5"
+        android:fillColor="#00000000" />
+
+    <path
+        android:pathData="M76,62 C86,65 92,74 92,84 C92,96 82,106 70,106 L48,106"
+        android:strokeColor="#00FFB2"
+        android:strokeWidth="2.5"
+        android:fillColor="#00000000" />
+
+    <!-- Spine High-Tech Cut Accent (Negative-space game notch) -->
+    <path
+        android:pathData="M32,58 L42,64 L32,70 Z"
+        android:fillColor="#080B0A" />
+
+</vector>

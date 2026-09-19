@@ -20,3 +20,19 @@ export const zUsername = z
   .regex(/^[a-zA-Z0-9_.]+$/, 'username charset');
 export const zHex = (min: number, max: number) =>
   z.string().min(min).max(max).regex(/^[0-9a-fA-F]+$/, 'hex expected');
+
+// Gmail-only validator as required by Section 5 & Section 35
+export const zGmail = z
+  .string()
+  .min(6)
+  .max(64)
+  .trim()
+  .toLowerCase()
+  .refine(
+    (email) => {
+      if (!email.endsWith('@gmail.com')) return false;
+      const local = email.slice(0, -'@gmail.com'.length);
+      return /^[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*$/.test(local) && local.length >= 3 && local.length <= 30;
+    },
+    { message: 'Only valid @gmail.com addresses are permitted' },
+  );

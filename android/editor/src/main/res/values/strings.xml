@@ -30,4 +30,6 @@
     <string name="offline_saved">No connection — saved on this device, will sync later.</string>
     <string name="merged_clean">Merged cleanly. Review, then Save.</string>
     <string name="merged_conflicts">Merged with conflicts (server version kept): %1$s. Review, then Save.</string>
+    <string name="image_permission_banner">This game can use custom images and artwork.</string>
+    <string name="add_image">Add Image</string>
 </resources>

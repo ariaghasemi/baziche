@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "meta": { "name": "Mini Games", "gameType": "minigames", "orientation": "portrait" },
+  "settings": { "locale": "fa", "fps": 60 },
+  "scenes": [
+    { "id": "s1", "name": "Hub", "entry": true, "background": { "color": "#120E24" }, "objectIds": ["title", "game1_btn", "game2_btn", "game3_btn"], "transitions": [] }
+  ],
+  "objects": [
+    { "id": "title", "sceneId": "s1", "kind": "text", "visible": true, "layer": 1, "components": { "Transform": { "x": 40, "y": 80, "w": 400, "h": 60 }, "Text": { "text": "مینی‌گیم‌های جذاب", "size": 32, "color": "#A78BFA" } } },
+    { "id": "game1_btn", "sceneId": "s1", "kind": "button", "visible": true, "layer": 2, "components": { "Transform": { "x": 60, "y": 200, "w": 360, "h": 70 }, "Button": { "label": "چالش واکنش سریع", "eventId": "ev_g1", "enabled": true } } },
+    { "id": "game2_btn", "sceneId": "s1", "kind": "button", "visible": true, "layer": 2, "components": { "Transform": { "x": 60, "y": 300, "w": 360, "h": 70 }, "Button": { "label": "تست حافظه تصویری", "eventId": "ev_g2", "enabled": true } } },
+    { "id": "game3_btn", "sceneId": "s1", "kind": "button", "visible": true, "layer": 2, "components": { "Transform": { "x": 60, "y": 400, "w": 360, "h": 70 }, "Button": { "label": "مسابقه ریاضی سرعتی", "eventId": "ev_g3", "enabled": true } } }
+  ],
+  "events": [
+    { "id": "ev_g1", "trigger": { "type": "tap", "target": "game1_btn" }, "actions": [ { "capability": "CAP-0020", "params": { "variable": "score", "amount": 5 } } ] },
+    { "id": "ev_g2", "trigger": { "type": "tap", "target": "game2_btn" }, "actions": [ { "capability": "CAP-0020", "params": { "variable": "score", "amount": 10 } } ] },
+    { "id": "ev_g3", "trigger": { "type": "tap", "target": "game3_btn" }, "actions": [ { "capability": "CAP-0020", "params": { "variable": "score", "amount": 15 } } ] }
+  ],
+  "variables": [
+    { "name": "score", "type": "number", "initial": 0 }
+  ],
+  "assets": []
+}

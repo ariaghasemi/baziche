@@ -91,4 +91,105 @@ describe('auth', () => {
     const r = await req(ctx, '/api/v1/auth/refresh', { method: 'POST', body: { refreshToken: s.refreshToken } });
     expect(r.status).toBe(401);
   });
+
+  it('email verification: send-code -> rejects non-gmail -> cooldown -> verify -> register with email -> login with email', async () => {
+    const ctx = await makeCtx();
+
+    // Rejects non-gmail
+    const nonGmail = await req(ctx, '/api/v1/auth/email/send-code', {
+      method: 'POST',
+      body: { email: 'user@yahoo.com' },
+    });
+    expect(nonGmail.status).toBe(400);
+
+    // Valid Gmail sends code
+    const send = await req(ctx, '/api/v1/auth/email/send-code', {
+      method: 'POST',
+      body: { email: 'player1@gmail.com' },
+    });
+    expect(send.status).toBe(200);
+    const sendJson = (await send.json()) as { success: boolean; cooldownSec: number };
+    expect(sendJson.success).toBe(true);
+    expect(sendJson.cooldownSec).toBe(60);
+
+    // Cooldown immediate retry
+    const retryImmediate = await req(ctx, '/api/v1/auth/email/send-code', {
+      method: 'POST',
+      body: { email: 'player1@gmail.com' },
+    });
+    expect(retryImmediate.status).toBe(429);
+
+    // Retrieve generated code from test DB to simulate user receiving the email
+    const row = await ctx.env.DB_AUTH.prepare(
+      'SELECT token FROM email_verifications WHERE email = ?',
+    )
+      .bind('player1@gmail.com')
+      .first<{ token: string }>();
+    expect(row).not.toBeNull();
+
+    // Wrong code fails
+    const badVerify = await req(ctx, '/api/v1/auth/email/verify-code', {
+      method: 'POST',
+      body: { email: 'player1@gmail.com', code: '000000' },
+    });
+    expect(badVerify.status).toBe(400);
+
+    // Register with verification token
+    const salt = randomSaltHex();
+    const clientHash = await clientStretch('StrongGmailPass123', salt, 100000);
+    const regRes = await req(ctx, '/api/v1/auth/register', {
+      method: 'POST',
+      body: {
+        phone: '09127777777',
+        email: 'player1@gmail.com',
+        verificationToken: row!.token,
+        username: 'gmailuser',
+        salt,
+        clientHash,
+        iterations: 100000,
+      },
+    });
+    expect(regRes.status).toBe(200);
+    const regJson = (await regRes.json()) as { success: boolean; user: { email: string; emailVerified: boolean } };
+    expect(regJson.user.email).toBe('player1@gmail.com');
+    expect(regJson.user.emailVerified).toBe(true);
+
+    // Challenge with email
+    const ch = await req(ctx, '/api/v1/auth/challenge', {
+      method: 'POST',
+      body: { email: 'player1@gmail.com' },
+    });
+    expect(ch.status).toBe(200);
+    const chj = (await ch.json()) as { salt: string; iterations: number };
+    expect(chj.salt).toBe(salt);
+
+    // Login with email
+    const login = await req(ctx, '/api/v1/auth/login', {
+      method: 'POST',
+      body: {
+        email: 'player1@gmail.com',
+        clientHash: await clientStretch('StrongGmailPass123', chj.salt, chj.iterations),
+      },
+    });
+    expect(login.status).toBe(200);
+    const loginJson = (await login.json()) as { accessToken: string; user: { email: string } };
+    expect(loginJson.user.email).toBe('player1@gmail.com');
+
+    // /me includes email and emailVerified
+    const me = await req(ctx, '/api/v1/me', { token: loginJson.accessToken });
+    const mej = (await me.json()) as { user: { email: string; emailVerified: boolean; username: string } };
+    expect(mej.user.email).toBe('player1@gmail.com');
+    expect(mej.user.emailVerified).toBe(true);
+
+    // PATCH /me/profile updates username and avatar
+    const patchRes = await req(ctx, '/api/v1/me/profile', {
+      method: 'PATCH',
+      token: loginJson.accessToken,
+      body: { username: 'gmailuser_pro', avatar: 'avatar_gamer_01' },
+    });
+    expect(patchRes.status).toBe(200);
+    const patchJson = (await patchRes.json()) as { user: { username: string; avatar: string } };
+    expect(patchJson.user.username).toBe('gmailuser_pro');
+    expect(patchJson.user.avatar).toBe('avatar_gamer_01');
+  });
 });

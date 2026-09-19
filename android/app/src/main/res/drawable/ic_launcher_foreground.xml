@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.75"
+        android:scaleY="0.75"
+        android:translateX="13.5"
+        android:translateY="13.5">
+        <!-- Main Stylized Gaming 'B' -->
+        <path
+            android:pathData="M32,22 L66,22 C77,22 86,30 86,40 C86,48 80,55 72,58 C82,61 88,70 88,80 C88,92 78,102 66,102 L32,102 L32,22 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:startX="32"
+                    android:startY="22"
+                    android:endX="88"
+                    android:endY="102"
+                    android:type="linear">
+                    <item android:offset="0.0" android:color="#0E7C5B" />
+                    <item android:offset="0.5" android:color="#10B981" />
+                    <item android:offset="1.0" android:color="#B8E62E" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <!-- Upper Cutout -->
+        <path
+            android:pathData="M48,34 L64,34 C70,34 74,37 74,42 C74,47 70,50 64,50 L48,50 Z"
+            android:fillColor="#080B0A" />
+        <!-- Lower Cutout -->
+        <path
+            android:pathData="M48,64 L66,64 C72,64 77,68 77,74 C77,80 72,84 66,84 L48,84 Z"
+            android:fillColor="#080B0A" />
+        <!-- Accent Glow Bevel -->
+        <path
+            android:pathData="M44,22 L66,22 C77,22 86,30 86,40 C86,48 80,55 72,58"
+            android:strokeColor="#B8E62E"
+            android:strokeWidth="2"
+            android:fillColor="#00000000" />
+        <path
+            android:pathData="M72,58 C82,61 88,70 88,80 C88,92 78,102 66,102 L44,102"
+            android:strokeColor="#00FFB2"
+            android:strokeWidth="2"
+            android:fillColor="#00000000" />
+    </group>
+</vector>

@@ -30,4 +30,6 @@
     <string name="offline_saved">اتصال نیست — روی همین دستگاه ذخیره شد، بعداً همگام می‌شود.</string>
     <string name="merged_clean">بدون تداخل ادغام شد. بازبینی کنید بعد ذخیره.</string>
     <string name="merged_conflicts">با تداخل ادغام شد (نسخه سرور نگه داشته شد): %1$s. بازبینی کنید بعد ذخیره.</string>
+    <string name="image_permission_banner">این بازی می‌تواند از تصاویر و طرح‌های اختصاصی شما استفاده کند.</string>
+    <string name="add_image">افزودن تصویر</string>
 </resources>
