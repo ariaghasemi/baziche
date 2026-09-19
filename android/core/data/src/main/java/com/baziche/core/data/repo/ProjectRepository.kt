@@ -134,10 +134,19 @@ class ProjectRepository(
                 cache.upsert(CachedProject(id, projName, gameType, rev, json.toString(), System.currentTimeMillis(), false))
                 return@withContext SaveResult.Saved(rev)
             }
-            if (res.error?.code == "REVISION_CONFLICT") {
-                return@withContext SaveResult.Conflict(res.serverRev ?: (baseRev + 1), res.serverCopy)
+        } catch (t: Throwable) {
+            if (t is HttpException && t.code() == 409) {
+                val parsed = try {
+                    ApiErrors.rawBody(t)?.let { NetworkModule.json.decodeFromString<ConflictResponse>(it) }
+                } catch (_: Exception) {
+                    null
+                }
+                return@withContext SaveResult.Conflict(parsed?.serverRev ?: (baseRev + 1), parsed?.serverCopy)
             }
-        } catch (_: Throwable) {
+            val e = ApiErrors.map(t)
+            if (e.code == "REVISION_CONFLICT") {
+                return@withContext SaveResult.Conflict(baseRev + 1, null)
+            }
         }
 
         // Local save fallback: user never loses their progress

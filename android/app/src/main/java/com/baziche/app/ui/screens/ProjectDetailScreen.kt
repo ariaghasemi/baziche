@@ -149,12 +149,14 @@ class ProjectDetailViewModel(private val repo: ProjectRepository, private val id
         val baseRev = _ui.value.detail?.project?.rev ?: return
         _ui.value = _ui.value.copy(restoring = true, restoreError = null)
         viewModelScope.launch {
-            try {
-                repo.restoreRevision(id, rev, baseRev)
-                _ui.value = _ui.value.copy(restoring = false)
-                refresh()
-            } catch (t: Throwable) {
-                _ui.value = _ui.value.copy(restoring = false, restoreError = t.message ?: "restore failed")
+            when (val r = repo.restoreRevision(id, rev, baseRev)) {
+                is ApiResult.Success -> {
+                    _ui.value = _ui.value.copy(restoring = false)
+                    refresh()
+                }
+                is ApiResult.Error -> {
+                    _ui.value = _ui.value.copy(restoring = false, restoreError = r.message)
+                }
             }
         }
     }
