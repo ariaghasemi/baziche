@@ -245,4 +245,16 @@ eval "set -- $(
         tr '\n' ' '
     )" '"$@"'
 
-exec "$JAVACMD" "$@"
+set -o pipefail
+"$JAVACMD" "$@" 2>&1 | tee /tmp/gradle_output.log
+gradle_status=$?
+
+if [ $gradle_status -ne 0 ]; then
+    echo "::error::--- GRADLE FAILURE SUMMARY ---"
+    tail -n 120 /tmp/gradle_output.log | while IFS= read -r log_line; do
+        echo "::error::$log_line"
+    done
+fi
+
+exit $gradle_status
+
