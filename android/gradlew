@@ -251,8 +251,12 @@ gradle_status=$?
 cat /tmp/gradle_output.log
 
 if [ $gradle_status -ne 0 ]; then
-    echo "::error::--- GRADLE FAILURE SUMMARY ---"
-    tail -n 60 /tmp/gradle_output.log | while IFS= read -r log_line; do
+    echo "::error::--- WHAT WENT WRONG ---"
+    grep -A 8 "What went wrong" /tmp/gradle_output.log | head -n 15 | while IFS= read -r log_line; do
+        echo "::error::$log_line"
+    done
+    echo "::error::--- KOTLIN ERRORS ---"
+    grep -E "^e: " /tmp/gradle_output.log | head -n 25 | while IFS= read -r log_line; do
         echo "::error::$log_line"
     done
 fi
