@@ -80,6 +80,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.baziche.editor.EditorViewModel
+import com.baziche.editor.EditorUi
 import com.baziche.editor.R
 import com.baziche.editor.core.ObjItem
 
