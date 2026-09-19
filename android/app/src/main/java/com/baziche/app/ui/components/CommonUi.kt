@@ -303,6 +303,7 @@ fun BazicheTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     label: String? = null,
     placeholder: String? = null,
     supportingText: String? = null,
@@ -317,6 +318,7 @@ fun BazicheTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         label = label?.let { { Text(it) } },
