@@ -193,10 +193,12 @@ class ProjectRepository(
 
     suspend fun mergeProject(id: String, baseRev: Int, json: JsonObject): MergedProject = withContext(Dispatchers.IO) {
         val res = auth.withAuthRetry { api.merge(id, MergeRequest(baseRev, json)) }
-        if (!res.success || res.merged == null || res.serverRev == null) {
+        val merged = res.merged
+        val serverRev = res.serverRev
+        if (!res.success || merged == null || serverRev == null) {
             throw ApiException(res.error?.code ?: "MERGE_FAILED", res.error?.message ?: "Merge failed", 400)
         }
-        MergedProject(res.merged, res.conflicts, res.serverRev)
+        MergedProject(merged, res.conflicts, serverRev)
     }
 
     suspend fun createBuild(projectId: String, target: String = "apk"): ApiResult<BuildDto> = withContext(Dispatchers.IO) {
