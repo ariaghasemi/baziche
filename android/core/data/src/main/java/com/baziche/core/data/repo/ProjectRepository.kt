@@ -232,6 +232,8 @@ class ProjectRepository(
         }
     }
 
+    suspend fun getBuild(buildId: String): ApiResult<BuildDto> = buildStatus(buildId)
+
     suspend fun getGameTypes(): List<GameTypeDto> = withContext(Dispatchers.IO) {
         try {
             val res = api.registries()
